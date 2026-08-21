@@ -1,0 +1,6 @@
+{
+  "name": "Axiom STEM: Interactive Simulation Marketplace",
+  "description": "World-class educational STEM platform where teachers and schools discover, test-drive, and license interactive simulations across Physics, Mathematics, Chemistry, and Biology with AI lesson planning.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
