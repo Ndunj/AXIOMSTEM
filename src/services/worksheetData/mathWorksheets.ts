@@ -290,5 +290,192 @@ export const MATH_WORKSHEETS: Record<string, SimulationWorksheetData> = {
       task: "Using set operations, calculate how many students are in at least one club (S ∪ M) and how many students are not enrolled in either club (S ∪ M)'.",
       exemplarAnswer: "Students in at least one club: |S ∪ M| = |S| + |M| - |S ∩ M| = 45 + 40 - 20 = 65 students. Students not enrolled in either club: |(S ∪ M)'| = |U| - |S ∪ M| = 100 - 65 = 35 students."
     }
+  },
+
+  "sim-geometric-transformations-rotation": {
+    drivingQuestion: "How do rigid motions (rotations, reflections, translations) and non-rigid transformations (dilations) change the coordinates, side lengths, and orientation of 2D geometric shapes?",
+    hypothesisPrompt: "If a triangle with vertices at (2,2), (6,2), and (4,6) is rotated 90° counterclockwise about the origin (0,0), predict the new coordinates of its vertices. Which transformations preserve side lengths and angles (isometries), and which change size?",
+    tableHeaders: ["Trial", "Transformation Type", "Parameters / Center", "Pre-Image Point A", "Image Point A'", "Pre-Image Point B", "Image Point B'", "Algebraic Mapping Rule"],
+    tableRows: [
+      ["1 (Rotation 90° CCW)", "Rotation", "θ = 90°, Center (0,0)", "(2.0, 2.0)", "(-2.0, 2.0)", "(6.0, 2.0)", "(-2.0, 6.0)", "(x, y) → (-y, x)"],
+      ["2 (Rotation 180°)", "Rotation", "θ = 180°, Center (0,0)", "(2.0, 2.0)", "(-2.0, -2.0)", "(6.0, 2.0)", "(-6.0, -2.0)", "(x, y) → (-x, -y)"],
+      ["3 (Translation)", "Translation", "Δx = +3, Δy = +2", "(2.0, 2.0)", "(5.0, 4.0)", "(6.0, 2.0)", "(9.0, 4.0)", "(x, y) → (x + 3, y + 2)"],
+      ["4 (Reflection X-Axis)", "Reflection", "Line y = 0 (X-axis)", "(2.0, 2.0)", "(2.0, -2.0)", "(6.0, 2.0)", "(6.0, -2.0)", "(x, y) → (x, -y)"],
+      ["5 (Reflection y = x)", "Reflection", "Line y = x", "(2.0, 2.0)", "(2.0, 2.0)", "(6.0, 2.0)", "(2.0, 6.0)", "(x, y) → (y, x)"],
+      ["6 (Dilation Scale 2×)", "Dilation", "k = 2.0, Center (0,0)", "(2.0, 2.0)", "(4.0, 4.0)", "(6.0, 2.0)", "(12.0, 4.0)", "(x, y) → (2x, 2y)"]
+    ],
+    criticalQuestions: [
+      {
+        prompt: "1. Rigid Motions and Congruence (Isometries)",
+        subtext: "Compare Trials 1 through 5 (rotations, translations, reflections) with Trial 6 (dilation). Why are rotations, translations, and reflections classified as rigid motions (isometries), and how does the image triangle compare to the pre-image in congruence and angle measures?",
+        exemplarAnswer: "Rigid motions (isometries) preserve both Euclidean distance between points and interior angle measures. Therefore, the image triangle produced by rotations, translations, and reflections is strictly congruent (identical size and shape) to the pre-image. In contrast, dilations scale distances by factor k, preserving angles and shape to produce similar, but not congruent, figures."
+      },
+      {
+        prompt: "2. Algebraic Rules for Rotations About the Origin",
+        subtext: "Analyze the coordinate changes in Trial 1 (90° CCW rotation) and Trial 2 (180° rotation). If a vertex is located at (x, y) = (5, -3), determine its new coordinates after a 90° CCW rotation and after a 270° CCW (or 90° CW) rotation.",
+        exemplarAnswer: "For a 90° CCW rotation, the rule is (x, y) → (-y, x), which transforms (5, -3) to (-(-3), 5) = (3, 5). For a 270° CCW (or 90° CW) rotation, the rule is (x, y) → (y, -x), which transforms (5, -3) to (-3, -5)."
+      },
+      {
+        prompt: "3. Effect of Moving the Center of Rotation / Dilation",
+        subtext: "In the simulation, drag the yellow pivot marker from (0,0) to (2,2). How does rotating or dilating a polygon about one of its own vertices compare to rotating or dilating about the coordinate origin?",
+        exemplarAnswer: "When the center of rotation or dilation is placed directly on vertex A (2,2), point A remains completely invariant (fixed in place at (2,2)), while all other vertices swing or scale around point A as the pivot anchor."
+      }
+    ],
+    realWorldScenario: {
+      title: "Video Game Computer Graphics & Robotic Arm Kinematics",
+      scenario: "A 2D video game engine renders a spaceship polygon that needs to rotate 90° when turning and translate forward by Δx = 10 units. Meanwhile, a robotic manufacturing arm rotates its gripper tool around an elbow joint pivot (x₀, y₀).",
+      task: "Explain how transformation matrices and coordinate rules allow game engines and robot controllers to compute the exact positions of vertices in real time.",
+      exemplarAnswer: "Graphics engines and robotic kinematics software represent polygon vertices as coordinate vectors and multiply them by 2D transformation matrices (or apply affine translation/rotation formulas). By shifting the origin to the elbow joint (x - x₀, y - y₀), applying trigonometric rotation [cos θ, -sin θ; sin θ, cos θ], and shifting back, the controller computes the real-time position of every vertex instantaneously."
+    }
+  },
+
+  "sim-advanced-multi-step-geometric-transformation": {
+    drivingQuestion: "How do composite (multi-step) geometric transformations modify shapes sequentially, and why does the order of transformation operations often yield completely different final images?",
+    hypothesisPrompt: "If you apply a reflection over the Y-axis followed by a 90° counterclockwise rotation about the origin, predict the final coordinates of a triangle. Will performing the rotation first and the reflection second result in the same image (are geometric compositions commutative)?",
+    tableHeaders: ["Pipeline Stage", "Step Description", "Transformation Type", "Rule Applied", "Point A (2,2)", "Point B (6,2)", "Point C (4,6)", "Congruence Status"],
+    tableRows: [
+      ["Initial", "Pre-Image", "Baseline", "(x, y)", "(2.0, 2.0)", "(6.0, 2.0)", "(4.0, 6.0)", "Original Object"],
+      ["Step 1", "Reflection over Y-Axis", "Reflection", "(x, y) → (-x, y)", "(-2.0, 2.0)", "(-6.0, 2.0)", "(-4.0, 6.0)", "Congruent (Orientation Reversed)"],
+      ["Step 2 (Final)", "Rotation 90° CCW about (0,0)", "Rotation", "(x, y) → (-y, x)", "(-2.0, -2.0)", "(-2.0, -6.0)", "(-6.0, -4.0)", "Congruent (Preserves Lengths)"],
+      ["Alternative 1", "Rotation 90° CCW first", "Rotation", "(x, y) → (-y, x)", "(-2.0, 2.0)", "(-2.0, 6.0)", "(-6.0, 4.0)", "Congruent Intermediate"],
+      ["Alternative 2", "Then Reflection over Y-Axis", "Reflection", "(x, y) → (-x, y)", "(2.0, 2.0)", "(2.0, 6.0)", "(6.0, 4.0)", "Different Final Position! (Non-commutative)"],
+      ["Glide Preset", "Reflect X-Axis + Trans (+4, 0)", "Glide Reflection", "(x, y) → (x + 4, -y)", "(6.0, -2.0)", "(10.0, -2.0)", "(8.0, -6.0)", "Congruent (Glide Reflection)"]
+    ],
+    criticalQuestions: [
+      {
+        prompt: "1. Non-Commutative Nature of Geometric Compositions",
+        subtext: "Analyze the difference between the Step 1 → Step 2 pipeline (Reflect Y then Rotate 90°) versus Alternative 1 → Alternative 2 (Rotate 90° then Reflect Y). Explain algebraically why matrix multiplication and transformation composition are generally non-commutative (T₁ ∘ T₂ ≠ T₂ ∘ T₁).",
+        exemplarAnswer: "Composing transformations is equivalent to matrix multiplication. Because matrix multiplication is non-commutative (A × B ≠ B × A), applying reflection R followed by rotation S modifies the coordinates differently than applying rotation S followed by reflection R. In the first case, (x, y) becomes (-x, y) then (-y, -x); in the second case, (x, y) becomes (-y, x) then (y, x), producing two distinct quadrants."
+      },
+      {
+        prompt: "2. Structure and Geometry of a Glide Reflection",
+        subtext: "Click the 'Glide Reflection' preset in the pipeline. How is a glide reflection defined, and why can it not be simplified into a single pure rotation, translation, or reflection alone?",
+        exemplarAnswer: "A glide reflection is the composite of a reflection across a line L and a translation parallel to line L. Because the orientation is flipped (opposite isometry) and no invariant fixed point exists on the line unless distance is zero, it represents an irreducible distinct class of 2D Euclidean isometries that cannot be reduced to a pure translation or pure rotation."
+      },
+      {
+        prompt: "3. Intermediate Stages and Phantom Geometry",
+        subtext: "Observe the purple phantom shapes displayed between steps. Why is tracking intermediate states valuable when diagnosing multi-joint robotic movements or multi-pass CAD transformations?",
+        exemplarAnswer: "Intermediate states allow engineers and animators to verify clearance envelopes, collision paths, and boundary conditions during motion execution, preventing robotic arms or virtual components from intersecting obstacles during transition phases."
+      }
+    ],
+    realWorldScenario: {
+      title: "Automated CNC Milling and Footstep Animation Sequences",
+      scenario: "A digital character animator needs to generate a realistic walking sequence (footprint tracks) along a curved path using glide reflections, while a CNC 5-axis milling machine must reposition a workpiece through sequential rotations and translations.",
+      task: "Using composite transformation notation, explain how chaining discrete transformation steps in a precise pipeline ensures repeatable positioning without spatial error accumulation.",
+      exemplarAnswer: "By defining a pipeline where each step is represented by an affine matrix T_total = T_n × ... × T_2 × T_1, the CNC controller or animation engine computes vertex paths deterministically. For walking footprints, each step is a glide reflection (alternating foot mirror + forward translation). Chaining transformation matrices allows the software to execute complex multi-axis motion smoothly and with mathematical precision."
+    }
+  },
+
+  "sim-unit-circle-trigonometry": {
+    drivingQuestion: "How does counterclockwise rotation on the unit circle define trigonometric functions (cosine, sine, tangent), radian measurements, harmonic wave oscillations, and electromagnetic phasors?",
+    hypothesisPrompt: "If you rotate a radius vector around a unit circle (R = 1) from 0° to 360°, predict how the horizontal projection (x), vertical projection (y), and slope ratio (y/x) will vary across the four quadrants. What happens to tan θ as θ approaches 90° and 270°?",
+    tableHeaders: ["Trial / Angle (θ)", "Radians (rad)", "Quadrant", "Cosine (x = cos θ)", "Sine (y = sin θ)", "Tangent (y/x = tan θ)", "Harmonic Wave Height", "Real Phasor E(t)"],
+    tableRows: [
+      ["0°", "0.000 rad (0.00π)", "Positive X-Axis", "1.0000", "0.0000", "0.0000", "0.0000 (Node)", "+1.0000 (Peak)"],
+      ["30°", "0.524 rad (0.17π)", "Quadrant I", "0.8660 (√3/2)", "0.5000 (1/2)", "0.5774 (1/√3)", "+0.5000", "+0.8660"],
+      ["45°", "0.785 rad (0.25π)", "Quadrant I", "0.7071 (√2/2)", "0.7071 (√2/2)", "1.0000", "+0.7071", "+0.7071"],
+      ["90°", "1.571 rad (0.50π)", "Positive Y-Axis", "0.0000", "1.0000", "Undefined (÷0)", "+1.0000 (Crest)", "0.0000 (Node)"],
+      ["135°", "2.356 rad (0.75π)", "Quadrant II", "-0.7071", "+0.7071", "-1.0000", "+0.7071", "-0.7071"],
+      ["180°", "3.142 rad (1.00π)", "Negative X-Axis", "-1.0000", "0.0000", "0.0000", "0.0000 (Node)", "-1.0000 (Trough)"],
+      ["270°", "4.712 rad (1.50π)", "Negative Y-Axis", "0.0000", "-1.0000", "Undefined (÷0)", "-1.0000 (Trough)", "0.0000 (Node)"],
+      ["360°", "6.283 rad (2.00π)", "Full Circle Cycle", "1.0000", "0.0000", "0.0000", "0.0000 (Cycle Complete)", "+1.0000 (Peak)"]
+    ],
+    criticalQuestions: [
+      {
+        prompt: "1. Geometric Meaning of Cosine and Sine on the Unit Circle",
+        subtext: "On a circle with radius R = 1 centered at (0,0), explain why any point on the perimeter has coordinates (x, y) = (cos θ, sin θ). Why does the Pythagorean Theorem directly yield the identity cos²(θ) + sin²(θ) = 1?",
+        exemplarAnswer: "In a right triangle with hypotenuse equal to the radius R = 1, cos θ = adjacent / hypotenuse = x / 1 = x, and sin θ = opposite / hypotenuse = y / 1 = y. Applying the Pythagorean theorem x² + y² = R² to the coordinates on the unit circle directly proves the fundamental Pythagorean trigonometric identity cos²(θ) + sin²(θ) = 1 for all real angles θ."
+      },
+      {
+        prompt: "2. Asymptotic Discontinuities of the Tangent Function",
+        subtext: "Observe the behavior of the tangent value as the angle moves from 89.0° to 90.0° and then to 91.0°. Why is tan(90°) undefined geometrically and algebraically?",
+        exemplarAnswer: "Algebraically, tan θ = sin θ / cos θ. At 90°, cos(90°) = 0, which results in division by zero (1 / 0), creating a vertical asymptote where tan θ approaches +∞ from the left and -∞ from the right. Geometrically, the terminal ray is vertical (parallel to the vertical tangent line x = 1), so it never intersects the tangent line."
+      },
+      {
+        prompt: "3. Physical Translation: Connecting Circular Motion to Harmonic Waves & Phasors",
+        subtext: "Switch between the 'Wave Plot' and 'EM Phasor' view modes in the simulation. How does the vertical position on the unit circle generate a sinusoidal wave, and how does the horizontal projection model real physical quantities in electrical circuits and electromagnetic waves?",
+        exemplarAnswer: "In the Wave Plot mode, mapping the vertical coordinate y = sin(θ) continuously against linear angle progression unwraps circular rotation into a transverse sine wave, illustrating simple harmonic motion. In EM Phasor mode, the real-axis horizontal projection x = cos(θ) models physical measurable quantities like alternating voltage V(t) = V₀ cos(ωt) or electric field oscillations E(t) = E₀ cos(ωt) in electromagnetic radiation."
+      }
+    ],
+    realWorldScenario: {
+      title: "AC Electrical Grid Transmission & Wireless Signal Phasors",
+      scenario: "Electrical power engineers model alternating current (AC) grid voltage V(t) = V_peak cos(ωt + φ) as a rotating 60 Hz phasor, while wireless communication transmitters resolve transmitted radio waves into In-phase (I = A cos θ) and Quadrature (Q = A sin θ) components on an IQ constellation diagram.",
+      task: "Explain how the unit circle's Cartesian projections (x = cos θ, y = sin θ) provide the foundational mathematical framework for signal processing, modulation, and electrical impedance analysis.",
+      exemplarAnswer: "By modeling periodic electrical signals as rotating vectors on the complex plane (Euler's formula e^(iθ) = cos θ + i sin θ), engineers can perform vector addition of voltages, calculate phase angles φ, determine real power (P = VI cos φ), and encode digital data into phase and amplitude constellations (such as QAM modulation in 5G WiFi) without solving complex differential equations in the time domain."
+    }
+  },
+
+  "sim-lissajous-curves": {
+    drivingQuestion: "How do parametric trigonometric equations x(t) = A·sin(a·t + δ) and y(t) = B·sin(b·t) generate Lissajous curves, and how do frequency ratios and phase shifts determine algebraic closed orbits and Chebyshev polynomials?",
+    hypothesisPrompt: "If you adjust the horizontal and vertical frequency values from a:b = 1:1 to 1:2 and 3:2 while varying the phase angle δ from 0° to 90°, predict how the number of horizontal and vertical intersections and line symmetry will change.",
+    tableHeaders: ["Parametric Preset", "Freq a (x)", "Freq b (y)", "Ratio (a:b)", "Phase Shift (δ)", "Parametric Form x(t), y(t)", "Cartesian Algebraic Form", "Symmetry & Intersections"],
+    tableRows: [
+      ["Linear Degenerate", "1", "1", "1:1", "0° (0 rad)", "x = sin(t), y = sin(t)", "y = x (Straight Line)", "Line segment along diagonal y=x, [-1, 1]"],
+      ["Orthogonal Circle", "1", "1", "1:1", "90° (π/2 rad)", "x = cos(t), y = sin(t)", "x² + y² = 1 (Unit Circle)", "Rotational continuous symmetry around origin"],
+      ["Tilted Ellipse", "1", "1", "1:1", "45° (π/4 rad)", "x = sin(t + π/4), y = sin(t)", "x² - √2 xy + y² = 1/2", "Elliptical closed orbit with 45° tilt"],
+      ["Parabolic Curve", "1", "2", "1:2", "0° (0 rad)", "x = sin(t), y = sin(2t)", "y² = 4x²(1 - x²)", "Figure-8 lemniscate with origin self-crossing"],
+      ["Chebyshev Parabola", "1", "2", "1:2", "90° (π/2 rad)", "x = cos(t), y = cos(2t)", "y = 2x² - 1 (T₂(x))", "Open parabolic arc spanning x ∈ [-1, 1]"],
+      ["Knot Harmonic 3:2", "3", "2", "3:2", "90° (π/2 rad)", "x = cos(3t), y = sin(2t)", "Degree 6 Algebraic Curve", "3 horizontal lobes, 2 vertical lobes"],
+      ["Complex Grid 3:4", "3", "4", "3:4", "90° (π/2 rad)", "x = cos(3t), y = sin(4t)", "Degree 12 Algebraic Curve", "3 horizontal lobes, 4 vertical lobes"]
+    ],
+    criticalQuestions: [
+      {
+        prompt: "1. Eliminating Parameter t to Derive Cartesian Equations",
+        subtext: "When a = 1, b = 2, and δ = 90°, x(t) = cos(t) and y(t) = cos(2t). Use the trigonometric double-angle identity cos(2t) = 2cos²(t) - 1 to eliminate the parameter t and write the curve as a direct Cartesian polynomial y = f(x).",
+        exemplarAnswer: "Using the double-angle identity y(t) = cos(2t) = 2cos²(t) - 1. Since x(t) = cos(t), substituting x gives y = 2x² - 1 for domain x ∈ [-1, 1]. This is the second-degree Chebyshev polynomial T₂(x), tracing a parabolic curve back and forth across the interval."
+      },
+      {
+        prompt: "2. Frequency Ratios, Tangencies, and Periodicity",
+        subtext: "Explain why any rational frequency ratio a/b = p/q (where p and q are coprime positive integers) produces a periodic, closed algebraic curve with fundamental period T = 2π / gcd(a, b). How do the values p and q relate to the number of vertical and horizontal boundary tangencies?",
+        exemplarAnswer: "Because both sin(at) and sin(bt) are periodic functions, if a/b is a rational number p/q, the least common multiple period T = 2π / gcd(a,b) guarantees that the point (x(t), y(t)) returns precisely to its initial position after time T. The curve touches the vertical boundaries x = ±A exactly 'a' times per period and touches the horizontal boundaries y = ±B exactly 'b' times per period."
+      },
+      {
+        prompt: "3. Topological Knots and 3D Lissajous Projections",
+        subtext: "In higher mathematics, when a third harmonic oscillation z(t) = C sin(c·t + γ) is added along a perpendicular z-axis, the resulting 3D curve can form non-intersecting Lissajous knots. Why are Lissajous figures fundamental to topology, Fourier analysis, and signal synthesis?",
+        exemplarAnswer: "Lissajous curves provide visual realizations of Fourier basis projections (superposition of orthogonal sine and cosine modes). In knot theory, 3D Lissajous curves form billiard knots inside rectangular prisms. In signal analysis, they represent the geometric trajectory of complex vector spaces and orthogonal harmonic decompositions."
+      }
+    ],
+    realWorldScenario: {
+      title: "Computer Graphics Parametric Rendering & Laser Light Shows",
+      scenario: "Digital animators and laser light show projectors use two galvanometers (mirror motors driven by sinusoidal voltage signals) to steer a single laser beam onto auditorium screens to draw smooth geometric patterns without sharp discontinuities.",
+      task: "Explain how programming specific frequency ratios and phase shifts allows laser technicians to render complex symmetric figures, rosettes, and logos in real time using pure trigonometric equations.",
+      exemplarAnswer: "A laser galvanometer deflects the beam along X and Y axes using precise analog voltages V_x(t) and V_y(t). By supplying sinusoidal signals with synchronized frequency ratios (e.g. 3:2 or 5:4) and controlled phase offsets δ, the single moving laser dot traces out continuous, seamless closed Lissajous curves fast enough (above human persistence of vision ~60 Hz) that the human eye perceives a glowing, solid geometric logo or animated pattern."
+    }
+  },
+
+  "sim-statistical-data-lab": {
+    drivingQuestion: "How do measures of central tendency and dispersion quantify the distribution of empirical datasets, and how do formula substitutions reveal the mathematical mechanics of variance and standard deviation?",
+    hypothesisPrompt: "If you introduce a significant positive outlier (e.g., changing a single value in a dataset from 15 to 95), predict which statistical metrics (Mean, Median, Mode, Range, Variance, Standard Deviation) will change drastically and which will remain resistant.",
+    tableHeaders: ["Dataset / Trial", "Sample Size (n)", "Data Type", "Mean (μ)", "Median", "Mode", "Variance (σ²)", "Std Dev (σ)", "Range", "Distribution Shape"],
+    tableRows: [
+      ["Baseline Discrete [2, 4, 6, 8, 10, 12, 14, 16]", "8", "Discrete", "9.00", "9.00", "No Mode", "21.00", "4.58", "14.00", "Uniform / Symmetric"],
+      ["Right-Skewed with Outlier [2, 4, 6, 8, 10, 12, 14, 80]", "8", "Discrete", "17.00", "9.00", "No Mode", "591.25", "24.32", "78.00", "Heavily Right-Skewed"],
+      ["Bimodal Clustering [5, 5, 5, 6, 18, 19, 20, 20]", "8", "Discrete", "12.25", "12.00", "5, 20 (freq 3/2)", "47.44", "6.89", "15.00", "Bimodal Dual-Peak"],
+      ["Zero-Variance Identical [12, 12, 12, 12, 12, 12, 12, 12]", "8", "Discrete", "12.00", "12.00", "12 (freq 8)", "0.00", "0.00", "0.00", "Degenerate / Single Point"],
+      ["Continuous Random Sample (n = 15, Range [10-50])", "15", "Continuous", "31.42", "30.15", "No Mode", "142.80", "11.95", "38.20", "Continuous Binned Spread"]
+    ],
+    criticalQuestions: [
+      {
+        prompt: "1. Resistant vs. Non-Resistant Statistical Measures",
+        subtext: "Compare how the Mean (μ) and Median responded when the outlier (80) was introduced in Trial 2. Why is the median considered a 'resistant' (robust) statistic while the mean and standard deviation are non-resistant?",
+        exemplarAnswer: "The Mean increased from 9.00 to 17.00 (+88.9%) and the Variance exploded from 21.00 to 591.25 because the arithmetic mean incorporates the magnitude of every data point into its sum Σx_i, and variance squares the extreme deviation (80 - 17)² = 3969. In contrast, the Median remained exactly 9.00 because it only depends on the ordinal rank position of the middle values, ignoring the magnitude of extreme boundary values."
+      },
+      {
+        prompt: "2. The Mathematical Mechanics of Variance: Why We Square Deviations",
+        subtext: "In the dynamic formula card for Variance σ² = Σ(x_i - μ)² / n, why do we square each difference (x_i - μ) before summing, instead of just taking the simple sum of deviations Σ(x_i - μ)?",
+        exemplarAnswer: "By the fundamental definition of the mean, the sum of signed deviations Σ(x_i - μ) is always identically equal to zero because positive deviations above the mean exactly cancel negative deviations below the mean. Squaring deviations eliminates negative signs, ensuring all discrepancies contribute positively, while also heavily penalizing larger deviations proportionally to distance from the center."
+      },
+      {
+        prompt: "3. Discrete Bar Chart vs. Binned Histogram & Frequency Polygon",
+        subtext: "Explain the conceptual differences between the Bar Graph (showing frequencies of exact discrete values) versus the Histogram and Frequency Polygon (grouping values into continuous interval bins).",
+        exemplarAnswer: "A categorical bar chart plots distinct, separate category bars with gaps, representing counts of exact identical values. A histogram groups adjacent continuous measurements into contiguous numerical bins (classes) without gaps between bars, displaying empirical probability density. A frequency polygon connects the class midpoints with linear segments, forming a continuous approximation of the underlying probability distribution curve."
+      }
+    ],
+    realWorldScenario: {
+      title: "Clinical Trial Blood Pressure Efficacy & Outlier Detection",
+      scenario: "Biostatisticians evaluating a new antihypertensive drug measure the reduction in systolic blood pressure across a test cohort of patients. If a single patient experiences an anomalous measurement due to sensor misplacement or non-compliance, it can severely distort the reported clinical efficacy.",
+      task: "Explain why FDA biostatistical guidelines require reporting both Mean/Standard Deviation and Median/Interquartile Range (IQR), and how dynamic formulas and box-plot histograms identify whether drug efficacy is uniformly distributed or driven by outliers.",
+      exemplarAnswer: "Reporting both sets of statistics reveals skewness: if the mean reduction differs substantially from the median, or if the standard deviation is inflated relative to the IQR, the distribution is skewed or contaminated by outliers. Histograms and frequency polygons visually uncover whether the treatment benefits the entire cohort or if a few extreme responders are artificially inflating the sample mean."
+    }
   }
 };

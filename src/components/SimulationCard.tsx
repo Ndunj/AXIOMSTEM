@@ -70,7 +70,7 @@ export const SimulationCard: React.FC<SimulationCardProps> = ({
 
   return (
     <div className="bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden hover:border-slate-700 transition-all duration-300 flex flex-col justify-between shadow-lg group hover:shadow-2xl hover:shadow-indigo-500/10 relative">
-      {/* Visual Header / Thumbnail Stage */}
+      {/* Card Header / Discipline & Meta */}
       <div className="relative p-5 pb-4 bg-gradient-to-b from-slate-950 to-slate-900 border-b border-slate-800/80">
         {/* Top Badges & Creator Controls */}
         <div className="flex items-center justify-between gap-2 mb-3">
@@ -82,6 +82,14 @@ export const SimulationCard: React.FC<SimulationCardProps> = ({
             >
               {simulation.discipline}
             </span>
+            {simulation.secondaryDisciplines?.map((sd) => (
+              <span
+                key={sd}
+                className="text-[11px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider bg-violet-500/10 text-violet-300 border border-violet-500/20"
+              >
+                {sd}
+              </span>
+            ))}
             {isLicensed ? (
               <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1">
                 <CheckCircle2 className="w-3 h-3 text-emerald-400" />

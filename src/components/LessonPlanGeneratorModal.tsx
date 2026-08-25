@@ -14,9 +14,13 @@ import {
   FileCheck2,
   RefreshCw,
   FileText,
-  KeyRound
+  KeyRound,
+  FileType,
+  Check,
+  FileDown
 } from "lucide-react";
 import { downloadWorksheetPDF } from "../services/pdfWorksheetGenerator";
+import { downloadLessonPlanDocx, downloadLessonPlanPdf } from "../services/lessonPlanExport";
 
 interface LessonPlanModalProps {
   simulation: SimulationItem;
@@ -33,6 +37,9 @@ export const LessonPlanGeneratorModal: React.FC<LessonPlanModalProps> = ({
   const [duration, setDuration] = useState(45);
   const [teacherNotes, setTeacherNotes] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isExportingDocx, setIsExportingDocx] = useState(false);
+  const [isExportingPdf, setIsExportingPdf] = useState(false);
+  const [successToast, setSuccessToast] = useState<string | null>(null);
   const [lessonPlan, setLessonPlan] = useState<LessonPlanData | null>(null);
 
   const generatePlan = async () => {
@@ -69,13 +76,41 @@ export const LessonPlanGeneratorModal: React.FC<LessonPlanModalProps> = ({
     window.print();
   };
 
+  const handleDownloadDocx = async () => {
+    if (!lessonPlan) return;
+    try {
+      setIsExportingDocx(true);
+      await downloadLessonPlanDocx(lessonPlan, simulation);
+      setSuccessToast("Word document (.docx) downloaded successfully!");
+      setTimeout(() => setSuccessToast(null), 4000);
+    } catch (err) {
+      console.error("Error exporting DOCX:", err);
+    } finally {
+      setIsExportingDocx(false);
+    }
+  };
+
+  const handleDownloadPdf = () => {
+    if (!lessonPlan) return;
+    try {
+      setIsExportingPdf(true);
+      downloadLessonPlanPdf(lessonPlan, simulation);
+      setSuccessToast("PDF Lesson Plan downloaded successfully!");
+      setTimeout(() => setSuccessToast(null), 4000);
+    } catch (err) {
+      console.error("Error exporting PDF:", err);
+    } finally {
+      setIsExportingPdf(false);
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
-      <div className="bg-slate-900 border border-slate-700/80 rounded-3xl w-full max-w-4xl max-h-[92vh] flex flex-col overflow-hidden shadow-2xl">
+      <div className="bg-slate-900 border border-slate-700/80 rounded-3xl w-full max-w-5xl max-h-[92vh] flex flex-col overflow-hidden shadow-2xl">
         {/* Header Bar */}
-        <div className="flex items-center justify-between px-6 py-4 bg-slate-950 border-b border-slate-800">
+        <div className="flex flex-wrap items-center justify-between px-6 py-4 bg-slate-950 border-b border-slate-800 gap-3">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 flex items-center justify-center">
+            <div className="w-9 h-9 rounded-xl bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 flex items-center justify-center shrink-0">
               <Sparkles className="w-5 h-5 text-indigo-400" />
             </div>
             <div>
@@ -84,31 +119,57 @@ export const LessonPlanGeneratorModal: React.FC<LessonPlanModalProps> = ({
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          {/* Quick Actions */}
+          <div className="flex items-center flex-wrap gap-2">
+            {lessonPlan && (
+              <>
+                <button
+                  onClick={handleDownloadDocx}
+                  disabled={isExportingDocx}
+                  className="flex items-center gap-1.5 px-3.5 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold shadow-md shadow-blue-600/25 cursor-pointer transition-all active:scale-95 disabled:opacity-50"
+                  title="Download as Microsoft Word (.docx) Document"
+                >
+                  <FileText className={`w-3.5 h-3.5 ${isExportingDocx ? "animate-spin" : ""}`} />
+                  <span>{isExportingDocx ? "Exporting..." : "Download Word (.docx)"}</span>
+                </button>
+
+                <button
+                  onClick={handleDownloadPdf}
+                  disabled={isExportingPdf}
+                  className="flex items-center gap-1.5 px-3.5 py-1.5 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-xs font-bold shadow-md shadow-rose-600/25 cursor-pointer transition-all active:scale-95 disabled:opacity-50"
+                  title="Download as Printable PDF (.pdf) Document"
+                >
+                  <FileDown className={`w-3.5 h-3.5 ${isExportingPdf ? "animate-spin" : ""}`} />
+                  <span>{isExportingPdf ? "Exporting..." : "Download PDF (.pdf)"}</span>
+                </button>
+              </>
+            )}
+
             <button
               onClick={() => downloadWorksheetPDF(simulation, { gradeLevel, includeAnswerKey: false })}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-sky-600 hover:bg-sky-500 text-white rounded-xl text-xs font-bold shadow-md shadow-sky-600/20 cursor-pointer transition-all active:scale-95"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-sky-300 border border-slate-700 rounded-xl text-xs font-medium cursor-pointer transition-all active:scale-95"
               title="Download paired Student Lab Worksheet PDF"
             >
-              <FileText className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Student PDF Worksheet</span>
+              <FileType className="w-3.5 h-3.5 text-sky-400" />
+              <span className="hidden sm:inline">Student Lab PDF</span>
             </button>
 
             <button
               onClick={() => downloadWorksheetPDF(simulation, { gradeLevel, includeAnswerKey: true })}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 rounded-xl text-xs font-semibold cursor-pointer transition-all active:scale-95"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-950/60 hover:bg-emerald-900/60 text-emerald-300 border border-emerald-500/30 rounded-xl text-xs font-semibold cursor-pointer transition-all active:scale-95"
               title="Download Teacher Answer Key PDF"
             >
               <KeyRound className="w-3.5 h-3.5 text-emerald-400" />
-              <span className="hidden sm:inline">Teacher Key</span>
+              <span className="hidden sm:inline">Answer Key</span>
             </button>
 
             {lessonPlan && (
               <button
                 onClick={handlePrint}
                 className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-medium border border-slate-700 cursor-pointer transition-all"
+                title="Print Lesson Plan"
               >
-                <Printer className="w-3.5 h-3.5" /> Print Plan
+                <Printer className="w-3.5 h-3.5" />
               </button>
             )}
             <button
@@ -119,6 +180,19 @@ export const LessonPlanGeneratorModal: React.FC<LessonPlanModalProps> = ({
             </button>
           </div>
         </div>
+
+        {/* Success Toast Notification */}
+        {successToast && (
+          <div className="bg-emerald-500/20 border-b border-emerald-500/40 px-6 py-2 flex items-center justify-between text-xs text-emerald-300 animate-in fade-in slide-in-from-top-1">
+            <div className="flex items-center gap-2">
+              <Check className="w-4 h-4 text-emerald-400" />
+              <span className="font-semibold">{successToast}</span>
+            </div>
+            <button onClick={() => setSuccessToast(null)} className="text-emerald-400 hover:text-emerald-200 text-xs">
+              Dismiss
+            </button>
+          </div>
+        )}
 
         {/* Configuration Bar */}
         <div className="p-4 bg-slate-950/50 border-b border-slate-800/80 grid grid-cols-1 sm:grid-cols-4 gap-3">
@@ -178,14 +252,41 @@ export const LessonPlanGeneratorModal: React.FC<LessonPlanModalProps> = ({
             </div>
           ) : lessonPlan ? (
             <div className="space-y-6">
-              {/* Document Title Header */}
-              <div className="border-b border-slate-800 pb-4">
-                <div className="flex items-center justify-between text-xs text-slate-400 font-mono mb-1">
-                  <span>DISCIPLINE: {lessonPlan.discipline.toUpperCase()}</span>
-                  <span>ESTIMATED TIME: {lessonPlan.estimatedTime}</span>
+              {/* Document Title & Direct Export Bar */}
+              <div className="border-b border-slate-800 pb-5">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-2">
+                  <div className="flex items-center gap-2 text-xs text-slate-400 font-mono">
+                    <span>DISCIPLINE: {lessonPlan.discipline.toUpperCase()}</span>
+                    <span>•</span>
+                    <span>ESTIMATED TIME: {lessonPlan.estimatedTime}</span>
+                  </div>
+
+                  {/* Prominent Export Callout in Document View */}
+                  <div className="flex items-center gap-2 bg-slate-950 p-1.5 rounded-xl border border-slate-800">
+                    <span className="text-[11px] text-slate-400 font-medium px-2 flex items-center gap-1">
+                      <Download className="w-3.5 h-3.5 text-indigo-400" /> Export Options:
+                    </span>
+                    <button
+                      onClick={handleDownloadDocx}
+                      disabled={isExportingDocx}
+                      className="px-3 py-1 bg-blue-600/20 hover:bg-blue-600 text-blue-300 hover:text-white border border-blue-500/40 rounded-lg text-xs font-semibold cursor-pointer transition-all flex items-center gap-1.5"
+                    >
+                      <FileText className="w-3.5 h-3.5 text-blue-400" />
+                      <span>.DOCX (Word)</span>
+                    </button>
+                    <button
+                      onClick={handleDownloadPdf}
+                      disabled={isExportingPdf}
+                      className="px-3 py-1 bg-rose-600/20 hover:bg-rose-600 text-rose-300 hover:text-white border border-rose-500/40 rounded-lg text-xs font-semibold cursor-pointer transition-all flex items-center gap-1.5"
+                    >
+                      <FileDown className="w-3.5 h-3.5 text-rose-400" />
+                      <span>.PDF (A4)</span>
+                    </button>
+                  </div>
                 </div>
-                <h1 className="text-2xl font-black text-white">{lessonPlan.title}</h1>
-                <div className="mt-2 inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-slate-800 text-sky-300 font-mono text-xs border border-slate-700">
+
+                <h1 className="text-2xl sm:text-3xl font-black text-white">{lessonPlan.title}</h1>
+                <div className="mt-2.5 inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-slate-800 text-sky-300 font-mono text-xs border border-slate-700">
                   <Award className="w-3.5 h-3.5 text-amber-400" />
                   <span>Standard Alignment: {lessonPlan.ngssStandard}</span>
                 </div>
@@ -200,7 +301,7 @@ export const LessonPlanGeneratorModal: React.FC<LessonPlanModalProps> = ({
                   {lessonPlan.learningObjectives.map((obj, i) => (
                     <li key={i} className="flex items-start gap-2">
                       <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 mt-0.5 shrink-0" />
-                      <span>{obj}</span>
+                      <span className="leading-relaxed">{obj}</span>
                     </li>
                   ))}
                 </ul>
@@ -259,6 +360,34 @@ export const LessonPlanGeneratorModal: React.FC<LessonPlanModalProps> = ({
                 <div className="p-4 rounded-2xl bg-slate-950/60 border border-slate-800">
                   <h4 className="font-bold text-purple-400 mb-1.5">Honors / Gifted Extension:</h4>
                   <p className="text-slate-300 leading-relaxed">{lessonPlan.differentiatedInstruction.extension}</p>
+                </div>
+              </div>
+
+              {/* Bottom Quick Download Banner */}
+              <div className="p-4 rounded-2xl bg-gradient-to-r from-blue-950/40 via-slate-900 to-rose-950/40 border border-slate-700 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div>
+                  <h4 className="text-xs font-bold text-white">Save or Distribute Lesson Plan</h4>
+                  <p className="text-[11px] text-slate-400">
+                    Open in Microsoft Word, Google Docs, or print the formatted PDF for department records.
+                  </p>
+                </div>
+                <div className="flex items-center gap-2 w-full sm:w-auto">
+                  <button
+                    onClick={handleDownloadDocx}
+                    disabled={isExportingDocx}
+                    className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold shadow-md shadow-blue-600/20 cursor-pointer transition-all active:scale-95 disabled:opacity-50"
+                  >
+                    <FileText className="w-4 h-4" />
+                    <span>Download Word (.docx)</span>
+                  </button>
+                  <button
+                    onClick={handleDownloadPdf}
+                    disabled={isExportingPdf}
+                    className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-xs font-bold shadow-md shadow-rose-600/20 cursor-pointer transition-all active:scale-95 disabled:opacity-50"
+                  >
+                    <FileDown className="w-4 h-4" />
+                    <span>Download PDF (.pdf)</span>
+                  </button>
                 </div>
               </div>
             </div>

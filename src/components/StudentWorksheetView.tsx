@@ -311,8 +311,16 @@ ${realWorldAnswer || "_[No solution recorded]_"}
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
           {/* Title & Metadata */}
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-sky-500/20 to-indigo-500/20 text-sky-400 border border-sky-500/30 flex items-center justify-center shadow-inner shrink-0">
-              <FileText className="w-5 h-5" />
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-sky-500/20 to-indigo-500/20 text-sky-400 border border-sky-500/30 flex items-center justify-center shadow-inner shrink-0 overflow-hidden">
+              <img
+                src="/axiom-stem-logo.png"
+                alt="AXIOM STEM"
+                referrerPolicy="no-referrer"
+                className="w-full h-full object-contain p-0.5"
+                onError={(e) => {
+                  (e.currentTarget as HTMLElement).style.display = "none";
+                }}
+              />
             </div>
             <div>
               <div className="flex items-center gap-2">
@@ -556,12 +564,12 @@ ${realWorldAnswer || "_[No solution recorded]_"}
                   </div>
                 </div>
 
-                <div className="text-xs text-slate-300 bg-slate-950 p-3.5 rounded-2xl border border-slate-800 leading-relaxed">
+                <div className="text-sm text-slate-300 bg-slate-950 p-4 rounded-2xl border border-slate-800 leading-relaxed">
                   {worksheetData.hypothesisPrompt}
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">
+                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">
                     Your Hypothesis / Prediction:
                   </label>
                   <textarea
@@ -572,7 +580,7 @@ ${realWorldAnswer || "_[No solution recorded]_"}
                       setHypothesis(e.target.value);
                     }}
                     placeholder="If [manipulated variable] increases/changes, then [responding variable] will... because..."
-                    className="w-full bg-slate-950 border border-slate-800 rounded-2xl p-3 text-xs text-slate-200 placeholder:text-slate-600 focus:outline-none focus:border-sky-500 transition-colors resize-y leading-relaxed"
+                    className="w-full bg-slate-950 border border-slate-800 rounded-2xl p-3.5 text-sm text-slate-200 placeholder:text-slate-600 focus:outline-none focus:border-sky-500 transition-colors resize-y leading-relaxed"
                   />
                 </div>
               </div>
@@ -611,26 +619,26 @@ ${realWorldAnswer || "_[No solution recorded]_"}
                   </div>
                 </div>
 
-                <p className="text-xs text-slate-300">{phrasing.phase2Subtitle}</p>
+                <p className="text-sm text-slate-300">{phrasing.phase2Subtitle}</p>
 
                 {/* Interactive Data Table */}
                 <div className="overflow-x-auto rounded-2xl border border-slate-800 bg-slate-950">
-                  <table className="w-full text-left border-collapse text-xs">
+                  <table className="w-full text-left border-collapse text-sm">
                     <thead>
                       <tr className="bg-slate-900/90 border-b border-slate-800 text-slate-300">
                         {worksheetData.tableHeaders.map((header, hIdx) => (
-                          <th key={hIdx} className="p-2.5 font-bold whitespace-nowrap">
+                          <th key={hIdx} className="p-3 font-bold whitespace-nowrap text-xs">
                             {header}
                           </th>
                         ))}
-                        <th className="p-2.5 w-8"></th>
+                        <th className="p-3 w-8"></th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-850">
                       {tableRows.map((row, rIdx) => (
                         <tr key={rIdx} className="hover:bg-slate-900/40 transition-colors">
                           {row.map((cell, cIdx) => (
-                            <td key={cIdx} className="p-2">
+                            <td key={cIdx} className="p-2.5">
                               <input
                                 type="text"
                                 value={cell}
@@ -638,11 +646,11 @@ ${realWorldAnswer || "_[No solution recorded]_"}
                                   handleTableCellChange(rIdx, cIdx, e.target.value)
                                 }
                                 placeholder={cIdx <= 1 ? "Condition" : "Reading..."}
-                                className="w-full bg-slate-900/70 border border-slate-800 rounded-lg px-2 py-1 text-xs text-slate-200 placeholder:text-slate-600 focus:outline-none focus:border-sky-500 transition-colors"
+                                className="w-full bg-slate-900/70 border border-slate-800 rounded-lg px-2.5 py-1.5 text-sm text-slate-200 placeholder:text-slate-600 focus:outline-none focus:border-sky-500 transition-colors"
                               />
                             </td>
                           ))}
-                          <td className="p-2 text-center">
+                          <td className="p-2.5 text-center">
                             {tableRows.length > 2 && (
                               <button
                                 type="button"
@@ -650,7 +658,7 @@ ${realWorldAnswer || "_[No solution recorded]_"}
                                 className="text-slate-600 hover:text-rose-400 p-1 rounded transition-colors cursor-pointer"
                                 title="Delete row"
                               >
-                                <Trash2 className="w-3 h-3" />
+                                <Trash2 className="w-3.5 h-3.5" />
                               </button>
                             )}
                           </td>
@@ -677,15 +685,15 @@ ${realWorldAnswer || "_[No solution recorded]_"}
                   {worksheetData.criticalQuestions.map((q, idx) => (
                     <div
                       key={idx}
-                      className="p-4 rounded-2xl bg-slate-950 border border-slate-800/90 space-y-2.5"
+                      className="p-4.5 rounded-2xl bg-slate-950 border border-slate-800/90 space-y-2.5"
                     >
                       <div className="flex items-start gap-2">
-                        <span className="text-xs font-bold text-sky-400 shrink-0 mt-0.5">
+                        <span className="text-sm font-bold text-sky-400 shrink-0 mt-0.5">
                           Q{idx + 1}.
                         </span>
                         <div>
-                          <div className="text-xs font-bold text-slate-100">{q.prompt}</div>
-                          <p className="text-[11px] text-slate-400 mt-0.5">{q.subtext}</p>
+                          <div className="text-sm font-bold text-slate-100">{q.prompt}</div>
+                          <p className="text-xs text-slate-300 mt-0.5 leading-relaxed">{q.subtext}</p>
                         </div>
                       </div>
 
@@ -694,7 +702,7 @@ ${realWorldAnswer || "_[No solution recorded]_"}
                         value={criticalAnswers[idx] || ""}
                         onChange={(e) => handleCriticalAnswerChange(idx, e.target.value)}
                         placeholder="Explain your answer citing observations or calculated patterns..."
-                        className="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-200 placeholder:text-slate-600 focus:outline-none focus:border-sky-500 transition-colors resize-y leading-relaxed"
+                        className="w-full bg-slate-900 border border-slate-800 rounded-xl p-3 text-sm text-slate-200 placeholder:text-slate-600 focus:outline-none focus:border-sky-500 transition-colors resize-y leading-relaxed"
                       />
                     </div>
                   ))}
@@ -714,14 +722,14 @@ ${realWorldAnswer || "_[No solution recorded]_"}
                 </div>
 
                 {/* 1. CLAIM */}
-                <div className="space-y-1.5 p-3.5 rounded-2xl bg-slate-950 border border-slate-800">
+                <div className="space-y-1.5 p-4 rounded-2xl bg-slate-950 border border-slate-800">
                   <div className="flex items-center justify-between">
-                    <label className="text-xs font-bold text-sky-400">
+                    <label className="text-sm font-bold text-sky-400">
                       {phrasing.claimTitle}
                     </label>
-                    <span className="text-[10px] text-slate-400">Direct conclusion</span>
+                    <span className="text-xs text-slate-400">Direct conclusion</span>
                   </div>
-                  <p className="text-[11px] text-slate-400">{phrasing.claimSubtext}</p>
+                  <p className="text-xs text-slate-300 leading-relaxed">{phrasing.claimSubtext}</p>
                   <textarea
                     rows={2}
                     value={claim}
@@ -730,19 +738,19 @@ ${realWorldAnswer || "_[No solution recorded]_"}
                       setClaim(e.target.value);
                     }}
                     placeholder="State a concise, definitive answer to the driving question..."
-                    className="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-200 placeholder:text-slate-600 focus:outline-none focus:border-sky-500 transition-colors resize-y"
+                    className="w-full bg-slate-900 border border-slate-800 rounded-xl p-3 text-sm text-slate-200 placeholder:text-slate-600 focus:outline-none focus:border-sky-500 transition-colors resize-y"
                   />
                 </div>
 
                 {/* 2. EVIDENCE */}
-                <div className="space-y-1.5 p-3.5 rounded-2xl bg-slate-950 border border-slate-800">
+                <div className="space-y-1.5 p-4 rounded-2xl bg-slate-950 border border-slate-800">
                   <div className="flex items-center justify-between">
-                    <label className="text-xs font-bold text-emerald-400">
+                    <label className="text-sm font-bold text-emerald-400">
                       {phrasing.evidenceTitle}
                     </label>
-                    <span className="text-[10px] text-slate-400">Specific data & units</span>
+                    <span className="text-xs text-slate-400">Specific data & units</span>
                   </div>
-                  <p className="text-[11px] text-slate-400">{phrasing.evidenceSubtext}</p>
+                  <p className="text-xs text-slate-300 leading-relaxed">{phrasing.evidenceSubtext}</p>
                   <textarea
                     rows={2}
                     value={evidence}
@@ -751,19 +759,19 @@ ${realWorldAnswer || "_[No solution recorded]_"}
                       setEvidence(e.target.value);
                     }}
                     placeholder="In Trial 1 with X=..., the measured Y was... whereas in Trial 3..."
-                    className="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-200 placeholder:text-slate-600 focus:outline-none focus:border-emerald-500 transition-colors resize-y"
+                    className="w-full bg-slate-900 border border-slate-800 rounded-xl p-3 text-sm text-slate-200 placeholder:text-slate-600 focus:outline-none focus:border-emerald-500 transition-colors resize-y"
                   />
                 </div>
 
                 {/* 3. REASONING */}
-                <div className="space-y-1.5 p-3.5 rounded-2xl bg-slate-950 border border-slate-800">
+                <div className="space-y-1.5 p-4 rounded-2xl bg-slate-950 border border-slate-800">
                   <div className="flex items-center justify-between">
-                    <label className="text-xs font-bold text-indigo-400">
+                    <label className="text-sm font-bold text-indigo-400">
                       {phrasing.reasoningTitle}
                     </label>
-                    <span className="text-[10px] text-slate-400">Scientific principle</span>
+                    <span className="text-xs text-slate-400">Scientific principle</span>
                   </div>
-                  <p className="text-[11px] text-slate-400">{phrasing.reasoningSubtext}</p>
+                  <p className="text-xs text-slate-300 leading-relaxed">{phrasing.reasoningSubtext}</p>
                   <textarea
                     rows={3}
                     value={reasoning}
@@ -772,7 +780,7 @@ ${realWorldAnswer || "_[No solution recorded]_"}
                       setReasoning(e.target.value);
                     }}
                     placeholder="This happens because [scientific/mathematical principle] dictates that..."
-                    className="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-200 placeholder:text-slate-600 focus:outline-none focus:border-indigo-500 transition-colors resize-y"
+                    className="w-full bg-slate-900 border border-slate-800 rounded-xl p-3 text-sm text-slate-200 placeholder:text-slate-600 focus:outline-none focus:border-indigo-500 transition-colors resize-y"
                   />
                 </div>
               </div>
@@ -791,10 +799,10 @@ ${realWorldAnswer || "_[No solution recorded]_"}
                   </div>
 
                   <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-2">
-                    <p className="text-xs text-slate-300 leading-relaxed font-medium">
+                    <p className="text-sm text-slate-200 leading-relaxed font-medium">
                       {worksheetData.realWorldScenario.scenario}
                     </p>
-                    <div className="text-xs font-bold text-amber-300 pt-1">
+                    <div className="text-sm font-bold text-amber-300 pt-1">
                       Challenge: {worksheetData.realWorldScenario.task}
                     </div>
                   </div>
@@ -807,7 +815,7 @@ ${realWorldAnswer || "_[No solution recorded]_"}
                       setRealWorldAnswer(e.target.value);
                     }}
                     placeholder="Describe your engineering recommendation or real-world solution..."
-                    className="w-full bg-slate-950 border border-slate-800 rounded-2xl p-3 text-xs text-slate-200 placeholder:text-slate-600 focus:outline-none focus:border-amber-500 transition-colors resize-y"
+                    className="w-full bg-slate-950 border border-slate-800 rounded-2xl p-3.5 text-sm text-slate-200 placeholder:text-slate-600 focus:outline-none focus:border-amber-500 transition-colors resize-y"
                   />
                 </div>
               )}

@@ -40,6 +40,15 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
         <div className="text-center max-w-3xl mx-auto">
           {/* Trust Badge */}
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-900 border border-slate-700/80 text-xs text-slate-300 mb-5 shadow-inner">
+            <img
+              src="/axiom-stem-logo.png"
+              alt="Axiom STEM"
+              referrerPolicy="no-referrer"
+              className="w-4 h-4 rounded-full object-contain"
+              onError={(e) => {
+                (e.currentTarget as HTMLElement).style.display = "none";
+              }}
+            />
             <span className="flex h-2 w-2 rounded-full bg-emerald-400 animate-ping" />
             <span className="font-semibold text-white">
               {isCreatorMode

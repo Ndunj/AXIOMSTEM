@@ -189,7 +189,7 @@ export const Header: React.FC<HeaderProps> = ({
                   src="/axiom-stem-logo.png"
                   alt="AXIOM STEM Logo"
                   referrerPolicy="no-referrer"
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                  className="w-full h-full object-contain p-0.5 group-hover:scale-110 transition-transform duration-500"
                   onError={(e) => {
                     // Fallback to icon if image load fails
                     (e.currentTarget as HTMLElement).style.display = "none";

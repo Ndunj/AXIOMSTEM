@@ -48,6 +48,7 @@ export interface SimulationItem {
   title: string;
   tagline: string;
   discipline: STEMDiscipline;
+  secondaryDisciplines?: STEMDiscipline[];
   gradeLevel: GradeLevel[];
   standards: string[]; // e.g. ["HS-PS2-1", "NGSS SEP-4", "AP Physics 1 Unit 2"]
   description: string;

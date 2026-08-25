@@ -1,0 +1,1325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AC Circuit Interactive Simulation & Laboratory</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --accent-blue: #38bdf8;
+            --accent-red: #f43f5e;
+            --accent-green: #34d399;
+            --accent-yellow: #fbbf24;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            max-width: 1300px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        header h1 {
+            font-size: 1.8rem;
+            color: var(--accent-blue);
+        }
+
+        header p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .main-layout {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 900px) {
+            .main-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .controls-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .section-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--accent-blue);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 6px;
+        }
+
+        .mode-buttons {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+        }
+
+        .btn-mode {
+            background-color: #0f172a;
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 8px 4px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: all 0.2s ease;
+        }
+
+        .btn-mode:hover {
+            border-color: var(--accent-blue);
+        }
+
+        .btn-mode.active {
+            background-color: var(--accent-blue);
+            color: #0f172a;
+            border-color: var(--accent-blue);
+        }
+
+        .slider-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .slider-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+        }
+
+        .slider-header span.val {
+            color: var(--accent-blue);
+            font-weight: bold;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            accent-color: var(--accent-blue);
+            background: #0f172a;
+            height: 6px;
+            border-radius: 3px;
+        }
+
+        input[type="range"]:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .toggle-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .btn-toggle {
+            background-color: #0f172a;
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            text-align: left;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn-toggle.active {
+            border-color: var(--accent-green);
+            background-color: rgba(52, 211, 153, 0.1);
+        }
+
+        .btn-action {
+            background-color: #0284c7;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-align: center;
+            transition: background 0.2s;
+        }
+
+        .btn-action:hover {
+            background-color: #0369a1;
+        }
+
+        .display-area {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .canvas-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .canvas-container {
+            width: 100%;
+            position: relative;
+        }
+
+        canvas {
+            width: 100%;
+            height: auto;
+            background-color: #090d16;
+            border-radius: 6px;
+            display: block;
+        }
+
+        .grid-2col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .grid-2col {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .readout-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 16px;
+        }
+
+        .readout-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .readout-item {
+            background-color: #0f172a;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+        }
+
+        .readout-item .lbl {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            display: block;
+        }
+
+        .readout-item .val {
+            font-size: 1rem;
+            font-weight: bold;
+            color: var(--accent-yellow);
+            margin-top: 2px;
+        }
+
+        .substitution-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 16px;
+        }
+
+        .substitution-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .sub-box {
+            background-color: #0f172a;
+            padding: 12px;
+            border-radius: 6px;
+            border-left: 3px solid var(--accent-blue);
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.85rem;
+            color: #e2e8f0;
+        }
+
+        .sub-box h4 {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            color: var(--accent-blue);
+            margin-bottom: 6px;
+            font-size: 0.85rem;
+        }
+
+        .sub-box .eq-line {
+            margin-bottom: 4px;
+        }
+
+        .sub-box .highlight {
+            color: var(--accent-yellow);
+            font-weight: bold;
+        }
+
+        .formulas-panel {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 16px;
+            display: none;
+        }
+
+        .formulas-panel.visible {
+            display: block;
+        }
+
+        .formula-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+            margin-top: 10px;
+        }
+
+        .formula-box {
+            background-color: #0f172a;
+            padding: 12px;
+            border-radius: 6px;
+            border-left: 3px solid var(--accent-blue);
+            font-size: 0.9rem;
+        }
+
+        .formula-box h4 {
+            color: var(--accent-blue);
+            margin-bottom: 6px;
+            font-size: 0.85rem;
+        }
+
+        .formula-box p {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            margin-top: 4px;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>AC Circuit Interactive Laboratory & Waveform Analyzer</h1>
+        <p>Real-Time Dynamic Formula Substitution, Reactance Calculations, Phasors, and Waveforms</p>
+    </header>
+
+    <div class="main-layout">
+        <div class="controls-card">
+            <div class="section-title">Circuit Type</div>
+            <div class="mode-buttons">
+                <button class="btn-mode" onclick="setMode('pureR', event)">Pure R</button>
+                <button class="btn-mode" onclick="setMode('pureL', event)">Pure L</button>
+                <button class="btn-mode" onclick="setMode('pureC', event)">Pure C</button>
+                <button class="btn-mode" onclick="setMode('pureLC', event)">Pure LC</button>
+                <button class="btn-mode" onclick="setMode('RL', event)">RL</button>
+                <button class="btn-mode" onclick="setMode('RC', event)">RC</button>
+                <button class="btn-mode active" onclick="setMode('RLC', event)">RLC</button>
+            </div>
+
+            <div class="section-title">Circuit Parameters</div>
+            
+            <div class="slider-group">
+                <div class="slider-header">
+                    <span>Resistance (R)</span>
+                    <span class="val" id="lbl-R">50 Ω</span>
+                </div>
+                <input type="range" id="slider-R" min="0" max="100" value="50" oninput="updateParams()">
+            </div>
+
+            <div class="slider-group">
+                <div class="slider-header">
+                    <span>Inductance (L)</span>
+                    <span class="val" id="lbl-L">100 mH</span>
+                </div>
+                <input type="range" id="slider-L" min="10" max="200" value="100" oninput="updateParams()">
+            </div>
+
+            <div class="slider-group">
+                <div class="slider-header">
+                    <span>Capacitance (C)</span>
+                    <span class="val" id="lbl-C">10 µF</span>
+                </div>
+                <input type="range" id="slider-C" min="1" max="50" value="10" oninput="updateParams()">
+            </div>
+
+            <div class="slider-group">
+                <div class="slider-header">
+                    <span>Frequency (f)</span>
+                    <span class="val" id="lbl-f">50 Hz</span>
+                </div>
+                <input type="range" id="slider-f" min="10" max="200" value="50" oninput="updateParams()">
+            </div>
+
+            <div class="slider-group">
+                <div class="slider-header">
+                    <span>RMS Voltage (V<sub>rms</sub>)</span>
+                    <span class="val" id="lbl-V">100 V</span>
+                </div>
+                <input type="range" id="slider-V" min="10" max="240" value="100" oninput="updateParams()">
+            </div>
+
+            <div class="section-title">Simulation & Views</div>
+            <div class="toggle-group">
+                <button class="btn-toggle active" id="btn-phasor" onclick="togglePhasor()">
+                    <span>Phasor Vector Diagram</span>
+                    <span id="state-phasor">ON</span>
+                </button>
+                <button class="btn-toggle active" id="btn-rms-overlay" onclick="toggleRMSOverlay()">
+                    <span>RMS Overlay Lines</span>
+                    <span id="state-rms">ON</span>
+                </button>
+                <button class="btn-toggle" id="btn-formulas" onclick="toggleFormulas()">
+                    <span>Formulas & Explanations</span>
+                    <span id="state-formulas">OFF</span>
+                </button>
+            </div>
+
+            <button class="btn-action" id="btn-pause" onclick="togglePause()">Pause / Play Animation</button>
+        </div>
+
+        <div class="display-area">
+            <div class="canvas-card">
+                <div class="section-title">Circuit Loop & AC Current Flow</div>
+                <div class="canvas-container">
+                    <canvas id="canvas-schematic" width="900" height="260"></canvas>
+                </div>
+            </div>
+
+            <div class="grid-2col">
+                <div class="canvas-card" id="card-phasor">
+                    <div class="section-title">Static Vector Phasor Diagram</div>
+                    <div class="canvas-container">
+                        <canvas id="canvas-phasor" width="400" height="260"></canvas>
+                    </div>
+                </div>
+
+                <div class="canvas-card" id="card-oscilloscope">
+                    <div class="section-title">AC Circuit sinusoidal waveform</div>
+                    <div class="canvas-container">
+                        <canvas id="canvas-waveform" width="400" height="260"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="readout-card">
+                <div class="section-title">Comprehensive Live Calculations</div>
+                <div class="readout-grid">
+                    <div class="readout-item">
+                        <span class="lbl">Instantaneous Voltage v(t)</span>
+                        <div class="val" id="calc-vInst" style="color: var(--accent-red);">0.00 V</div>
+                    </div>
+                    <div class="readout-item">
+                        <span class="lbl">RMS Voltage (V<sub>rms</sub>)</span>
+                        <div class="val" id="calc-Vrms">0.00 V</div>
+                    </div>
+                    <div class="readout-item">
+                        <span class="lbl">Peak Voltage (V<sub>0</sub>)</span>
+                        <div class="val" id="calc-Vmax">0.00 V</div>
+                    </div>
+
+                    <div class="readout-item">
+                        <span class="lbl">Instantaneous Current i(t)</span>
+                        <div class="val" id="calc-iInst" style="color: var(--accent-blue);">0.00 A</div>
+                    </div>
+                    <div class="readout-item">
+                        <span class="lbl">RMS Current (I<sub>rms</sub>)</span>
+                        <div class="val" id="calc-Irms">0.00 A</div>
+                    </div>
+                    <div class="readout-item">
+                        <span class="lbl">Peak Current (I<sub>0</sub>)</span>
+                        <div class="val" id="calc-Imax">0.00 A</div>
+                    </div>
+
+                    <div class="readout-item">
+                        <span class="lbl">Instantaneous Power p(t)</span>
+                        <div class="val" id="calc-pInst" style="color: var(--accent-green);">0.00 W</div>
+                    </div>
+                    <div class="readout-item">
+                        <span class="lbl">Average Active Power (P<sub>avg</sub>)</span>
+                        <div class="val" id="calc-Pavg">0.00 W</div>
+                    </div>
+                    <div class="readout-item">
+                        <span class="lbl">Net Impedance (Z)</span>
+                        <div class="val" id="calc-Z">0.00 Ω</div>
+                    </div>
+
+                    <div class="readout-item">
+                        <span class="lbl">Inductive Reactance (X<sub>L</sub>)</span>
+                        <div class="val" id="calc-XL">0.00 Ω</div>
+                    </div>
+                    <div class="readout-item">
+                        <span class="lbl">Capacitive Reactance (X<sub>C</sub>)</span>
+                        <div class="val" id="calc-XC">0.00 Ω</div>
+                    </div>
+                    <div class="readout-item">
+                        <span class="lbl">Phase Angle (ϕ)</span>
+                        <div class="val" id="calc-phi">0.00°</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="substitution-card">
+                <div class="section-title">Dynamic Mathematical Substitutions</div>
+                <div class="substitution-grid">
+                    <div class="sub-box">
+                        <h4>Inductive Reactance (X<sub>L</sub>)</h4>
+                        <div class="eq-line" id="sub-XL-formula">X<sub>L</sub> = 2 x π x f x L</div>
+                        <div class="eq-line" id="sub-XL-sub">X<sub>L</sub> = 2 x π x 50 x 0.100</div>
+                        <div class="eq-line highlight" id="sub-XL-res">X<sub>L</sub> = 31.42 Ω</div>
+                    </div>
+
+                    <div class="sub-box">
+                        <h4>Capacitive Reactance (X<sub>C</sub>)</h4>
+                        <div class="eq-line" id="sub-XC-formula">X<sub>C</sub> = 1 / (2 x π x f x C)</div>
+                        <div class="eq-line" id="sub-XC-sub">X<sub>C</sub> = 1 / (2 x π x 50 x 0.000010)</div>
+                        <div class="eq-line highlight" id="sub-XC-res">X<sub>C</sub> = 318.31 Ω</div>
+                    </div>
+
+                    <div class="sub-box">
+                        <h4>Total Impedance (Z)</h4>
+                        <div class="eq-line" id="sub-Z-formula">Z = √( R² + (X<sub>L</sub> - X<sub>C</sub>)² )</div>
+                        <div class="eq-line" id="sub-Z-sub">Z = √( 50² + (31.42 - 318.31)² )</div>
+                        <div class="eq-line highlight" id="sub-Z-res">Z = 291.22 Ω</div>
+                    </div>
+
+                    <div class="sub-box">
+                        <h4>Phase Angle Formula (ϕ)</h4>
+                        <div class="eq-line" id="sub-phi-formula">tan(ϕ) = (X<sub>L</sub> - X<sub>C</sub>) / R</div>
+                        <div class="eq-line" id="sub-phi-sub">ϕ = atan((31.42 - 318.31) / 50)</div>
+                        <div class="eq-line highlight" id="sub-phi-res">ϕ = -80.1°</div>
+                    </div>
+
+                    <div class="sub-box">
+                        <h4>Resistor Voltage (V<sub>R</sub>)</h4>
+                        <div class="eq-line" id="sub-VR-formula">V<sub>R</sub> = I<sub>rms</sub> x R</div>
+                        <div class="eq-line" id="sub-VR-sub">V<sub>R</sub> = 0.34 x 50</div>
+                        <div class="eq-line highlight" id="sub-VR-res">V<sub>R</sub> = 17.17 V</div>
+                    </div>
+
+                    <div class="sub-box">
+                        <h4>Inductor Voltage (V<sub>L</sub>)</h4>
+                        <div class="eq-line" id="sub-VL-formula">V<sub>L</sub> = I<sub>rms</sub> x X<sub>L</sub></div>
+                        <div class="eq-line" id="sub-VL-sub">V<sub>L</sub> = 0.34 x 31.42</div>
+                        <div class="eq-line highlight" id="sub-VL-res">V<sub>L</sub> = 10.79 V</div>
+                    </div>
+
+                    <div class="sub-box">
+                        <h4>Capacitor Voltage (V<sub>C</sub>)</h4>
+                        <div class="eq-line" id="sub-VC-formula">V<sub>C</sub> = I<sub>rms</sub> x X<sub>C</sub></div>
+                        <div class="eq-line" id="sub-VC-sub">V<sub>C</sub> = 0.34 x 318.31</div>
+                        <div class="eq-line highlight" id="sub-VC-res">V<sub>C</sub> = 109.30 V</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="formulas-panel" id="formulas-panel">
+                <div class="section-title">Mathematical Principles & Equations</div>
+                <div class="formula-grid">
+                    <div class="formula-box">
+                        <h4>RMS vs Peak Values</h4>
+                        <div>V<sub>rms</sub> = V<sub>0</sub> / √2 &nbsp;|&nbsp; I<sub>rms</sub> = I<sub>0</sub> / √2</div>
+                        <p>Effective values delivering equivalent DC heating power in resistive loads.</p>
+                    </div>
+                    <div class="formula-box">
+                        <h4>Instantaneous Equations</h4>
+                        <div>v(t) = V<sub>0</sub> sin(ωt) &nbsp;|&nbsp; i(t) = I<sub>0</sub> sin(ωt - ϕ)</div>
+                        <p>Exact current and voltage values at any given instant in time.</p>
+                    </div>
+                    <div class="formula-box">
+                        <h4>Total Impedance (Z)</h4>
+                        <div>Z = √( R² + (X<sub>L</sub> - X<sub>C</sub>)² )</div>
+                        <p>Total opposition to AC current flow combining resistive and reactive parts.</p>
+                    </div>
+                    <div class="formula-box">
+                        <h4>Active Power</h4>
+                        <div>P<sub>avg</sub> = V<sub>rms</sub> x I<sub>rms</sub> x cos(ϕ)</div>
+                        <p>Real power consumed by resistive components in watts (W).</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let mode = 'RLC';
+        let R = 50, L = 0.1, C = 0.00001, f = 50, Vrms = 100;
+        let showPhasor = true;
+        let showRMSOverlay = true;
+        let showFormulas = false;
+        let isRunning = true;
+
+        let XL = 0, XC = 0, Z = 0, Irms = 0, Imax = 0, Vmax = 0, phi = 0;
+        let VR_max = 0, VL_max = 0, VC_max = 0;
+        let VR_rms = 0, VL_rms = 0, VC_rms = 0;
+        let vInst = 0, iInst = 0, pInst = 0, Pavg = 0;
+
+        let time = 0;
+        let lastTimestamp = performance.now();
+        let electronDisplacement = 0;
+
+        const cvSchematic = document.getElementById('canvas-schematic');
+        const ctxSchematic = cvSchematic.getContext('2d');
+        const cvPhasor = document.getElementById('canvas-phasor');
+        const ctxPhasor = cvPhasor.getContext('2d');
+        const cvWaveform = document.getElementById('canvas-waveform');
+        const ctxWaveform = cvWaveform.getContext('2d');
+
+        function resizeCanvases() {
+            [cvSchematic, cvPhasor, cvWaveform].forEach(canvas => {
+                const rect = canvas.getBoundingClientRect();
+                if (rect.width > 0 && rect.height > 0) {
+                    canvas.width = rect.width;
+                    canvas.height = rect.height;
+                }
+            });
+        }
+
+        function setMode(newMode, evt) {
+            mode = newMode;
+            document.querySelectorAll('.btn-mode').forEach(b => b.classList.remove('active'));
+            if (evt && evt.target) {
+                evt.target.classList.add('active');
+            }
+
+            const sliderR = document.getElementById('slider-R');
+            const sliderL = document.getElementById('slider-L');
+            const sliderC = document.getElementById('slider-C');
+
+            sliderR.disabled = false;
+            sliderL.disabled = false;
+            sliderC.disabled = false;
+
+            if (mode === 'pureR') {
+                sliderL.disabled = true;
+                sliderC.disabled = true;
+            } else if (mode === 'pureL') {
+                sliderR.disabled = true;
+                sliderC.disabled = true;
+            } else if (mode === 'pureC') {
+                sliderR.disabled = true;
+                sliderL.disabled = true;
+            } else if (mode === 'pureLC') {
+                sliderR.disabled = true;
+            } else if (mode === 'RL') {
+                sliderC.disabled = true;
+            } else if (mode === 'RC') {
+                sliderL.disabled = true;
+            }
+
+            updateParams();
+        }
+
+        function updateParams() {
+            R = parseFloat(document.getElementById('slider-R').value);
+            L = parseFloat(document.getElementById('slider-L').value) / 1000;
+            C = parseFloat(document.getElementById('slider-C').value) / 1000000;
+            f = parseFloat(document.getElementById('slider-f').value);
+            Vrms = parseFloat(document.getElementById('slider-V').value);
+
+            let hasR = true, hasL = true, hasC = true;
+
+            if (mode === 'pureR') { hasL = false; hasC = false; R = Math.max(R, 1); }
+            else if (mode === 'pureL') { hasR = false; hasC = false; R = 0; }
+            else if (mode === 'pureC') { hasR = false; hasL = false; R = 0; }
+            else if (mode === 'pureLC') { hasR = false; R = 0; }
+            else if (mode === 'RL') { hasC = false; R = Math.max(R, 1); }
+            else if (mode === 'RC') { hasL = false; R = Math.max(R, 1); }
+            else if (mode === 'RLC') { R = Math.max(R, 1); }
+
+            XL = hasL ? (2 * Math.PI * f * L) : 0;
+            XC = hasC ? (1 / (2 * Math.PI * f * C)) : 0;
+
+            let Xnet = XL - XC;
+
+            if (!hasL && !hasC) Z = R;
+            else if (!hasR && hasL && !hasC) Z = XL;
+            else if (!hasR && !hasL && hasC) Z = XC;
+            else if (!hasR && hasL && hasC) Z = Math.abs(XL - XC);
+            else Z = Math.sqrt(R * R + Xnet * Xnet);
+
+            if (Z < 0.0001) Z = 0.0001;
+
+            if (mode === 'pureR') {
+                phi = 0;
+            } else if (mode === 'pureL') {
+                phi = Math.PI / 2;
+            } else if (mode === 'pureC') {
+                phi = -Math.PI / 2;
+            } else if (mode === 'pureLC') {
+                if (XL > XC) phi = Math.PI / 2;
+                else if (XC > XL) phi = -Math.PI / 2;
+                else phi = 0;
+            } else if (mode === 'RL') {
+                phi = Math.atan2(XL, R);
+            } else if (mode === 'RC') {
+                phi = Math.atan2(-XC, R);
+            } else {
+                phi = Math.atan2(Xnet, R);
+            }
+
+            Irms = Vrms / Z;
+            Imax = Irms * Math.SQRT2;
+            Vmax = Vrms * Math.SQRT2;
+
+            VR_rms = hasR ? (Irms * R) : 0;
+            VL_rms = hasL ? (Irms * XL) : 0;
+            VC_rms = hasC ? (Irms * XC) : 0;
+
+            VR_max = hasR ? (Imax * R) : 0;
+            VL_max = hasL ? (Imax * XL) : 0;
+            VC_max = hasC ? (Imax * XC) : 0;
+
+            Pavg = Vrms * Irms * Math.cos(phi);
+
+            document.getElementById('lbl-R').innerText = R + " Ω";
+            document.getElementById('lbl-L').innerText = Math.round(L * 1000) + " mH";
+            document.getElementById('lbl-C').innerText = Math.round(C * 1000000) + " µF";
+            document.getElementById('lbl-f').innerText = f + " Hz";
+            document.getElementById('lbl-V').innerText = Vrms + " V";
+
+            document.getElementById('calc-XL').innerText = hasL ? XL.toFixed(2) + " Ω" : "0.00 Ω (N/A)";
+            document.getElementById('calc-XC').innerText = hasC ? XC.toFixed(2) + " Ω" : "0.00 Ω (N/A)";
+            document.getElementById('calc-Z').innerText = Z.toFixed(2) + " Ω";
+            document.getElementById('calc-Vrms').innerText = Vrms.toFixed(1) + " V";
+            document.getElementById('calc-Vmax').innerText = Vmax.toFixed(1) + " V";
+            document.getElementById('calc-Irms').innerText = Irms.toFixed(2) + " A";
+            document.getElementById('calc-Imax').innerText = Imax.toFixed(2) + " A";
+            document.getElementById('calc-Pavg').innerText = Pavg.toFixed(1) + " W";
+            document.getElementById('calc-phi').innerText = (phi * 180 / Math.PI).toFixed(1) + "°";
+
+            updateFormulaSubstitutions(hasR, hasL, hasC);
+        }
+
+        function updateFormulaSubstitutions(hasR, hasL, hasC) {
+            const xlForm = document.getElementById('sub-XL-formula');
+            const xlSub = document.getElementById('sub-XL-sub');
+            const xlRes = document.getElementById('sub-XL-res');
+            if (hasL) {
+                xlForm.innerHTML = `X<sub>L</sub> = 2 x π x f x L`;
+                xlSub.innerHTML = `X<sub>L</sub> = 2 x π x ${f} x ${L.toFixed(3)}`;
+                xlRes.innerHTML = `X<sub>L</sub> = ${XL.toFixed(2)} Ω`;
+            } else {
+                xlForm.innerHTML = `X<sub>L</sub> = Not active in ${mode}`;
+                xlSub.innerHTML = `X<sub>L</sub> = 0.00 Ω`;
+                xlRes.innerHTML = `X<sub>L</sub> = 0.00 Ω`;
+            }
+
+            const xcForm = document.getElementById('sub-XC-formula');
+            const xcSub = document.getElementById('sub-XC-sub');
+            const xcRes = document.getElementById('sub-XC-res');
+            if (hasC) {
+                xcForm.innerHTML = `X<sub>C</sub> = 1 / (2 x π x f x C)`;
+                xcSub.innerHTML = `X<sub>C</sub> = 1 / (2 x π x ${f} x ${C.toFixed(6)})`;
+                xcRes.innerHTML = `X<sub>C</sub> = ${XC.toFixed(2)} Ω`;
+            } else {
+                xcForm.innerHTML = `X<sub>C</sub> = Not active in ${mode}`;
+                xcSub.innerHTML = `X<sub>C</sub> = 0.00 Ω`;
+                xcRes.innerHTML = `X<sub>C</sub> = 0.00 Ω`;
+            }
+
+            const zForm = document.getElementById('sub-Z-formula');
+            const zSub = document.getElementById('sub-Z-sub');
+            const zRes = document.getElementById('sub-Z-res');
+
+            if (mode === 'pureR') {
+                zForm.innerHTML = `Z = R`;
+                zSub.innerHTML = `Z = ${R}`;
+                zRes.innerHTML = `Z = ${Z.toFixed(2)} Ω`;
+            } else if (mode === 'pureL') {
+                zForm.innerHTML = `Z = X<sub>L</sub>`;
+                zSub.innerHTML = `Z = ${XL.toFixed(2)}`;
+                zRes.innerHTML = `Z = ${Z.toFixed(2)} Ω`;
+            } else if (mode === 'pureC') {
+                zForm.innerHTML = `Z = X<sub>C</sub>`;
+                zSub.innerHTML = `Z = ${XC.toFixed(2)}`;
+                zRes.innerHTML = `Z = ${Z.toFixed(2)} Ω`;
+            } else if (mode === 'pureLC') {
+                zForm.innerHTML = `Z = |X<sub>L</sub> - X<sub>C</sub>|`;
+                zSub.innerHTML = `Z = |${XL.toFixed(2)} - ${XC.toFixed(2)}|`;
+                zRes.innerHTML = `Z = ${Z.toFixed(2)} Ω`;
+            } else if (mode === 'RL') {
+                zForm.innerHTML = `Z = √( R² + X<sub>L</sub>² )`;
+                zSub.innerHTML = `Z = √( ${R}² + ${XL.toFixed(2)}² )`;
+                zRes.innerHTML = `Z = ${Z.toFixed(2)} Ω`;
+            } else if (mode === 'RC') {
+                zForm.innerHTML = `Z = √( R² + X<sub>C</sub>² )`;
+                zSub.innerHTML = `Z = √( ${R}² + ${XC.toFixed(2)}² )`;
+                zRes.innerHTML = `Z = ${Z.toFixed(2)} Ω`;
+            } else {
+                zForm.innerHTML = `Z = √( R² + (X<sub>L</sub> - X<sub>C</sub>)² )`;
+                zSub.innerHTML = `Z = √( ${R}² + (${XL.toFixed(2)} - ${XC.toFixed(2)})² )`;
+                zRes.innerHTML = `Z = ${Z.toFixed(2)} Ω`;
+            }
+
+            const phiForm = document.getElementById('sub-phi-formula');
+            const phiSub = document.getElementById('sub-phi-sub');
+            const phiRes = document.getElementById('sub-phi-res');
+
+            let phiDeg = (phi * 180 / Math.PI).toFixed(1);
+
+            if (mode === 'pureR') {
+                phiForm.innerHTML = `Pure R: Current & Voltage in Phase`;
+                phiSub.innerHTML = `ϕ = 0°`;
+                phiRes.innerHTML = `ϕ = 0.0°`;
+            } else if (mode === 'pureL') {
+                phiForm.innerHTML = `Pure L: Voltage leads by +90°`;
+                phiSub.innerHTML = `ϕ = +π / 2 rad`;
+                phiRes.innerHTML = `ϕ = +90.0°`;
+            } else if (mode === 'pureC') {
+                phiForm.innerHTML = `Pure C: Voltage lags by -90°`;
+                phiSub.innerHTML = `ϕ = -π / 2 rad`;
+                phiRes.innerHTML = `ϕ = -90.0°`;
+            } else if (mode === 'pureLC') {
+                phiForm.innerHTML = `Pure LC: Purely Reactive`;
+                phiSub.innerHTML = `X<sub>L</sub> = ${XL.toFixed(1)}, X<sub>C</sub> = ${XC.toFixed(1)}`;
+                phiRes.innerHTML = `ϕ = ${phiDeg}°`;
+            } else if (mode === 'RL') {
+                phiForm.innerHTML = `tan(ϕ) = X<sub>L</sub> / R`;
+                phiSub.innerHTML = `ϕ = atan(${XL.toFixed(2)} / ${R})`;
+                phiRes.innerHTML = `ϕ = +${phiDeg}°`;
+            } else if (mode === 'RC') {
+                phiForm.innerHTML = `tan(ϕ) = -X<sub>C</sub> / R`;
+                phiSub.innerHTML = `ϕ = atan(-${XC.toFixed(2)} / ${R})`;
+                phiRes.innerHTML = `ϕ = ${phiDeg}°`;
+            } else {
+                phiForm.innerHTML = `tan(ϕ) = (X<sub>L</sub> - X<sub>C</sub>) / R`;
+                phiSub.innerHTML = `ϕ = atan((${XL.toFixed(1)} - ${XC.toFixed(1)}) / ${R})`;
+                phiRes.innerHTML = `ϕ = ${phiDeg}°`;
+            }
+
+            const vrForm = document.getElementById('sub-VR-formula');
+            const vrSub = document.getElementById('sub-VR-sub');
+            const vrRes = document.getElementById('sub-VR-res');
+            if (hasR) {
+                vrForm.innerHTML = `V<sub>R</sub> = I<sub>rms</sub> x R`;
+                vrSub.innerHTML = `V<sub>R</sub> = ${Irms.toFixed(2)} x ${R}`;
+                vrRes.innerHTML = `V<sub>R</sub> = ${VR_rms.toFixed(2)} V`;
+            } else {
+                vrForm.innerHTML = `V<sub>R</sub> = Not active in ${mode}`;
+                vrSub.innerHTML = `V<sub>R</sub> = 0.00 V`;
+                vrRes.innerHTML = `V<sub>R</sub> = 0.00 V`;
+            }
+
+            const vlForm = document.getElementById('sub-VL-formula');
+            const vlSub = document.getElementById('sub-VL-sub');
+            const vlRes = document.getElementById('sub-VL-res');
+            if (hasL) {
+                vlForm.innerHTML = `V<sub>L</sub> = I<sub>rms</sub> x X<sub>L</sub>`;
+                vlSub.innerHTML = `V<sub>L</sub> = ${Irms.toFixed(2)} x ${XL.toFixed(2)}`;
+                vlRes.innerHTML = `V<sub>L</sub> = ${VL_rms.toFixed(2)} V`;
+            } else {
+                vlForm.innerHTML = `V<sub>L</sub> = Not active in ${mode}`;
+                vlSub.innerHTML = `V<sub>L</sub> = 0.00 V`;
+                vlRes.innerHTML = `V<sub>L</sub> = 0.00 V`;
+            }
+
+            const vcForm = document.getElementById('sub-VC-formula');
+            const vcSub = document.getElementById('sub-VC-sub');
+            const vcRes = document.getElementById('sub-VC-res');
+            if (hasC) {
+                vcForm.innerHTML = `V<sub>C</sub> = I<sub>rms</sub> x X<sub>C</sub>`;
+                vcSub.innerHTML = `V<sub>C</sub> = ${Irms.toFixed(2)} x ${XC.toFixed(2)}`;
+                vcRes.innerHTML = `V<sub>C</sub> = ${VC_rms.toFixed(2)} V`;
+            } else {
+                vcForm.innerHTML = `V<sub>C</sub> = Not active in ${mode}`;
+                vcSub.innerHTML = `V<sub>C</sub> = 0.00 V`;
+                vcRes.innerHTML = `V<sub>C</sub> = 0.00 V`;
+            }
+        }
+
+        function togglePhasor() {
+            showPhasor = !showPhasor;
+            document.getElementById('btn-phasor').classList.toggle('active', showPhasor);
+            document.getElementById('state-phasor').innerText = showPhasor ? "ON" : "OFF";
+            document.getElementById('card-phasor').style.display = showPhasor ? "flex" : "none";
+            resizeCanvases();
+        }
+
+        function toggleRMSOverlay() {
+            showRMSOverlay = !showRMSOverlay;
+            document.getElementById('btn-rms-overlay').classList.toggle('active', showRMSOverlay);
+            document.getElementById('state-rms').innerText = showRMSOverlay ? "ON" : "OFF";
+        }
+
+        function toggleFormulas() {
+            showFormulas = !showFormulas;
+            document.getElementById('btn-formulas').classList.toggle('active', showFormulas);
+            document.getElementById('state-formulas').innerText = showFormulas ? "ON" : "OFF";
+            document.getElementById('formulas-panel').classList.toggle('visible', showFormulas);
+        }
+
+        function togglePause() {
+            isRunning = !isRunning;
+            document.getElementById('btn-pause').innerText = isRunning ? "Pause Animation" : "Resume Animation";
+        }
+
+        function drawInductor(ctx, cx, cy) {
+            ctx.beginPath();
+            ctx.strokeStyle = "#34d399";
+            ctx.lineWidth = 3;
+            for (let i = 0; i < 4; i++) {
+                ctx.arc(cx - 15 + i * 10, cy, 6, Math.PI, 0, false);
+            }
+            ctx.stroke();
+            ctx.fillStyle = "#34d399";
+            ctx.font = "12px sans-serif";
+            ctx.fillText("L (" + Math.round(L * 1000) + "mH)", cx - 22, cy - 14);
+        }
+
+        function drawCapacitor(ctx, cx, cy) {
+            ctx.strokeStyle = "#fbbf24";
+            ctx.lineWidth = 3;
+            
+            ctx.beginPath();
+            ctx.moveTo(cx - 6, cy - 15);
+            ctx.lineTo(cx - 6, cy + 15);
+            ctx.moveTo(cx + 6, cy - 15);
+            ctx.lineTo(cx + 6, cy + 15);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(cx - 25, cy);
+            ctx.lineTo(cx - 6, cy);
+            ctx.moveTo(cx + 6, cy);
+            ctx.lineTo(cx + 25, cy);
+            ctx.stroke();
+
+            ctx.fillStyle = "#fbbf24";
+            ctx.font = "12px sans-serif";
+            ctx.fillText("C (" + Math.round(C * 1000000) + "µF)", cx - 20, cy - 18);
+        }
+
+        function drawVoltmeterLabel(ctx, startX, endX, compY, label, color, offsetAbove) {
+            const h = offsetAbove ? -38 : 38;
+            const wireY = compY + h;
+            const midX = (startX + endX) / 2;
+
+            ctx.save();
+            ctx.strokeStyle = color;
+            ctx.fillStyle = color;
+            ctx.lineWidth = 1.5;
+            ctx.setLineDash([3, 3]);
+
+            ctx.beginPath();
+            ctx.moveTo(startX, compY);
+            ctx.lineTo(startX, wireY);
+            ctx.lineTo(midX - 16, wireY);
+
+            ctx.moveTo(endX, compY);
+            ctx.lineTo(endX, wireY);
+            ctx.lineTo(midX + 16, wireY);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            ctx.beginPath();
+            ctx.arc(startX, compY, 3, 0, Math.PI * 2);
+            ctx.arc(endX, compY, 3, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = color;
+            ctx.font = "bold 13px sans-serif";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+
+            if (label.includes('_')) {
+                const parts = label.split('_');
+                const mainText = parts[0];
+                const subText = parts[1];
+                const mainWidth = ctx.measureText(mainText).width;
+                ctx.font = "9px sans-serif";
+                const subWidth = ctx.measureText(subText).width;
+                const totalWidth = mainWidth + subWidth;
+
+                const startXPos = midX - (totalWidth / 2);
+
+                ctx.font = "bold 13px sans-serif";
+                ctx.fillText(mainText, startXPos + (mainWidth / 2), wireY);
+
+                ctx.font = "9px sans-serif";
+                ctx.fillText(subText, startXPos + mainWidth + (subWidth / 2), wireY + 4);
+            } else {
+                ctx.fillText(label, midX, wireY);
+            }
+
+            ctx.restore();
+        }
+
+        function drawSchematic() {
+            const w = cvSchematic.width;
+            const h = cvSchematic.height;
+            ctxSchematic.clearRect(0, 0, w, h);
+
+            const padX = 60, padY = 70;
+            const topY = padY, botY = h - 45;
+            const leftX = padX, rightX = w - padX;
+
+            ctxSchematic.strokeStyle = "#475569";
+            ctxSchematic.lineWidth = 3;
+            ctxSchematic.beginPath();
+            ctxSchematic.strokeRect(leftX, topY, rightX - leftX, botY - topY);
+
+            const midX = (leftX + rightX) / 2;
+            ctxSchematic.clearRect(midX - 30, botY - 15, 60, 30);
+            ctxSchematic.fillStyle = "#1e293b";
+            ctxSchematic.beginPath();
+            ctxSchematic.arc(midX, botY, 22, 0, Math.PI * 2);
+            ctxSchematic.fill();
+            ctxSchematic.stroke();
+
+            ctxSchematic.strokeStyle = "#38bdf8";
+            ctxSchematic.lineWidth = 2;
+            ctxSchematic.beginPath();
+            for (let x = -12; x <= 12; x++) {
+                let y = 8 * Math.sin((x / 12) * Math.PI);
+                if (x === -12) ctxSchematic.moveTo(midX + x, botY + y);
+                else ctxSchematic.lineTo(midX + x, botY + y);
+            }
+            ctxSchematic.stroke();
+
+            let activeComps = [];
+            if (mode === 'pureR') activeComps = ['R'];
+            else if (mode === 'pureL') activeComps = ['L'];
+            else if (mode === 'pureC') activeComps = ['C'];
+            else if (mode === 'pureLC') activeComps = ['L', 'C'];
+            else if (mode === 'RL') activeComps = ['R', 'L'];
+            else if (mode === 'RC') activeComps = ['R', 'C'];
+            else if (mode === 'RLC') activeComps = ['R', 'L', 'C'];
+
+            let segmentWidth = (rightX - leftX) / (activeComps.length + 1);
+
+            ctxSchematic.strokeStyle = "#475569";
+            ctxSchematic.lineWidth = 3;
+            ctxSchematic.beginPath();
+            ctxSchematic.moveTo(leftX, topY);
+            ctxSchematic.lineTo(rightX, topY);
+            ctxSchematic.stroke();
+
+            activeComps.forEach((comp, idx) => {
+                let cx = leftX + segmentWidth * (idx + 1);
+                let startX = cx - 30;
+                let endX = cx + 30;
+
+                ctxSchematic.clearRect(cx - 28, topY - 18, 56, 36);
+
+                ctxSchematic.strokeStyle = "#f8fafc";
+                ctxSchematic.lineWidth = 3;
+
+                if (comp === 'R') {
+                    ctxSchematic.beginPath();
+                    ctxSchematic.moveTo(cx - 25, topY);
+                    ctxSchematic.lineTo(cx - 20, topY - 10); ctxSchematic.lineTo(cx - 10, topY + 10);
+                    ctxSchematic.lineTo(cx, topY - 10); ctxSchematic.lineTo(cx + 10, topY + 10);
+                    ctxSchematic.lineTo(cx + 20, topY - 10); ctxSchematic.lineTo(cx + 25, topY);
+                    ctxSchematic.stroke();
+                    ctxSchematic.fillStyle = "#38bdf8";
+                    ctxSchematic.font = "12px sans-serif";
+                    ctxSchematic.fillText("R (" + R + "Ω)", cx - 18, topY - 18);
+                    drawVoltmeterLabel(ctxSchematic, startX, endX, topY, "V_R", "#f8fafc", true);
+                } else if (comp === 'L') {
+                    drawInductor(ctxSchematic, cx, topY);
+                    drawVoltmeterLabel(ctxSchematic, startX, endX, topY, "V_L", "#34d399", true);
+                } else if (comp === 'C') {
+                    drawCapacitor(ctxSchematic, cx, topY);
+                    drawVoltmeterLabel(ctxSchematic, startX, endX, topY, "V_C", "#fbbf24", true);
+                }
+            });
+
+            const totalPerimeter = 2 * ((rightX - leftX) + (botY - topY));
+            const electronCount = 36;
+
+            if (isRunning) {
+                electronDisplacement += (iInst / (Imax || 1)) * 28.0;
+            }
+
+            ctxSchematic.fillStyle = "#fbbf24";
+            ctxSchematic.shadowColor = "#f59e0b";
+            ctxSchematic.shadowBlur = 6;
+
+            for (let i = 0; i < electronCount; i++) {
+                let basePos = i * (totalPerimeter / electronCount);
+                let pos = (basePos + electronDisplacement) % totalPerimeter;
+                if (pos < 0) pos += totalPerimeter;
+
+                let ex = leftX, ey = topY;
+                let topW = rightX - leftX;
+                let sideH = botY - topY;
+
+                if (pos < topW) {
+                    ex = leftX + pos; ey = topY;
+                } else if (pos < topW + sideH) {
+                    ex = rightX; ey = topY + (pos - topW);
+                } else if (pos < 2 * topW + sideH) {
+                    ex = rightX - (pos - (topW + sideH)); ey = botY;
+                } else {
+                    ex = leftX; ey = botY - (pos - (2 * topW + sideH));
+                }
+
+                ctxSchematic.beginPath();
+                ctxSchematic.arc(ex, ey, 3.5, 0, Math.PI * 2);
+                ctxSchematic.fill();
+            }
+            ctxSchematic.shadowBlur = 0;
+        }
+
+        function drawPhasorLabel(ctx, label, x, y) {
+            if (label.includes('_')) {
+                const parts = label.split('_');
+                const mainText = parts[0];
+                const subText = parts[1];
+
+                ctx.font = "11px sans-serif";
+                ctx.fillText(mainText, x, y);
+                const mainWidth = ctx.measureText(mainText).width;
+
+                ctx.font = "8px sans-serif";
+                ctx.fillText(subText, x + mainWidth, y + 3);
+            } else {
+                ctx.font = "11px sans-serif";
+                ctx.fillText(label, x, y);
+            }
+        }
+
+        function drawPhasor() {
+            const w = cvPhasor.width;
+            const h = cvPhasor.height;
+            ctxPhasor.clearRect(0, 0, w, h);
+
+            const cx = w / 2;
+            const cy = h / 2;
+
+            ctxPhasor.strokeStyle = "#334155";
+            ctxPhasor.lineWidth = 1;
+            ctxPhasor.beginPath();
+            ctxPhasor.moveTo(20, cy); ctxPhasor.lineTo(w - 20, cy);
+            ctxPhasor.moveTo(cx, 20); ctxPhasor.lineTo(cx, h - 20);
+            ctxPhasor.stroke();
+
+            const maxVal = Math.max(VR_max, VL_max, VC_max, Vmax, 1);
+            const scale = (Math.min(w, h) / 2 - 35) / maxVal;
+
+            function drawVector(len, angleRad, color, label) {
+                const vx = cx + len * scale * Math.cos(angleRad);
+                const vy = cy - len * scale * Math.sin(angleRad);
+
+                ctxPhasor.strokeStyle = color;
+                ctxPhasor.fillStyle = color;
+                ctxPhasor.lineWidth = 2.5;
+
+                ctxPhasor.beginPath();
+                ctxPhasor.moveTo(cx, cy);
+                ctxPhasor.lineTo(vx, vy);
+                ctxPhasor.stroke();
+
+                const headLen = 8;
+                const a = Math.atan2(vy - cy, vx - cx);
+                ctxPhasor.beginPath();
+                ctxPhasor.moveTo(vx, vy);
+                ctxPhasor.lineTo(vx - headLen * Math.cos(a - Math.PI / 6), vy - headLen * Math.sin(a - Math.PI / 6));
+                ctxPhasor.lineTo(vx - headLen * Math.cos(a + Math.PI / 6), vy - headLen * Math.sin(a + Math.PI / 6));
+                ctxPhasor.fill();
+
+                drawPhasorLabel(ctxPhasor, label, vx + 6, vy - 4);
+            }
+
+            drawVector(Imax * (maxVal / (Imax || 1)) * 0.6, 0, "#38bdf8", "I");
+            if (VR_max > 0) drawVector(VR_max, 0, "#f8fafc", "V_R");
+            if (VL_max > 0) drawVector(VL_max, Math.PI / 2, "#34d399", "V_L");
+            if (VC_max > 0) drawVector(VC_max, -Math.PI / 2, "#fbbf24", "V_C");
+            drawVector(Vmax, phi, "#f43f5e", "V_total");
+
+            if (Math.abs(phi) > 0.01) {
+                const arcRadius = 40;
+                ctxPhasor.strokeStyle = "#fbbf24";
+                ctxPhasor.lineWidth = 1.5;
+                ctxPhasor.setLineDash([3, 3]);
+
+                ctxPhasor.beginPath();
+                ctxPhasor.arc(cx, cy, arcRadius, 0, -phi, phi > 0);
+                ctxPhasor.stroke();
+                ctxPhasor.setLineDash([]);
+
+                const phiDeg = (phi * 180 / Math.PI).toFixed(1);
+                const midAngle = -phi / 2;
+                const labelX = cx + (arcRadius + 18) * Math.cos(midAngle);
+                const labelY = cy + (arcRadius + 18) * Math.sin(midAngle);
+
+                ctxPhasor.fillStyle = "#fbbf24";
+                ctxPhasor.font = "bold 12px sans-serif";
+                ctxPhasor.textAlign = "center";
+                ctxPhasor.fillText(`ϕ = ${phiDeg}°`, labelX, labelY);
+                ctxPhasor.textAlign = "left";
+            }
+        }
+
+        function drawWaveform() {
+            const w = cvWaveform.width;
+            const h = cvWaveform.height;
+            ctxWaveform.clearRect(0, 0, w, h);
+
+            const midY = h / 2;
+
+            ctxWaveform.strokeStyle = "#334155";
+            ctxWaveform.lineWidth = 1;
+            ctxWaveform.beginPath();
+            ctxWaveform.moveTo(0, midY); ctxWaveform.lineTo(w, midY);
+            ctxWaveform.stroke();
+
+            const vAmp = (h / 2 - 25) * 0.7;
+            const iAmp = (h / 2 - 25) * 0.7;
+
+            ctxWaveform.strokeStyle = "#f43f5e";
+            ctxWaveform.lineWidth = 2;
+            ctxWaveform.beginPath();
+            for (let x = 0; x < w; x++) {
+                let t = time + (x / w) * Math.PI * 4;
+                let y = midY - Math.sin(t) * vAmp;
+                if (x === 0) ctxWaveform.moveTo(x, y);
+                else ctxWaveform.lineTo(x, y);
+            }
+            ctxWaveform.stroke();
+
+            ctxWaveform.strokeStyle = "#38bdf8";
+            ctxWaveform.lineWidth = 2;
+            ctxWaveform.beginPath();
+            for (let x = 0; x < w; x++) {
+                let t = time + (x / w) * Math.PI * 4;
+                let y = midY - Math.sin(t - phi) * iAmp;
+                if (x === 0) ctxWaveform.moveTo(x, y);
+                else ctxWaveform.lineTo(x, y);
+            }
+            ctxWaveform.stroke();
+
+            const particleCount = 16;
+            for (let p = 0; p < particleCount; p++) {
+                let xFrac = ((p / particleCount) + (time / (Math.PI * 4))) % 1;
+                let px = xFrac * w;
+                let pt = time + (px / w) * Math.PI * 4;
+
+                let pyV = midY - Math.sin(pt) * vAmp;
+                ctxWaveform.fillStyle = "rgba(244, 63, 94, 0.5)";
+                ctxWaveform.beginPath();
+                ctxWaveform.arc(px, pyV, 1.5, 0, Math.PI * 2);
+                ctxWaveform.fill();
+
+                let pyI = midY - Math.sin(pt - phi) * iAmp;
+                ctxWaveform.fillStyle = "rgba(56, 189, 248, 0.5)";
+                ctxWaveform.beginPath();
+                ctxWaveform.arc(px, pyI, 1.5, 0, Math.PI * 2);
+                ctxWaveform.fill();
+            }
+
+            const endX = w - 2;
+            const endVoltageTime = time + Math.PI * 4;
+            const endCurrentTime = endVoltageTime - phi;
+
+            const endVoltageY = midY - Math.sin(endVoltageTime) * vAmp;
+            const endCurrentY = midY - Math.sin(endCurrentTime) * iAmp;
+
+            ctxWaveform.fillStyle = "#f43f5e";
+            ctxWaveform.shadowColor = "#f43f5e";
+            ctxWaveform.shadowBlur = 10;
+            ctxWaveform.beginPath();
+            ctxWaveform.arc(endX - 4, endVoltageY, 6, 0, Math.PI * 2);
+            ctxWaveform.fill();
+
+            ctxWaveform.fillStyle = "#38bdf8";
+            ctxWaveform.shadowColor = "#38bdf8";
+            ctxWaveform.shadowBlur = 10;
+            ctxWaveform.beginPath();
+            ctxWaveform.arc(endX - 4, endCurrentY, 6, 0, Math.PI * 2);
+            ctxWaveform.fill();
+
+            ctxWaveform.shadowBlur = 0;
+
+            if (showRMSOverlay) {
+                ctxWaveform.setLineDash([4, 4]);
+
+                ctxWaveform.strokeStyle = "rgba(244, 63, 94, 0.6)";
+                ctxWaveform.beginPath();
+                ctxWaveform.moveTo(0, midY - vAmp / Math.SQRT2); ctxWaveform.lineTo(w, midY - vAmp / Math.SQRT2);
+                ctxWaveform.moveTo(0, midY + vAmp / Math.SQRT2); ctxWaveform.lineTo(w, midY + vAmp / Math.SQRT2);
+                ctxWaveform.stroke();
+
+                ctxWaveform.strokeStyle = "rgba(56, 189, 248, 0.6)";
+                ctxWaveform.beginPath();
+                ctxWaveform.moveTo(0, midY - iAmp / Math.SQRT2); ctxWaveform.lineTo(w, midY - iAmp / Math.SQRT2);
+                ctxWaveform.moveTo(0, midY + iAmp / Math.SQRT2); ctxWaveform.lineTo(w, midY + iAmp / Math.SQRT2);
+                ctxWaveform.stroke();
+
+                ctxWaveform.setLineDash([]);
+            }
+        }
+
+        function draw(timestamp) {
+            let dt = (timestamp - lastTimestamp) / 1000;
+            lastTimestamp = timestamp;
+
+            if (isRunning) {
+                time += 0.12;
+            }
+
+            vInst = Vmax * Math.sin(time);
+            iInst = Imax * Math.sin(time - phi);
+            pInst = vInst * iInst;
+
+            document.getElementById('calc-vInst').innerText = vInst.toFixed(1) + " V";
+            document.getElementById('calc-iInst').innerText = iInst.toFixed(2) + " A";
+            document.getElementById('calc-pInst').innerText = pInst.toFixed(1) + " W";
+
+            drawSchematic();
+            if (showPhasor) drawPhasor();
+            drawWaveform();
+
+            requestAnimationFrame(draw);
+        }
+
+        window.addEventListener('resize', resizeCanvases);
+
+        window.addEventListener('DOMContentLoaded', () => {
+            resizeCanvases();
+            updateParams();
+            requestAnimationFrame(draw);
+        });
+    </script>
+</body>
+</html>

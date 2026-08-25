@@ -88,18 +88,26 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                 return (
                   <div
                     key={item.simulation.id}
-                    className="bg-slate-950/70 p-4 rounded-2xl border border-slate-800 space-y-3"
+                    className="bg-slate-950/70 p-3.5 rounded-2xl border border-slate-800 space-y-3"
                   >
                     <div className="flex justify-between items-start gap-2">
-                      <div>
-                        <span className="text-[10px] font-bold uppercase text-sky-400 font-mono">
-                          {item.simulation.discipline}
-                        </span>
-                        <h4 className="text-sm font-bold text-white line-clamp-1">{item.simulation.title}</h4>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span
+                            className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider border ${
+                              item.simulation.badgeColor || "bg-sky-500/10 text-sky-400 border-sky-500/20"
+                            }`}
+                          >
+                            {item.simulation.discipline}
+                          </span>
+                        </div>
+                        <h4 className="text-xs font-bold text-white line-clamp-1 mt-0.5">{item.simulation.title}</h4>
+                        <p className="text-[10px] text-slate-400 truncate mt-0.5">{item.simulation.tagline}</p>
                       </div>
                       <button
                         onClick={() => onRemoveItem(item.simulation.id)}
-                        className="text-slate-500 hover:text-rose-400 p-1 cursor-pointer"
+                        className="text-slate-500 hover:text-rose-400 p-1 cursor-pointer transition-colors shrink-0"
+                        title="Remove from cart"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>

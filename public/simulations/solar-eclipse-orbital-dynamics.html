@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Solar Eclipse & Orbital Mechanics Simulation</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #000;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #fff;
+        }
+        #canvas-container {
+            width: 100vw;
+            height: 100vh;
+        }
+
+        /* Centralized Professional Main Title */
+        #main-title {
+            position: absolute;
+            top: 25px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            pointer-events: none;
+            z-index: 100;
+        }
+        #main-title h1 {
+            font-size: 22px;
+            margin: 0;
+            color: #ffd700;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            font-weight: 700;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5), 0 0 20px rgba(0, 0, 0, 0.9);
+        }
+        #main-title p {
+            font-size: 10px;
+            margin: 4px 0 0 0;
+            color: #cccccc;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 0 0 6px rgba(0, 0, 0, 0.9);
+        }
+
+        /* Left Controls UI */
+        #ui {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.85);
+            padding: 15px 20px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 215, 0, 0.4);
+            pointer-events: auto;
+            z-index: 100;
+        }
+        #ui h2 {
+            font-size: 14px;
+            margin: 0 0 10px 0;
+            color: #ffd700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .control-group {
+            margin-bottom: 10px;
+        }
+        label {
+            display: inline-block;
+            width: 90px;
+            font-size: 12px;
+        }
+        button {
+            background: #ffd700;
+            border: none;
+            color: #000;
+            padding: 6px 12px;
+            font-weight: bold;
+            font-size: 11px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 5px;
+        }
+        button:hover {
+            background: #fff;
+        }
+
+        /* Right Side Explanatory Info Panel */
+        #info-panel {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 320px;
+            max-height: calc(100vh - 60px);
+            background: rgba(10, 15, 25, 0.88);
+            border: 1px solid rgba(255, 215, 0, 0.35);
+            border-radius: 8px;
+            padding: 16px;
+            box-sizing: border-box;
+            overflow-y: auto;
+            z-index: 100;
+            font-size: 12px;
+            line-height: 1.5;
+            color: #e0e0e0;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.8);
+        }
+        #info-panel h2 {
+            font-size: 15px;
+            color: #ffd700;
+            margin: 0 0 10px 0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 1px solid rgba(255, 215, 0, 0.2);
+            padding-bottom: 6px;
+        }
+        #info-panel p {
+            margin: 0 0 10px 0;
+        }
+        .info-section {
+            margin-bottom: 12px;
+        }
+        .info-title {
+            font-weight: 700;
+            color: #58a6ff;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            font-size: 11px;
+            letter-spacing: 0.5px;
+        }
+        .info-list {
+            margin: 0;
+            padding-left: 16px;
+        }
+        .info-list li {
+            margin-bottom: 6px;
+        }
+
+        /* Scrollbar styles for Info Panel */
+        #info-panel::-webkit-scrollbar {
+            width: 6px;
+        }
+        #info-panel::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.3);
+        }
+        #info-panel::-webkit-scrollbar-thumb {
+            background: rgba(255, 215, 0, 0.4);
+            border-radius: 3px;
+        }
+
+        /* Clean Borderless White Labels */
+        .callout-label {
+            position: absolute;
+            pointer-events: none;
+            z-index: 10;
+            transform: translate(-50%, -100%);
+            transition: opacity 0.2s ease-out;
+        }
+        .callout-text {
+            color: #ffffff;
+            font-weight: 600;
+            font-size: 7px;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            background: transparent;
+            border: none;
+            box-shadow: none;
+            text-shadow: 0 0 4px rgba(0, 0, 0, 0.9), 0 0 8px rgba(0, 0, 0, 0.7);
+            white-space: nowrap;
+        }
+    </style>
+    <!-- Three.js Library & OrbitControls -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+</head>
+<body>
+
+    <div id="canvas-container"></div>
+
+    <!-- Centralized Main Title Header -->
+    <div id="main-title">
+        <h1>Solar Eclipse & Orbital Dynamics</h1>
+        <p>3D Interactive Astronomical Simulation</p>
+    </div>
+
+    <!-- Simulation Controls -->
+    <div id="ui">
+        <h2>Simulation Controls</h2>
+        <div class="control-group">
+            <label for="speed">Orbit Speed:</label>
+            <input type="range" id="speed" min="0" max="0.01" step="0.0005" value="0.002">
+        </div>
+        <div class="control-group">
+            <button id="toggle-orbit">Pause / Resume</button>
+            <button id="align-eclipse">Align Eclipse</button>
+        </div>
+    </div>
+
+    <!-- Explanatory Write-Up Panel -->
+    <div id="info-panel">
+        <h2>Understanding Solar Eclipses</h2>
+        
+        <div class="info-section">
+            <p>A <strong>solar eclipse</strong> occurs when the Moon passes directly between the Earth and the Sun, temporarily blocking all or part of the Sun's light from reaching Earth.</p>
+        </div>
+
+        <div class="info-section">
+            <div class="info-title">Types of Solar Eclipses</div>
+            <ul class="info-list">
+                <li><strong>Total Eclipse:</strong> The Moon completely covers the Sun's bright disk, revealing the faint outer atmosphere (corona).</li>
+                <li><strong>Partial Eclipse:</strong> The Moon and Sun are not perfectly aligned, creating a crescent-shaped Sun.</li>
+                <li><strong>Annular Eclipse:</strong> The Moon is at apogee (farther from Earth) and appears smaller than the Sun, creating a "ring of fire".</li>
+                <li><strong>Hybrid Eclipse:</strong> Shifts between an annular and total eclipse along different parts of its path.</li>
+            </ul>
+        </div>
+
+        <div class="info-section">
+            <div class="info-title">Shadow Dynamics</div>
+            <p>The Moon casts two main shadows onto Earth during an alignment:</p>
+            <ul class="info-list">
+                <li><strong>Umbra:</strong> The dark inner core shadow. Observers within this zone experience a total solar eclipse.</li>
+                <li><strong>Penumbra:</strong> The lighter outer shadow region where observers see a partial solar eclipse.</li>
+            </ul>
+        </div>
+
+        <div class="info-section">
+            <div class="info-title">Orbital Mechanics</div>
+            <p>Earth revolves around the Sun in an <strong>anticlockwise direction</strong> (when viewed from above the North Pole). Solar eclipses do not occur every month because the Moon's orbit is tilted at approximately 5 degrees relative to Earth's orbital plane (the ecliptic).</p>
+        </div>
+
+        <div class="info-section">
+            <div class="info-title">Viewing Safety</div>
+            <p>Never look directly at the Sun without ISO 12312-2 certified solar viewing glasses. Standard sunglasses are not safe for direct solar observation.</p>
+        </div>
+    </div>
+
+    <!-- Borderless Floating Labels -->
+    <div id="label-sun" class="callout-label">
+        <div class="callout-text">SUN</div>
+    </div>
+    
+    <div id="label-earth" class="callout-label">
+        <div class="callout-text">EARTH</div>
+    </div>
+    
+    <div id="label-moon" class="callout-label">
+        <div class="callout-text">MOON</div>
+    </div>
+
+    <script>
+        // --- Procedural Textures ---
+        function createEarthTexture() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 2048;
+            canvas.height = 1024;
+            const ctx = canvas.getContext('2d');
+            
+            // Natural Deep Atmosphere / Light Blue Ocean Base
+            ctx.fillStyle = '#1565c0';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Subtle Muted Vegetation Landmasses
+            ctx.fillStyle = '#4ab367';
+            for (let i = 0; i < 2200; i++) {
+                const x = Math.random() * canvas.width;
+                const y = Math.random() * canvas.height * 0.75 + canvas.height * 0.125;
+                const r = Math.random() * 55 + 15;
+                ctx.beginPath();
+                ctx.arc(x, y, r, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            ctx.fillStyle = '#2e7d32';
+            for (let i = 0; i < 800; i++) {
+                const x = Math.random() * canvas.width;
+                const y = Math.random() * canvas.height * 0.65 + canvas.height * 0.175;
+                const r = Math.random() * 35 + 10;
+                ctx.beginPath();
+                ctx.arc(x, y, r, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            // Polar Ice Caps
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, canvas.width, 100);
+            ctx.fillRect(0, canvas.height - 100, canvas.width, 100);
+
+            return new THREE.CanvasTexture(canvas);
+        }
+
+        function createMoonTexture() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 1024;
+            canvas.height = 512;
+            const ctx = canvas.getContext('2d');
+            
+            ctx.fillStyle = '#777777';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.fillStyle = '#444444';
+            for (let i = 0; i < 800; i++) {
+                const x = Math.random() * canvas.width;
+                const y = Math.random() * canvas.height;
+                const r = Math.random() * 15 + 3;
+                ctx.beginPath();
+                ctx.arc(x, y, r, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            return new THREE.CanvasTexture(canvas);
+        }
+
+        function createGlowTexture() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 512;
+            canvas.height = 512;
+            const ctx = canvas.getContext('2d');
+
+            const gradient = ctx.createRadialGradient(256, 256, 100, 256, 256, 256);
+            gradient.addColorStop(0.0, 'rgba(255, 220, 100, 1.0)');
+            gradient.addColorStop(0.3, 'rgba(255, 180, 40, 0.6)');
+            gradient.addColorStop(0.7, 'rgba(255, 140, 0, 0.15)');
+            gradient.addColorStop(1.0, 'rgba(0, 0, 0, 0.0)');
+
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, 512, 512);
+
+            return new THREE.CanvasTexture(canvas);
+        }
+
+        // --- Setup Scene ---
+        const container = document.getElementById('canvas-container');
+        const scene = new THREE.Scene();
+        
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 25000);
+        camera.position.set(0, 1500, 5000);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        container.appendChild(renderer.domElement);
+
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+
+        // Starfield Background
+        const starsGeometry = new THREE.BufferGeometry();
+        const starsCount = 7000;
+        const starPositions = new Float32Array(starsCount * 3);
+        for(let i = 0; i < starsCount * 3; i++) {
+            starPositions[i] = (Math.random() - 0.5) * 15000;
+        }
+        starsGeometry.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
+        const starsMaterial = new THREE.PointsMaterial({ color: 0xffffff, size: 2.5 });
+        const starField = new THREE.Points(starsGeometry, starsMaterial);
+        scene.add(starField);
+
+        const customUniforms = { uTime: { value: 0 } };
+
+        // --- SUN ---
+        const sunRadius = 450;
+        const sunGeometry = new THREE.SphereGeometry(sunRadius, 128, 128);
+        const sunMaterial = new THREE.MeshBasicMaterial({ color: 0xffea70 });
+        const sun = new THREE.Mesh(sunGeometry, sunMaterial);
+        sun.position.set(0, 0, 0);
+        scene.add(sun);
+
+        // Continuous Corona
+        const spriteMaterial = new THREE.SpriteMaterial({
+            map: createGlowTexture(),
+            blending: THREE.AdditiveBlending,
+            transparent: true
+        });
+        const sunCorona = new THREE.Sprite(spriteMaterial);
+        sunCorona.scale.set(sunRadius * 4.2, sunRadius * 4.2, 1.0);
+        sun.add(sunCorona);
+
+        // --- EARTH ORBITAL PATH VISUALIZATION ---
+        const earthSunOrbitRadius = 2600;
+        const orbitPathGeo = new THREE.RingGeometry(earthSunOrbitRadius - 3.5, earthSunOrbitRadius + 3.5, 256);
+        const orbitPathMat = new THREE.MeshBasicMaterial({ color: 0xffd700, side: THREE.DoubleSide, transparent: true, opacity: 0.35 });
+        const orbitPathMesh = new THREE.Mesh(orbitPathGeo, orbitPathMat);
+        orbitPathMesh.rotation.x = Math.PI / 2;
+        scene.add(orbitPathMesh);
+
+        // --- DIRECT LIGHT SOURCE FROM SUN ---
+        const sunLight = new THREE.DirectionalLight(0xffdf80, 2.5);
+        sunLight.castShadow = true;
+        
+        sunLight.shadow.mapSize.width = 4096;
+        sunLight.shadow.mapSize.height = 4096;
+        sunLight.shadow.camera.near = 10;
+        sunLight.shadow.camera.far = 5000;
+        
+        const d = 500;
+        sunLight.shadow.camera.left = -d;
+        sunLight.shadow.camera.right = d;
+        sunLight.shadow.camera.top = d;
+        sunLight.shadow.camera.bottom = -d;
+        sunLight.shadow.bias = -0.0001;
+
+        scene.add(sunLight);
+        scene.add(sunLight.target);
+
+        const ambientLight = new THREE.AmbientLight(0x152030);
+        scene.add(ambientLight);
+
+        // --- EARTH ---
+        const earthRadius = 180;
+        const earthGeometry = new THREE.SphereGeometry(earthRadius, 128, 128);
+        const earthMaterial = new THREE.MeshStandardMaterial({
+            map: createEarthTexture(),
+            roughness: 0.6,
+            metalness: 0.1
+        });
+        
+        const earthPivot = new THREE.Group();
+        earthPivot.rotation.z = THREE.MathUtils.degToRad(23.5);
+        scene.add(earthPivot);
+
+        const earth = new THREE.Mesh(earthGeometry, earthMaterial);
+        earth.receiveShadow = true;
+        earth.castShadow = true;
+        earthPivot.add(earth);
+
+        // --- MOON ---
+        const moonRadius = 48.6;
+        const moonGeometry = new THREE.SphereGeometry(moonRadius, 64, 64);
+        const moonMaterial = new THREE.MeshStandardMaterial({
+            map: createMoonTexture(),
+            roughness: 0.9
+        });
+        const moon = new THREE.Mesh(moonGeometry, moonMaterial);
+        moon.castShadow = true;
+        moon.receiveShadow = true;
+        scene.add(moon);
+
+        // --- EXTENDED LIGHT RAYS REACHING EARTH & MOON ---
+        const parallelRays = new THREE.Group();
+        const rayCount = 32;
+        const rayLength = 2100;
+
+        const rayShaderMaterial = new THREE.ShaderMaterial({
+            uniforms: customUniforms,
+            transparent: true,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false,
+            vertexShader: `
+                varying vec2 vUv;
+                void main() {
+                    vUv = uv;
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                }
+            `,
+            fragmentShader: `
+                uniform float uTime;
+                varying vec2 vUv;
+                void main() {
+                    float rayPulse = sin(vUv.y * 25.0 - uTime * 4.0) * 0.2 + 0.8;
+                    float fadeEdges = sin(vUv.y * 3.14159);
+                    vec3 goldenRayColor = vec3(1.0, 0.8, 0.2);
+                    float alpha = fadeEdges * rayPulse * 0.35;
+                    gl_FragColor = vec4(goldenRayColor, alpha);
+                }
+            `
+        });
+
+        for (let i = 0; i < rayCount; i++) {
+            const rayGeo = new THREE.CylinderGeometry(2.5, 2.5, rayLength, 8);
+            const ray = new THREE.Mesh(rayGeo, rayShaderMaterial);
+            
+            ray.rotation.x = Math.PI / 2;
+            
+            const angle = (i / rayCount) * Math.PI * 2;
+            const r = 30 + Math.random() * 240;
+            const offsetX = Math.sin(angle) * r;
+            const offsetY = Math.cos(angle) * r;
+            
+            ray.position.set(offsetX, offsetY, 0);
+            parallelRays.add(ray);
+        }
+        scene.add(parallelRays);
+
+        // --- Simulation Variables ---
+        let earthSunOrbitAngle = Math.PI;
+        let moonOrbitAngle = Math.PI;
+        let moonOrbitRadius = 430;
+        let isPaused = false;
+        let speed = parseFloat(document.getElementById('speed').value);
+
+        document.getElementById('speed').addEventListener('input', (e) => {
+            speed = parseFloat(e.target.value);
+        });
+
+        document.getElementById('toggle-orbit').addEventListener('click', () => {
+            isPaused = !isPaused;
+        });
+
+        document.getElementById('align-eclipse').addEventListener('click', () => {
+            moonOrbitAngle = Math.PI;
+            updatePositions();
+        });
+
+        function updatePositions() {
+            earthPivot.position.x = sun.position.x + Math.cos(earthSunOrbitAngle) * earthSunOrbitRadius;
+            earthPivot.position.z = sun.position.z + Math.sin(earthSunOrbitAngle) * earthSunOrbitRadius;
+
+            moon.position.x = earthPivot.position.x + Math.cos(moonOrbitAngle) * moonOrbitRadius;
+            moon.position.z = earthPivot.position.z + Math.sin(moonOrbitAngle) * moonOrbitRadius;
+
+            sunLight.position.copy(sun.position);
+            sunLight.target.position.copy(earthPivot.position);
+
+            const midPoint = new THREE.Vector3().addVectors(sun.position, earthPivot.position).multiplyScalar(0.5);
+            parallelRays.position.copy(midPoint);
+            parallelRays.lookAt(earthPivot.position);
+        }
+
+        // --- Precise 3D Label Tracking ---
+        const sunLabel = document.getElementById('label-sun');
+        const earthLabel = document.getElementById('label-earth');
+        const moonLabel = document.getElementById('label-moon');
+
+        function updateLabelPosition(object, labelElement, yOffset = 0) {
+            const tempV = new THREE.Vector3();
+            object.getWorldPosition(tempV);
+            tempV.y += yOffset;
+            
+            tempV.project(camera);
+
+            if (tempV.z > 1) {
+                labelElement.style.opacity = '0';
+                return;
+            } else {
+                labelElement.style.opacity = '1';
+            }
+
+            const x = (tempV.x *  .5 + .5) * window.innerWidth;
+            const y = (tempV.y * -.5 + .5) * window.innerHeight;
+
+            labelElement.style.left = `${x}px`;
+            labelElement.style.top = `${y}px`;
+        }
+
+        // --- Animation Loop ---
+        const clock = new THREE.Clock();
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            const elapsedTime = clock.getElapsedTime();
+            customUniforms.uTime.value = elapsedTime;
+
+            if (!isPaused) {
+                earthSunOrbitAngle -= speed * 0.2; // Anticlockwise revolution
+                moonOrbitAngle -= speed;           // Anticlockwise moon orbit
+                updatePositions();
+            }
+
+            earth.rotation.y += 0.003;
+            moon.rotation.y += 0.001;
+
+            controls.update();
+
+            // Dynamic Label updates
+            updateLabelPosition(sun, sunLabel, sunRadius + 40);
+            updateLabelPosition(earth, earthLabel, earthRadius + 25);
+            updateLabelPosition(moon, moonLabel, moonRadius + 20);
+
+            renderer.render(scene, camera);
+        }
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        updatePositions();
+        animate();
+    </script>
+</body>
+</html>

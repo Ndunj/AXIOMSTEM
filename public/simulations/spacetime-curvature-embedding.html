@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spacetime Embedding Diagram & Interactive Explanations</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background-color: #020617;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+
+    /* Left Control & Information Deck */
+    #ui {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      color: #f8fafc;
+      background: rgba(15, 23, 42, 0.88);
+      padding: 16px 20px;
+      border-radius: 12px;
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      backdrop-filter: blur(12px);
+      width: 320px;
+      max-height: calc(100vh - 32px);
+      overflow-y: auto;
+      z-index: 10;
+      box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.6);
+    }
+
+    #ui::-webkit-scrollbar { width: 6px; }
+    #ui::-webkit-scrollbar-thumb { background: rgba(56, 189, 248, 0.3); border-radius: 3px; }
+
+    h2 { 
+      margin: 0 0 4px 0; 
+      font-size: 1.1rem; 
+      color: #38bdf8; 
+      letter-spacing: -0.01em;
+    }
+    
+    .subtitle {
+      font-size: 0.72rem;
+      color: #94a3b8;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .section-title {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #e2e8f0;
+      margin-top: 14px;
+      margin-bottom: 6px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 4px;
+    }
+
+    p { margin: 4px 0; font-size: 0.78rem; color: #cbd5e1; line-height: 1.45; }
+
+    /* Interactive Controls */
+    .control-group { margin-top: 10px; }
+    label { display: block; font-size: 0.75rem; color: #94a3b8; margin-bottom: 2px; }
+    input[type=range] { width: 100%; cursor: pointer; accent-color: #38bdf8; }
+
+    button {
+      width: 100%;
+      margin-top: 8px;
+      padding: 8px;
+      background: #0284c7;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    button:hover { background: #0369a1; }
+
+    button.secondary-btn {
+      background: rgba(56, 189, 248, 0.15);
+      color: #38bdf8;
+      border: 1px solid rgba(56, 189, 248, 0.4);
+    }
+    button.secondary-btn:hover {
+      background: rgba(56, 189, 248, 0.25);
+    }
+
+    /* Key Definitions Callouts */
+    .concept-card {
+      background: rgba(30, 41, 59, 0.7);
+      border-left: 3px solid #38bdf8;
+      padding: 8px 10px;
+      margin-top: 8px;
+      border-radius: 0 6px 6px 0;
+    }
+
+    .concept-card h4 {
+      margin: 0 0 2px 0;
+      font-size: 0.78rem;
+      color: #38bdf8;
+    }
+
+    .concept-card p {
+      margin: 0;
+      font-size: 0.73rem;
+      color: #94a3b8;
+      line-height: 1.35;
+    }
+
+    .legend {
+      margin-top: 10px;
+      font-size: 0.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .legend-item { display: flex; align-items: center; }
+    .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 8px; }
+
+    /* Modal Styles */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(2, 6, 23, 0.75);
+      backdrop-filter: blur(6px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-card {
+      background: #0f172a;
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      border-radius: 12px;
+      width: 90%;
+      max-width: 440px;
+      padding: 20px 24px;
+      box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.8);
+      color: #f8fafc;
+      transform: translateY(12px);
+      transition: transform 0.3s ease;
+    }
+
+    .modal-overlay.active .modal-card {
+      transform: translateY(0);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 10px;
+      margin-bottom: 14px;
+    }
+
+    .modal-header h3 {
+      margin: 0;
+      font-size: 1.05rem;
+      color: #38bdf8;
+    }
+
+    .close-btn {
+      background: none;
+      border: none;
+      color: #94a3b8;
+      font-size: 1.2rem;
+      cursor: pointer;
+      padding: 0;
+      margin: 0;
+      width: auto;
+    }
+    .close-btn:hover { color: #f8fafc; }
+
+    .modal-body ul {
+      margin: 0;
+      padding-left: 18px;
+    }
+
+    .modal-body li {
+      font-size: 0.82rem;
+      color: #cbd5e1;
+      margin-bottom: 10px;
+      line-height: 1.45;
+    }
+
+    .modal-body strong {
+      color: #38bdf8;
+    }
+
+    .math-text {
+      color: #facc15;
+      font-family: monospace;
+    }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+</head>
+<body>
+
+  <!-- Simulation Control Panel -->
+  <div id="ui">
+    <h2>Spacetime Curvature</h2>
+    <div class="subtitle">General Relativity Interactive Guide</div>
+
+    <div class="control-group">
+      <label for="massSlider">Gravitational Mass Well (Depth): <span id="massVal" style="color:#38bdf8">18</span></label>
+      <input type="range" id="massSlider" min="6" max="32" value="18">
+    </div>
+
+    <button id="addParticleBtn">+ Launch Test Particle</button>
+    <button id="explainSphereBtn" class="secondary-btn">🔍 What is the Black Sphere & Ring?</button>
+
+    <div class="legend">
+      <div class="legend-item"><span class="dot" style="background:#4ade80;"></span> Stable Orbiting Mass</div>
+      <div class="legend-item"><span class="dot" style="background:#f87171;"></span> Trapped (Past Horizon)</div>
+    </div>
+
+    <!-- Core Scientific Definitions -->
+    <div class="section-title">📖 Core Definitions</div>
+
+    <div class="concept-card">
+      <h4>1. Spacetime Grid</h4>
+      <p>The 2D blue sheet embeds a 3D visual of 4D spacetime. Mass causes this grid to stretch and dip downward.</p>
+    </div>
+
+    <div class="concept-card">
+      <h4>2. Geodesics (Orbital Paths)</h4>
+      <p>Objects don't feel a pulling "force". They travel in straight paths across curved space, appearing to orbit.</p>
+    </div>
+
+    <div class="concept-card">
+      <h4>3. Event Horizon</h4>
+      <p>The bright cyan ring marks the radius where escape velocity equals light speed (<span class="math-text">v_esc = c</span>). Nothing escapes.</p>
+    </div>
+  </div>
+
+  <!-- Educational Pop-up Modal -->
+  <div id="explanationModal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>The Central Black Hole Structure</h3>
+        <button id="closeModalBtn" class="close-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <ul>
+          <li>
+            <strong>The Black Sphere (Singularity & Horizon):</strong> Represents the region of space where gravity is so strong that no light or matter can escape once inside.
+          </li>
+          <li>
+            <strong>The Bright Cyan Ring (Event Horizon Boundary):</strong> Represents the mathematical boundary around the black hole where the escape velocity exactly equals the speed of light (<span class="math-text">v_esc = c</span>).
+          </li>
+          <li>
+            <strong>Orbital Behavior:</strong> Outside this ring, objects can maintain stable orbits indefinitely. Once an object crosses inside it, all paths lead inward toward the singularity.
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // --- Scene & Camera Setup ---
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 1, 1000);
+    camera.position.set(20, 30, 55);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    document.body.appendChild(renderer.domElement);
+
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+
+    // --- Core Parameters ---
+    let depthFactor = 18;
+    const eventHorizonRadius = 4;
+    const maxRadius = 30;
+
+    // --- Central Mass & Event Horizon ---
+    const bhGeo = new THREE.SphereGeometry(eventHorizonRadius, 32, 32);
+    const bhMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
+    const blackHole = new THREE.Mesh(bhGeo, bhMat);
+    scene.add(blackHole);
+
+    const ringGeo = new THREE.RingGeometry(eventHorizonRadius, eventHorizonRadius + 0.4, 64);
+    const ringMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8, side: THREE.DoubleSide });
+    const horizonRing = new THREE.Mesh(ringGeo, ringMat);
+    horizonRing.rotation.x = Math.PI / 2;
+    scene.add(horizonRing);
+
+    // --- Smooth Polar Radial Mesh (Coordinate Sheet) ---
+    const rings = 32;
+    const spokes = 48;
+    
+    function getDip(r) {
+      if (r <= eventHorizonRadius) return -depthFactor * 0.8;
+      return -depthFactor * (1 - Math.pow((r - eventHorizonRadius) / (maxRadius - eventHorizonRadius), 0.45));
+    }
+
+    const gridGeometry = new THREE.BufferGeometry();
+    const vertices = [];
+    const indices = [];
+
+    for (let i = 0; i <= rings; i++) {
+      const r = eventHorizonRadius + (i / rings) * (maxRadius - eventHorizonRadius);
+      const y = getDip(r);
+      for (let j = 0; j < spokes; j++) {
+        const theta = (j / spokes) * Math.PI * 2;
+        vertices.push(Math.cos(theta) * r, y, Math.sin(theta) * r);
+      }
+    }
+
+    for (let i = 0; i <= rings; i++) {
+      for (let j = 0; j < spokes; j++) {
+        const current = i * spokes + j;
+        const nextSpoke = i * spokes + ((j + 1) % spokes);
+        indices.push(current, nextSpoke);
+
+        if (i < rings) {
+          const nextRing = (i + 1) * spokes + j;
+          indices.push(current, nextRing);
+        }
+      }
+    }
+
+    gridGeometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+    gridGeometry.setIndex(indices);
+
+    const gridMaterial = new THREE.LineBasicMaterial({ color: 0x0284c7, transparent: true, opacity: 0.85 });
+    const funnelMesh = new THREE.LineSegments(gridGeometry, gridMaterial);
+    scene.add(funnelMesh);
+
+    function updateGrid() {
+      const pos = funnelMesh.geometry.attributes.position;
+      let idx = 0;
+      for (let i = 0; i <= rings; i++) {
+        const r = eventHorizonRadius + (i / rings) * (maxRadius - eventHorizonRadius);
+        const y = getDip(r);
+        for (let j = 0; j < spokes; j++) {
+          pos.setY(idx, y);
+          idx++;
+        }
+      }
+      pos.needsUpdate = true;
+    }
+
+    // --- Orbiting Particles & Geodesic Paths ---
+    const particles = [];
+    const particleGeo = new THREE.SphereGeometry(0.5, 16, 16);
+
+    function addParticle() {
+      const mat = new THREE.MeshBasicMaterial({ color: 0x4ade80 });
+      const mesh = new THREE.Mesh(particleGeo, mat);
+      const r = 12 + Math.random() * 12;
+      const angle = Math.random() * Math.PI * 2;
+      
+      mesh.position.set(Math.cos(angle) * r, getDip(r), Math.sin(angle) * r);
+      scene.add(mesh);
+
+      const tanSpeed = Math.sqrt(depthFactor * 0.8 / r);
+      const velocity = new THREE.Vector3(-Math.sin(angle), 0, Math.cos(angle)).multiplyScalar(tanSpeed);
+
+      particles.push({ mesh, velocity, r });
+    }
+
+    for (let i = 0; i < 4; i++) addParticle();
+
+    // --- Animation Loop ---
+    const clock = new THREE.Clock();
+
+    function animate() {
+      requestAnimationFrame(animate);
+      const dt = Math.min(clock.getDelta(), 0.05);
+
+      particles.forEach(p => {
+        const dist = Math.sqrt(p.mesh.position.x ** 2 + p.mesh.position.z ** 2);
+        if (dist > eventHorizonRadius) {
+          const radial = p.mesh.position.clone().negate().setY(0).normalize();
+          const accel = radial.multiplyScalar((depthFactor * 10) / (dist * dist));
+          
+          p.velocity.add(accel.multiplyScalar(dt));
+          p.mesh.position.add(p.velocity.clone().multiplyScalar(dt));
+          p.mesh.position.y = getDip(dist);
+        } else {
+          p.mesh.material.color.set(0xf87171); // Trapped past horizon
+        }
+      });
+
+      controls.update();
+      renderer.render(scene, camera);
+    }
+
+    // --- Event Listeners & Modal Controls ---
+    const modal = document.getElementById('explanationModal');
+
+    document.getElementById('explainSphereBtn').addEventListener('click', () => {
+      modal.classList.add('active');
+    });
+
+    document.getElementById('closeModalBtn').addEventListener('click', () => {
+      modal.classList.remove('active');
+    });
+
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) modal.classList.remove('active');
+    });
+
+    document.getElementById('massSlider').addEventListener('input', (e) => {
+      depthFactor = parseFloat(e.target.value);
+      document.getElementById('massVal').innerText = depthFactor;
+      updateGrid();
+    });
+
+    document.getElementById('addParticleBtn').addEventListener('click', addParticle);
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    animate();
+  </script>
+</body>
+</html>

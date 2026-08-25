@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Saturn & Moons Educational Simulation</title>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: #000;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    #canvas-container {
+      width: 100%;
+      height: 100%;
+    }
+    #ui-overlay {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      width: 320px;
+      max-height: calc(100% - 60px);
+      color: #fff;
+      background: rgba(10, 15, 30, 0.88);
+      padding: 18px 22px;
+      border-radius: 12px;
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+      z-index: 10;
+      overflow-y: auto;
+    }
+    #ui-overlay::-webkit-scrollbar {
+      width: 6px;
+    }
+    #ui-overlay::-webkit-scrollbar-thumb {
+      background: rgba(255, 215, 0, 0.4);
+      border-radius: 3px;
+    }
+    h1 {
+      margin: 0 0 4px 0;
+      font-size: 20px;
+      color: #ffd700;
+    }
+    .controls-hint {
+      margin: 0 0 15px 0;
+      font-size: 11px;
+      color: #aaa;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+      padding-bottom: 8px;
+    }
+    .section-title {
+      font-size: 14px;
+      font-weight: bold;
+      color: #00e5ff;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .info-card {
+      margin-bottom: 12px;
+    }
+    .info-card strong {
+      color: #ffd700;
+      display: block;
+      font-size: 13px;
+      margin-bottom: 2px;
+    }
+    .info-card p {
+      margin: 0;
+      font-size: 12px;
+      line-height: 1.4;
+      color: #ddd;
+    }
+    .moon-list {
+      margin: 4px 0 0 0;
+      padding-left: 18px;
+      font-size: 12px;
+      color: #ccc;
+    }
+  </style>
+  <!-- Three.js and OrbitControls Libraries -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+</head>
+<body>
+
+<div id="ui-overlay">
+  <h1>Saturn Orbital Simulation</h1>
+  <div class="controls-hint">Left Click + Drag: Rotate | Right Click + Drag: Pan | Scroll: Zoom</div>
+
+  <div class="section-title">Key Characteristics</div>
+
+  <div class="info-card">
+    <strong>The Ring System</strong>
+    <p>Saturn's defining feature is its extensive ring system, composed mostly of water ice, rocky debris, and dust particles. These rings span tens of thousands of kilometers yet are remarkably thin—often less than a kilometer thick.</p>
+  </div>
+
+  <div class="info-card">
+    <strong>Moons & Satellites</strong>
+    <p>Saturn hosts a diverse system of over 100 moons. Visible in this simulation:</p>
+    <ul class="moon-list">
+      <li>Mimas</li>
+      <li>Enceladus</li>
+      <li>Tethys</li>
+      <li>Dione</li>
+      <li>Rhea</li>
+      <li>Titan</li>
+      <li>Iapetus</li>
+    </ul>
+  </div>
+
+  <div class="info-card">
+    <strong>Atmospheric Features</strong>
+    <p>Saturn displays faint atmospheric banding caused by high-speed winds exceeding 1,800 km/h, alongside a unique hexagonal jet stream surrounding its north pole.</p>
+  </div>
+
+  <div class="info-card">
+    <strong>Density</strong>
+    <p>Saturn is the least dense planet in the Solar System, with an average density lower than that of water.</p>
+  </div>
+</div>
+
+<div id="canvas-container"></div>
+
+<script>
+  // --- Scene Setup ---
+  const container = document.getElementById('canvas-container');
+  const scene = new THREE.Scene();
+  
+  const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 2500);
+  camera.position.set(0, 180, 440);
+
+  const renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setPixelRatio(window.devicePixelRatio);
+  container.appendChild(renderer.domElement);
+
+  const controls = new THREE.OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true;
+  controls.dampingFactor = 0.05;
+  controls.target.set(0, 0, 0);
+
+  // --- Lighting ---
+  const ambientLight = new THREE.AmbientLight(0x555555);
+  scene.add(ambientLight);
+
+  const sunLight = new THREE.PointLight(0xfffae6, 3.2, 2000);
+  scene.add(sunLight);
+
+  // --- Helper for Large Text Labels ---
+  function createTextLabel(text, colorStr = "#ffffff", fontSize = 48, scaleX = 48, scaleY = 12) {
+    const canvas = document.createElement('canvas');
+    canvas.width = 512;
+    canvas.height = 128;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = colorStr;
+    ctx.font = `Bold ${fontSize}px Arial`;
+    ctx.fillText(text, 20, 80);
+
+    const texture = new THREE.CanvasTexture(canvas);
+    const spriteMat = new THREE.SpriteMaterial({ map: texture, transparent: true });
+    const sprite = new THREE.Sprite(spriteMat);
+    sprite.scale.set(scaleX, scaleY, 1);
+    return sprite;
+  }
+
+  // --- Twinkling Starfield ---
+  const starCount = 3500;
+  const starGeometry = new THREE.BufferGeometry();
+  const starPositions = new Float32Array(starCount * 3);
+
+  for (let i = 0; i < starCount; i++) {
+    starPositions[i * 3] = (Math.random() - 0.5) * 1800;
+    starPositions[i * 3 + 1] = (Math.random() - 0.5) * 1800;
+    starPositions[i * 3 + 2] = (Math.random() - 0.5) * 1800;
+  }
+
+  starGeometry.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
+  const starMaterial = new THREE.PointsMaterial({ color: 0xffffff, size: 1.6, transparent: true, opacity: 0.8 });
+  const starField = new THREE.Points(starGeometry, starMaterial);
+  scene.add(starField);
+
+  // --- Sun Core & Enhanced Pulsating Gold Glow ---
+  const sunGroup = new THREE.Group();
+  scene.add(sunGroup);
+
+  // 1. Fixed Circumference Golden Radial Glow Sprite
+  function createUniformGlowTexture() {
+    const canvas = document.createElement('canvas');
+    canvas.width = 512;
+    canvas.height = 512;
+    const ctx = canvas.getContext('2d');
+
+    const centerX = 256;
+    const centerY = 256;
+    const radius = 250;
+
+    const gradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, radius);
+    gradient.addColorStop(0.0, 'rgba(255, 223, 0, 1.0)');
+    gradient.addColorStop(0.4, 'rgba(255, 215, 0, 0.90)');
+    gradient.addColorStop(0.7, 'rgba(218, 165, 32, 0.60)');
+    gradient.addColorStop(0.9, 'rgba(255, 191, 0, 0.25)');
+    gradient.addColorStop(1.0, 'rgba(218, 165, 32, 0.0)');
+
+    ctx.fillStyle = gradient;
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+    ctx.fill();
+
+    return new THREE.CanvasTexture(canvas);
+  }
+
+  const glowTexture = createUniformGlowTexture();
+  const glowSpriteMaterial = new THREE.SpriteMaterial({
+    map: glowTexture,
+    color: 0xffd700,
+    transparent: true,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false
+  });
+  
+  const sunGlowSprite = new THREE.Sprite(glowSpriteMaterial);
+  sunGlowSprite.scale.set(140, 140, 1.0);
+  sunGroup.add(sunGlowSprite);
+
+  // 2. Larger Inner Sun Core Sphere (Radius 36)
+  const sunCoreMat = new THREE.MeshStandardMaterial({
+    color: 0xfffcf0,
+    emissive: 0xffd700,
+    emissiveIntensity: 0.5,
+    roughness: 0.2
+  });
+
+  const sunCore = new THREE.Mesh(
+    new THREE.SphereGeometry(36, 64, 64),
+    sunCoreMat
+  );
+  sunGroup.add(sunCore);
+
+  // Extra Large Sun Label
+  const sunLabel = createTextLabel("SUN", "#ffffff", 64, 60, 15);
+  sunLabel.position.set(0, 68, 0);
+  sunGroup.add(sunLabel);
+
+  // --- Saturn System Group ---
+  const saturnOrbitRadius = 180;
+  const saturnPivot = new THREE.Group();
+  scene.add(saturnPivot);
+
+  const saturnGroup = new THREE.Group();
+  saturnGroup.position.x = saturnOrbitRadius;
+  saturnPivot.add(saturnGroup);
+
+  // --- Saturn Body with Fine Surface Lines ---
+  const saturnGeo = new THREE.SphereGeometry(14, 64, 64);
+  const saturnMat = new THREE.MeshStandardMaterial({ color: 0xdfc088, roughness: 0.5 });
+  const saturn = new THREE.Mesh(saturnGeo, saturnMat);
+  saturnGroup.add(saturn);
+
+  // Extra Large Saturn Label
+  const saturnLabel = createTextLabel("SATURN", "#ffd700", 64, 64, 16);
+  saturnLabel.position.set(0, 26, 0);
+  saturnGroup.add(saturnLabel);
+
+  // Fine Surface Lines across Saturn
+  const lineCount = 18;
+  for (let i = 0; i < lineCount; i++) {
+    const latAngle = ((i / lineCount) - 0.5) * Math.PI * 0.85;
+    const radiusAtLat = 14.05 * Math.cos(latAngle);
+    const yPos = 14.05 * Math.sin(latAngle);
+
+    const lineGeo = new THREE.BufferGeometry();
+    const points = [];
+    for (let j = 0; j <= 64; j++) {
+      const theta = (j / 64) * Math.PI * 2;
+      points.push(new THREE.Vector3(radiusAtLat * Math.cos(theta), yPos, radiusAtLat * Math.sin(theta)));
+    }
+    lineGeo.setFromPoints(points);
+
+    const lineColor = (i % 2 === 0) ? 0x9e7b4f : 0xffebd0;
+    const lineMat = new THREE.LineBasicMaterial({ color: lineColor, transparent: true, opacity: 0.45 });
+    const bandLine = new THREE.Line(lineGeo, lineMat);
+    saturn.add(bandLine);
+  }
+
+  saturnGroup.rotation.z = 0.4;
+
+  // --- Multi-Colored Concentric Rings & Outlines ---
+  const ringLayers = [
+    { inner: 17, outer: 21, color: 0xe07a5f, opacity: 0.85 },
+    { inner: 21.5, outer: 27, color: 0x3d5a80, opacity: 0.90 },
+    { inner: 27.5, outer: 32, color: 0xf4a261, opacity: 0.85 },
+    { inner: 32.5, outer: 37, color: 0x9b5de5, opacity: 0.80 },
+    { inner: 37.5, outer: 40, color: 0x00f5d4, opacity: 0.75 }
+  ];
+
+  ringLayers.forEach(layer => {
+    const rGeo = new THREE.RingGeometry(layer.inner, layer.outer, 128);
+    const rMat = new THREE.MeshStandardMaterial({
+      color: layer.color,
+      side: THREE.DoubleSide,
+      transparent: true,
+      opacity: layer.opacity,
+      roughness: 0.3
+    });
+    const rMesh = new THREE.Mesh(rGeo, rMat);
+    rMesh.rotation.x = Math.PI / 2;
+    saturnGroup.add(rMesh);
+
+    [layer.inner, layer.outer].forEach(radius => {
+      const outlineGeo = new THREE.BufferGeometry();
+      const pts = [];
+      for (let k = 0; k <= 128; k++) {
+        const theta = (k / 128) * Math.PI * 2;
+        pts.push(new THREE.Vector3(radius * Math.cos(theta), radius * Math.sin(theta), 0));
+      }
+      outlineGeo.setFromPoints(pts);
+      const outlineMat = new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.6 });
+      const outline = new THREE.Line(outlineGeo, outlineMat);
+      outline.rotation.x = Math.PI / 2;
+      saturnGroup.add(outline);
+    });
+  });
+
+  // --- Moons ---
+  const moonsData = [
+    { name: "Mimas", distance: 48, size: 1.8, color: 0xdddddd, speed: 0.025 },
+    { name: "Enceladus", distance: 56, size: 2.2, color: 0xffffff, speed: 0.020 },
+    { name: "Tethys", distance: 65, size: 2.5, color: 0xd0d0d0, speed: 0.016 },
+    { name: "Dione", distance: 76, size: 2.8, color: 0xc8c8c8, speed: 0.013 },
+    { name: "Rhea", distance: 88, size: 3.3, color: 0xb5b5b5, speed: 0.010 },
+    { name: "Titan", distance: 105, size: 5.0, color: 0xffb703, speed: 0.007 },
+    { name: "Iapetus", distance: 125, size: 3.0, color: 0x8d99ae, speed: 0.004 }
+  ];
+
+  const moons = [];
+  moonsData.forEach(data => {
+    const moonGroup = new THREE.Group();
+    saturnGroup.add(moonGroup);
+
+    const mesh = new THREE.Mesh(
+      new THREE.SphereGeometry(data.size, 32, 32),
+      new THREE.MeshStandardMaterial({ color: data.color, roughness: 0.6 })
+    );
+    mesh.position.x = data.distance;
+    moonGroup.add(mesh);
+
+    const label = createTextLabel(data.name, "#ffffff", 36, 32, 8);
+    label.position.set(data.distance, data.size + 4, 0);
+    moonGroup.add(label);
+
+    const pathGeo = new THREE.RingGeometry(data.distance - 0.2, data.distance + 0.2, 128);
+    const pathMat = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide, transparent: true, opacity: 0.12 });
+    const path = new THREE.Mesh(pathGeo, pathMat);
+    path.rotation.x = Math.PI / 2;
+    saturnGroup.add(path);
+
+    moons.push({ group: moonGroup, speed: data.speed, angle: Math.random() * Math.PI * 2 });
+  });
+
+  // --- Sun Orbit Line ---
+  const sunOrbitPath = new THREE.Mesh(
+    new THREE.RingGeometry(saturnOrbitRadius - 0.4, saturnOrbitRadius + 0.4, 256),
+    new THREE.MeshBasicMaterial({ color: 0xffd700, side: THREE.DoubleSide, transparent: true, opacity: 0.2 })
+  );
+  sunOrbitPath.rotation.x = Math.PI / 2;
+  scene.add(sunOrbitPath);
+
+  // --- Asteroids Labeled "ASTEROID" ---
+  const asteroidGroup = new THREE.Group();
+  scene.add(asteroidGroup);
+  const asteroids = [];
+
+  const asteroidPositions = [
+    { x: -140, y: 30, z: 120, vx: 0.2, vy: -0.05, vz: 0.15 },
+    { x: 180, y: -40, z: -160, vx: -0.25, vy: 0.08, vz: -0.1 },
+    { x: -220, y: 50, z: -80, vx: 0.18, vy: -0.03, vz: 0.22 }
+  ];
+
+  asteroidPositions.forEach(posData => {
+    const radius = 5.0;
+    const geo = new THREE.DodecahedronGeometry(radius, 1);
+    
+    const pos = geo.attributes.position;
+    for (let k = 0; k < pos.count; k++) {
+      const v = new THREE.Vector3().fromBufferAttribute(pos, k);
+      v.multiplyScalar(0.85 + Math.random() * 0.3);
+      pos.setXYZ(k, v.x, v.y, v.z);
+    }
+    geo.computeVertexNormals();
+
+    const mat = new THREE.MeshStandardMaterial({ color: 0x9a8878, roughness: 0.95 });
+    const mesh = new THREE.Mesh(geo, mat);
+
+    const astLabel = createTextLabel("ASTEROID", "#ffcc00", 36, 32, 8);
+    astLabel.position.set(0, radius + 4, 0);
+    mesh.add(astLabel);
+
+    mesh.position.set(posData.x, posData.y, posData.z);
+    asteroidGroup.add(mesh);
+
+    asteroids.push({
+      mesh,
+      velocity: new THREE.Vector3(posData.vx, posData.vy, posData.vz)
+    });
+  });
+
+  // --- Dynamic Comet with Label ---
+  const comet = new THREE.Mesh(
+    new THREE.SphereGeometry(2, 16, 16),
+    new THREE.MeshBasicMaterial({ color: 0x99ffff })
+  );
+  
+  const cometTail = new THREE.Mesh(
+    new THREE.ConeGeometry(1.5, 25, 16),
+    new THREE.MeshBasicMaterial({ color: 0x00e5ff, transparent: true, opacity: 0.45 })
+  );
+  cometTail.rotation.x = -Math.PI / 2;
+  cometTail.position.z = -12.5;
+  comet.add(cometTail);
+
+  // Comet Label Attachment
+  const cometLabel = createTextLabel("COMET", "#00e5ff", 36, 32, 8);
+  cometLabel.position.set(0, 6, 0);
+  comet.add(cometLabel);
+
+  scene.add(comet);
+
+  function resetComet() {
+    comet.position.set(-400, (Math.random() - 0.5) * 150, (Math.random() - 0.5) * 300);
+  }
+  resetComet();
+
+  // --- Animation Loop ---
+  let time = 0;
+
+  function animate() {
+    requestAnimationFrame(animate);
+
+    time += 0.0025;
+
+    // Gentle Pulsating Gold Glow
+    const pulseFactor = 1 + Math.sin(time * 3) * 0.05;
+    sunGlowSprite.scale.set(140 * pulseFactor, 140 * pulseFactor, 1.0);
+    glowSpriteMaterial.opacity = 0.90 + Math.sin(time * 3) * 0.10;
+
+    // Sync inner sun core emissive warmth
+    sunCoreMat.emissiveIntensity = 0.5 + Math.sin(time * 3) * 0.1;
+
+    // Counter-clockwise Orbit around Sun
+    saturnPivot.rotation.y = time;
+
+    // Saturn Self-Rotation
+    saturn.rotation.y += 0.008;
+
+    // Moons Movement
+    moons.forEach(m => {
+      m.angle += m.speed;
+      m.group.rotation.y = m.angle;
+    });
+
+    // Move Asteroids
+    asteroids.forEach(a => {
+      a.mesh.position.add(a.velocity);
+      a.mesh.rotation.x += 0.008;
+      a.mesh.rotation.y += 0.012;
+
+      if (Math.abs(a.mesh.position.x) > 380) a.mesh.position.x *= -1;
+      if (Math.abs(a.mesh.position.z) > 380) a.mesh.position.z *= -1;
+    });
+
+    // Comet Movement
+    comet.position.x += 1.6;
+    comet.position.z += 0.5;
+    comet.lookAt(comet.position.clone().add(new THREE.Vector3(1.6, 0, 0.5)));
+
+    if (comet.position.x > 400) {
+      resetComet();
+    }
+
+    // Twinkling Starfield
+    starMaterial.opacity = 0.65 + Math.sin(time * 6) * 0.25;
+
+    controls.update();
+    renderer.render(scene, camera);
+  }
+
+  animate();
+
+  // --- Window Resize ---
+  window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  });
+</script>
+</body>
+</html>

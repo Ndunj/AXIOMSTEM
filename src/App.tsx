@@ -135,16 +135,25 @@ export default function App() {
     }
   }, [standards]);
 
-  // Creator's Uploaded Simulations Repository (guarantees all STEM apps including Quantum EM Spectrum, Wheel & Axle, Bridge Circuits, Quadratic Graph, 3D IUPAC Chemistry, 3D Conic Calculus, Land & Sea Breeze, Electric Circuits, and Micrometer Screw Gauge are always loaded)
+  // Creator's Uploaded Simulations Repository (guarantees all STEM simulations are accurately loaded)
   const [customSimulations, setCustomSimulations] = useState<SimulationItem[]>(() => {
     try {
-      const saved = localStorage.getItem("axiom_custom_simulations_v13");
+      // Clear legacy cache keys that may contain outdated simulation catalogs
+      localStorage.removeItem("axiom_custom_simulations_v15");
+      localStorage.removeItem("axiom_custom_simulations_v14");
+      localStorage.removeItem("axiom_custom_simulations_v13");
+      localStorage.removeItem("axiom_custom_simulations_v12");
+      localStorage.removeItem("axiom_custom_simulations_v11");
+      
+      const saved = localStorage.getItem("axiom_custom_simulations_v16");
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          // Keep user-added custom creations, and ensure all STEM_SIMULATIONS are present
+          // Keep only truly custom user-created items (not default simulations)
           const customUserAdded = parsed.filter(
-            (p: SimulationItem) => !STEM_SIMULATIONS.some((stem) => stem.id === p.id)
+            (p: SimulationItem) =>
+              (p.id.startsWith("app-sim-") || p.id.startsWith("custom-")) &&
+              !STEM_SIMULATIONS.some((stem) => stem.id === p.id)
           );
           return [...STEM_SIMULATIONS, ...customUserAdded];
         }
@@ -158,7 +167,7 @@ export default function App() {
   // Save simulations to localStorage
   useEffect(() => {
     try {
-      localStorage.setItem("axiom_custom_simulations_v13", JSON.stringify(customSimulations));
+      localStorage.setItem("axiom_custom_simulations_v16", JSON.stringify(customSimulations));
       localStorage.setItem("axiom_custom_simulations", JSON.stringify(customSimulations));
     } catch (e) {
       console.error("Failed to persist simulations:", e);
@@ -236,6 +245,13 @@ export default function App() {
       if (map[sim.discipline] !== undefined) {
         map[sim.discipline]++;
       }
+      if (sim.secondaryDisciplines && Array.isArray(sim.secondaryDisciplines)) {
+        sim.secondaryDisciplines.forEach((sd) => {
+          if (map[sd] !== undefined && sd !== sim.discipline) {
+            map[sd]++;
+          }
+        });
+      }
     });
     return map;
   }, [customSimulations]);
@@ -245,8 +261,12 @@ export default function App() {
     return customSimulations
       .filter((sim) => {
         // Discipline match
-        if (selectedDiscipline !== "all" && sim.discipline !== selectedDiscipline) {
-          return false;
+        if (selectedDiscipline !== "all") {
+          const matchesPrimary = sim.discipline === selectedDiscipline;
+          const matchesSecondary = sim.secondaryDisciplines?.includes(selectedDiscipline);
+          if (!matchesPrimary && !matchesSecondary) {
+            return false;
+          }
         }
         // Grade level match
         if (selectedGrade !== "all") {

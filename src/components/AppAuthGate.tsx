@@ -104,14 +104,24 @@ export const AppAuthGate: React.FC<AppAuthGateProps> = ({ onAuthSuccess }) => {
       {/* Top Brand Nav */}
       <header className="border-b border-slate-800/80 bg-slate-950/80 backdrop-blur-xl px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-sky-500 via-indigo-600 to-emerald-400 p-0.5 shadow-lg shadow-indigo-500/20">
-            <div className="w-full h-full bg-slate-950 rounded-[14px] flex items-center justify-center">
-              <Atom className="w-5 h-5 text-sky-400 animate-spin-slow" />
+          <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-sky-500 via-indigo-600 to-emerald-400 p-0.5 shadow-lg shadow-indigo-500/20 overflow-hidden shrink-0">
+            <div className="w-full h-full bg-slate-950 rounded-[14px] flex items-center justify-center overflow-hidden">
+              <img
+                src="/axiom-stem-logo.png"
+                alt="AXIOM STEM Logo"
+                referrerPolicy="no-referrer"
+                className="w-full h-full object-contain p-0.5"
+                onError={(e) => {
+                  (e.currentTarget as HTMLElement).style.display = "none";
+                }}
+              />
             </div>
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-base font-black tracking-tight text-white">AXIOM STEM</span>
+              <span className="text-base font-black tracking-tight text-white font-mono">
+                AXIOM<span className="text-sky-400">STEM</span>
+              </span>
               <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
                 PORTAL
               </span>

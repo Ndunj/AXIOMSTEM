@@ -1,0 +1,1437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Comprehensive Chemistry Workbench</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --bg-dark: #0f172a;
+      --panel-bg: #1e293b;
+      --card-bg: #334155;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent-green: #10b981;
+      --accent-orange: #f59e0b;
+      --accent-red: #ef4444;
+      --border: #475569;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    header h1 {
+      font-size: 2rem;
+      color: #60a5fa;
+      margin-bottom: 5px;
+    }
+
+    header p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    .nav-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 20px;
+      background: var(--panel-bg);
+      padding: 6px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      justify-content: center;
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 8px 16px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .tab-btn.active {
+      background: var(--primary);
+      color: white;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    }
+
+    .tab-btn:hover:not(.active) {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .main-container {
+      width: 100%;
+      max-width: 1100px;
+      background: var(--panel-bg);
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      padding: 24px;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+    }
+
+    .view-panel {
+      display: none;
+    }
+
+    .view-panel.active {
+      display: block;
+    }
+
+    /* --- Element Explorer --- */
+    .element-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(95px, 1fr));
+      gap: 10px;
+      margin-bottom: 24px;
+      max-height: 280px;
+      overflow-y: auto;
+      padding-right: 5px;
+    }
+
+    .element-card {
+      background: var(--card-bg);
+      border: 2px solid transparent;
+      border-radius: 10px;
+      padding: 8px 6px;
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.15s ease, border-color 0.15s ease;
+      position: relative;
+    }
+
+    .element-card:hover {
+      transform: translateY(-3px);
+      border-color: #60a5fa;
+    }
+
+    .element-card.selected {
+      border-color: var(--accent-green);
+      background: #1e3a8a;
+    }
+
+    .element-card .num {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      position: absolute;
+      top: 4px;
+      left: 6px;
+    }
+
+    .element-card .symbol {
+      font-size: 1.3rem;
+      font-weight: bold;
+      margin-top: 4px;
+    }
+
+    .element-card .name {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .element-card .sub-config {
+      font-size: 0.65rem;
+      color: #38bdf8;
+      margin-top: 2px;
+      font-family: monospace;
+    }
+
+    .details-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      background: var(--card-bg);
+      padding: 20px;
+      border-radius: 12px;
+    }
+
+    @media (max-width: 768px) {
+      .details-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .info-box h2 {
+      font-size: 1.5rem;
+      color: #60a5fa;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .info-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .info-list li {
+      display: flex;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 4px;
+      font-size: 0.95rem;
+    }
+
+    .bohr-canvas-container {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background: #020617;
+      border-radius: 12px;
+      padding: 10px;
+    }
+
+    /* --- Subscript / Superscript formatting --- */
+    .subscript { vertical-align: sub; font-size: 0.75em; }
+    .superscript { vertical-align: super; font-size: 0.75em; }
+
+    /* --- Polyatomic Ions Module --- */
+    .poly-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    @media (max-width: 768px) {
+      .poly-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .poly-card {
+      background: var(--card-bg);
+      padding: 18px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+    }
+
+    .poly-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 8px;
+    }
+
+    .poly-name {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #60a5fa;
+    }
+
+    .poly-formula {
+      font-size: 1.3rem;
+      font-weight: bold;
+      color: var(--accent-orange);
+    }
+
+    .poly-desc {
+      font-size: 0.9rem;
+      line-height: 1.4;
+      color: var(--text-main);
+      margin-bottom: 10px;
+    }
+
+    .poly-badge {
+      display: inline-block;
+      font-size: 0.8rem;
+      padding: 2px 8px;
+      border-radius: 4px;
+      background: rgba(16, 185, 129, 0.2);
+      color: #6ee7b7;
+      border: 1px solid var(--accent-green);
+    }
+
+    /* --- Valency vs Oxidation Module --- */
+    .ox-selector {
+      margin-bottom: 20px;
+    }
+
+    .ox-selector select {
+      width: 100%;
+      padding: 12px;
+      background: var(--card-bg);
+      color: var(--text-main);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 1rem;
+      outline: none;
+    }
+
+    .ox-comparison {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    @media (max-width: 600px) {
+      .ox-comparison {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .ox-box {
+      background: var(--card-bg);
+      padding: 20px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      text-align: center;
+    }
+
+    .ox-box h3 {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+    }
+
+    .ox-value {
+      font-size: 2.5rem;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .ox-valency { color: var(--accent-orange); }
+    .ox-state { color: #38bdf8; }
+
+    .ox-explanation {
+      margin-top: 20px;
+      background: rgba(0, 0, 0, 0.2);
+      padding: 16px;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+
+    /* --- Equation Balancer --- */
+    .reaction-selector {
+      margin-bottom: 24px;
+    }
+
+    .reaction-selector select {
+      width: 100%;
+      padding: 12px;
+      background: var(--card-bg);
+      color: var(--text-main);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 1rem;
+      outline: none;
+    }
+
+    .equation-workspace {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      background: var(--card-bg);
+      padding: 24px;
+      border-radius: 12px;
+      margin-bottom: 24px;
+    }
+
+    .species-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(0, 0, 0, 0.2);
+      padding: 8px 12px;
+      border-radius: 10px;
+    }
+
+    .coeff-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .coeff-btn {
+      background: var(--primary);
+      border: none;
+      color: white;
+      width: 24px;
+      height: 24px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+      line-height: 1;
+    }
+
+    .coeff-btn:hover {
+      background: var(--primary-hover);
+    }
+
+    .coeff-val {
+      font-size: 1.4rem;
+      font-weight: bold;
+      color: var(--accent-orange);
+      min-width: 20px;
+      text-align: center;
+    }
+
+    .species-formula {
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+
+    .arrow {
+      font-size: 1.8rem;
+      color: #38bdf8;
+      margin: 0 10px;
+    }
+
+    .balance-status {
+      padding: 12px;
+      border-radius: 8px;
+      text-align: center;
+      font-weight: bold;
+      font-size: 1.1rem;
+      margin-bottom: 20px;
+    }
+
+    .status-unbalanced {
+      background: rgba(239, 68, 68, 0.2);
+      color: #fca5a5;
+      border: 1px solid var(--accent-red);
+    }
+
+    .status-balanced {
+      background: rgba(16, 185, 129, 0.2);
+      color: #6ee7b7;
+      border: 1px solid var(--accent-green);
+    }
+
+    .atom-tally {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .tally-box {
+      background: rgba(0, 0, 0, 0.3);
+      padding: 16px;
+      border-radius: 10px;
+    }
+
+    .tally-box h4 {
+      margin-bottom: 8px;
+      color: #60a5fa;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 4px;
+    }
+
+    .tally-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.95rem;
+      padding: 4px 0;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Comprehensive Chemistry Workbench</h1>
+    <p>Orbital Configurations, Variable Valencies, Polyatomic Ions & IUPAC Nomenclature</p>
+  </header>
+
+  <div class="nav-tabs">
+    <button class="tab-btn active" onclick="switchTab('explorer')">Element Explorer</button>
+    <button class="tab-btn" onclick="switchTab('builder')">Compound Builder</button>
+    <button class="tab-btn" onclick="switchTab('polyatomic')">Polyatomic Ions</button>
+    <button class="tab-btn" onclick="switchTab('oxidation')">Valency vs. Oxidation</button>
+    <button class="tab-btn" onclick="switchTab('balancer')">Equation Balancer</button>
+  </div>
+
+  <div class="main-container">
+
+    <!-- TAB 1: ELEMENT EXPLORER -->
+    <div id="explorer" class="view-panel active">
+      <div class="element-grid" id="elementGrid"></div>
+      
+      <div class="details-layout">
+        <div class="info-box">
+          <h2 id="elemTitle">Element Name</h2>
+          <ul class="info-list">
+            <li><span>Atomic Number (Z):</span> <strong id="elemZ">-</strong></li>
+            <li><span>Symbol:</span> <strong id="elemSymbol">-</strong></li>
+            <li><span>Group / Period:</span> <strong id="elemGroupPeriod">-</strong></li>
+            <li><span>K, L, M, N Shells:</span> <strong id="elemConfig">-</strong></li>
+            <li><span>spdf Configuration:</span> <strong id="elemSpdfConfig" style="font-family:monospace; color:#38bdf8;">-</strong></li>
+            <li><span>Valence Electrons:</span> <strong id="elemValElectrons">-</strong></li>
+            <li><span>Primary / Common Valency:</span> <strong id="elemValency">-</strong></li>
+            <li><span>Common Ion(s):</span> <strong id="elemIon">-</strong></li>
+          </ul>
+        </div>
+        <div class="bohr-canvas-container">
+          <canvas id="bohrCanvas" width="340" height="340"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: COMPOUND BUILDER -->
+    <div id="builder" class="view-panel space-y-6">
+      
+      <!-- Section 1: Ion Selection -->
+      <section class="bg-slate-800/80 rounded-xl border border-slate-700 p-6 shadow-xl">
+        <h2 class="text-xl font-semibold mb-4 text-slate-200 border-b border-slate-700 pb-2">
+          1. Select Reactants
+        </h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          
+          <!-- Cation Dropdown -->
+          <div>
+            <label for="cationSelect" class="block text-sm font-medium text-slate-300 mb-2">
+              Cation / Metal / Polyatomic (+):
+            </label>
+            <select id="cationSelect" class="w-full bg-slate-900 border border-slate-600 text-slate-100 text-sm rounded-lg p-3 focus:ring-2 focus:ring-teal-500 focus:outline-none">
+              <option value="" disabled selected>-- Select Cation --</option>
+            </select>
+            <div id="cationInfo" class="mt-3 text-xs text-slate-400 bg-slate-900/50 p-3 rounded border border-slate-700/50 min-h-[60px]">
+              Select a cation to view its valency and electron configuration.
+            </div>
+          </div>
+
+          <!-- Anion Dropdown -->
+          <div>
+            <label for="anionSelect" class="block text-sm font-medium text-slate-300 mb-2">
+              Anion / Non-Metal / Polyatomic (-):
+            </label>
+            <select id="anionSelect" class="w-full bg-slate-900 border border-slate-600 text-slate-100 text-sm rounded-lg p-3 focus:ring-2 focus:ring-teal-500 focus:outline-none">
+              <option value="" disabled selected>-- Select Anion --</option>
+            </select>
+            <div id="anionInfo" class="mt-3 text-xs text-slate-400 bg-slate-900/50 p-3 rounded border border-slate-700/50 min-h-[60px]">
+              Select an anion to view its valency and electron configuration.
+            </div>
+          </div>
+
+        </div>
+
+        <button id="buildBtn" class="mt-6 w-full bg-teal-600 hover:bg-teal-500 text-white font-bold py-3 px-4 rounded-lg transition duration-200 shadow-md flex justify-center items-center gap-2">
+          Synthesize Compound
+        </button>
+      </section>
+
+      <!-- Section 2: Synthesis Results -->
+      <section id="resultCard" class="hidden bg-slate-800/80 rounded-xl border border-slate-700 p-6 shadow-xl space-y-6">
+        
+        <h2 class="text-xl font-semibold text-slate-200 border-b border-slate-700 pb-2">
+          2. Synthesis & Criss-Cross Step
+        </h2>
+
+        <!-- Real-World Feasibility Flag Banner -->
+        <div id="feasibilityBanner" class="p-4 rounded-lg border text-sm flex flex-col gap-1"></div>
+
+        <!-- Visualization Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+          
+          <!-- Cation Box -->
+          <div class="bg-slate-900/80 p-4 rounded-lg border border-slate-700">
+            <span class="text-xs text-slate-400 block mb-1">Cation Valency</span>
+            <div id="resCationSymbol" class="text-3xl font-bold text-teal-400 mb-1">-</div>
+            <div id="resCationValency" class="text-lg font-semibold text-teal-200">0</div>
+          </div>
+
+          <!-- Criss Cross Symbol -->
+          <div class="flex flex-col justify-center items-center bg-slate-900/30 p-4 rounded-lg border border-dashed border-slate-700">
+            <span class="text-xs text-slate-400 mb-1">Criss-Cross Ratio</span>
+            <div id="resRatio" class="text-lg font-mono text-amber-400 font-bold">- : -</div>
+            <span class="text-xs text-slate-500 mt-1">(Simplified Valency Ratio)</span>
+          </div>
+
+          <!-- Anion Box -->
+          <div class="bg-slate-900/80 p-4 rounded-lg border border-slate-700">
+            <span class="text-xs text-slate-400 block mb-1">Anion Valency</span>
+            <div id="resAnionSymbol" class="text-3xl font-bold text-teal-400 mb-1">-</div>
+            <div id="resAnionValency" class="text-lg font-semibold text-teal-200">0</div>
+          </div>
+
+        </div>
+
+        <!-- Chemical Formula Output -->
+        <div class="bg-slate-900 p-6 rounded-lg border border-teal-500/30 text-center">
+          <span class="text-xs uppercase tracking-wider text-teal-400 font-semibold block mb-2">Synthesized Compound</span>
+          <div id="formulaDisplay" class="text-4xl font-extrabold text-white tracking-wide"></div>
+          <div id="nameDisplay" class="text-lg text-slate-300 font-medium mt-2"></div>
+        </div>
+
+      </section>
+
+    </div>
+
+    <!-- TAB 3: POLYATOMIC IONS EXPLORER -->
+    <div id="polyatomic" class="view-panel">
+      <div class="poly-grid">
+        <div class="poly-card">
+          <div class="poly-header">
+            <span class="poly-name">Hydroxide Ion</span>
+            <span class="poly-formula">OH⁻</span>
+          </div>
+          <p class="poly-desc">Oxygen shares a single covalent bond with Hydrogen. The group accepts 1 additional electron from a metal donor to complete Oxygen's outer octet.</p>
+          <span class="poly-badge">Net Charge: -1 | Valency: 1</span>
+        </div>
+
+        <div class="poly-card">
+          <div class="poly-header">
+            <span class="poly-name">Trioxonitrate (V) Ion</span>
+            <span class="poly-formula">NO₃⁻</span>
+          </div>
+          <p class="poly-desc">Central Nitrogen atom covalently bonded to three Oxygen atoms. The entire molecular framework gains 1 electron, delocalised via resonance across oxygen bonds.</p>
+          <span class="poly-badge">Net Charge: -1 | Valency: 1</span>
+        </div>
+
+        <div class="poly-card">
+          <div class="poly-header">
+            <span class="poly-name">Tetraoxosulphate (VI) Ion</span>
+            <span class="poly-formula">SO₄²⁻</span>
+          </div>
+          <p class="poly-desc">Central Sulphur atom shares electrons with four Oxygen atoms. The cluster accepts 2 extra electrons to satisfy all outer octets, resulting in a stable doubly-charged anion.</p>
+          <span class="poly-badge">Net Charge: -2 | Valency: 2</span>
+        </div>
+
+        <div class="poly-card">
+          <div class="poly-header">
+            <span class="poly-name">Trioxocarbonate (IV) Ion</span>
+            <span class="poly-formula">CO₃²⁻</span>
+          </div>
+          <p class="poly-desc">Carbon bonded to three Oxygen atoms in a trigonal planar arrangement. Captures 2 extra electrons to stabilise formal charges across oxygen atoms.</p>
+          <span class="poly-badge">Net Charge: -2 | Valency: 2</span>
+        </div>
+
+        <div class="poly-card">
+          <div class="poly-header">
+            <span class="poly-name">Ammonium Ion</span>
+            <span class="poly-formula">NH₄⁺</span>
+          </div>
+          <p class="poly-desc">Nitrogen shares its lone pair with an incoming H⁺ proton (dative covalent bond). The entire molecule loses 1 electron relative to total protons, creating a polyatomic cation.</p>
+          <span class="poly-badge">Net Charge: +1 | Valency: 1</span>
+        </div>
+
+        <div class="poly-card">
+          <div class="poly-header">
+            <span class="poly-name">Tetraoxophosphate (V) Ion</span>
+            <span class="poly-formula">PO₄³⁻</span>
+          </div>
+          <p class="poly-desc">Central Phosphorus atom surrounded by four Oxygen atoms. The polyatomic cluster accepts 3 electrons to complete oxygen octets.</p>
+          <span class="poly-badge">Net Charge: -3 | Valency: 3</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 4: VALENCY VS OXIDATION STATE -->
+    <div id="oxidation" class="view-panel">
+      <div class="ox-selector">
+        <label for="moleculeSelect" style="display:block; margin-bottom:8px; color:var(--text-muted);">Select Target Species & Central Atom:</label>
+        <select id="moleculeSelect" onchange="updateOxidationView()"></select>
+      </div>
+
+      <div class="ox-comparison">
+        <div class="ox-box">
+          <h3>Structural Valency</h3>
+          <div class="ox-value ox-valency" id="oxValencyVal">-</div>
+          <p style="font-size:0.85rem; color:var(--text-muted);">Number of chemical bonds formed (Combining capacity)</p>
+        </div>
+        <div class="ox-box">
+          <h3>Oxidation State</h3>
+          <div class="ox-value ox-state" id="oxStateVal">-</div>
+          <p style="font-size:0.85rem; color:var(--text-muted);">Hypothetical charge if all bonds were 100% ionic</p>
+        </div>
+      </div>
+
+      <div class="ox-explanation" id="oxExplanationText"></div>
+    </div>
+
+    <!-- TAB 5: EQUATION BALANCER -->
+    <div id="balancer" class="view-panel">
+      <div class="reaction-selector">
+        <label for="reactionSelect" style="display:block; margin-bottom:8px; color:var(--text-muted);">Select Reaction Scheme to Balance:</label>
+        <select id="reactionSelect" onchange="loadReaction()"></select>
+      </div>
+
+      <div class="equation-workspace" id="equationWorkspace"></div>
+
+      <div id="balanceStatus" class="balance-status status-unbalanced">
+        Equation Unbalanced
+      </div>
+
+      <div class="atom-tally">
+        <div class="tally-box">
+          <h4>Reactant Atoms</h4>
+          <div id="reactantTally"></div>
+        </div>
+        <div class="tally-box">
+          <h4>Product Atoms</h4>
+          <div id="productTally"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // --- DATABASE: Elements ---
+    const elements = [
+      { z: 1, symbol: "H", name: "Hydrogen", group: 1, period: 1, shells: [1], spdf: "1s¹", valence: 1, valency: 1, ion: "H⁺ / H⁻", metal: false, fixedValency: true, possibleValencies: [1] },
+      { z: 2, symbol: "He", name: "Helium", group: 18, period: 1, shells: [2], spdf: "1s²", valence: 2, valency: 0, ion: "None", metal: false, fixedValency: true, possibleValencies: [0] },
+      { z: 3, symbol: "Li", name: "Lithium", group: 1, period: 2, shells: [2, 1], spdf: "1s² 2s¹", valence: 1, valency: 1, ion: "Li⁺", metal: true, fixedValency: true, possibleValencies: [1] },
+      { z: 4, symbol: "Be", name: "Beryllium", group: 2, period: 2, shells: [2, 2], spdf: "1s² 2s²", valence: 2, valency: 2, ion: "Be²⁺", metal: true, fixedValency: true, possibleValencies: [2] },
+      { z: 5, symbol: "B", name: "Boron", group: 13, period: 2, shells: [2, 3], spdf: "1s² 2s² 2p¹", valence: 3, valency: 3, ion: "B³⁺", metal: false, fixedValency: true, possibleValencies: [3] },
+      { z: 6, symbol: "C", name: "Carbon", group: 14, period: 2, shells: [2, 4], spdf: "1s² 2s² 2p²", valence: 4, valency: 4, ion: "C⁴⁻ / C⁴⁺", metal: false, fixedValency: false, possibleValencies: [2, 4] },
+      { z: 7, symbol: "N", name: "Nitrogen", group: 15, period: 2, shells: [2, 5], spdf: "1s² 2s² 2p³", valence: 5, valency: 3, ion: "N³⁻", metal: false, fixedValency: false, possibleValencies: [3] },
+      { z: 8, symbol: "O", name: "Oxygen", group: 16, period: 2, shells: [2, 6], spdf: "1s² 2s² 2p⁴", valence: 6, valency: 2, ion: "O²⁻", metal: false, fixedValency: true, possibleValencies: [2] },
+      { z: 9, symbol: "F", name: "Fluorine", group: 17, period: 2, shells: [2, 7], spdf: "1s² 2s² 2p⁵", valence: 7, valency: 1, ion: "F⁻", metal: false, fixedValency: true, possibleValencies: [1] },
+      { z: 10, symbol: "Ne", name: "Neon", group: 18, period: 2, shells: [2, 8], spdf: "1s² 2s² 2p⁶", valence: 8, valency: 0, ion: "None", metal: false, fixedValency: true, possibleValencies: [0] },
+      { z: 11, symbol: "Na", name: "Sodium", group: 1, period: 3, shells: [2, 8, 1], spdf: "1s² 2s² 2p⁶ 3s¹", valence: 1, valency: 1, ion: "Na⁺", metal: true, fixedValency: true, possibleValencies: [1] },
+      { z: 12, symbol: "Mg", name: "Magnesium", group: 2, period: 3, shells: [2, 8, 2], spdf: "1s² 2s² 2p⁶ 3s²", valence: 2, valency: 2, ion: "Mg²⁺", metal: true, fixedValency: true, possibleValencies: [2] },
+      { z: 13, symbol: "Al", name: "Aluminium", group: 13, period: 3, shells: [2, 8, 3], spdf: "1s² 2s² 2p⁶ 3s² 3p¹", valence: 3, valency: 3, ion: "Al³⁺", metal: true, fixedValency: true, possibleValencies: [3] },
+      { z: 14, symbol: "Si", name: "Silicon", group: 14, period: 3, shells: [2, 8, 4], spdf: "1s² 2s² 2p⁶ 3s² 3p⁴", valence: 4, valency: 4, ion: "Si⁴⁻", metal: false, fixedValency: false, possibleValencies: [4] },
+      { z: 15, symbol: "P", name: "Phosphorus", group: 15, period: 3, shells: [2, 8, 5], spdf: "1s² 2s² 2p⁶ 3s² 3p³", valence: 5, valency: 3, ion: "P³⁻", metal: false, fixedValency: false, possibleValencies: [3, 5] },
+      { z: 16, symbol: "S", name: "Sulphur", group: 16, period: 3, shells: [2, 8, 6], spdf: "1s² 2s² 2p⁶ 3s² 3p⁴", valence: 6, valency: 2, ion: "S²⁻", metal: false, fixedValency: false, possibleValencies: [2, 4, 6] },
+      { z: 17, symbol: "Cl", name: "Chlorine", group: 17, period: 3, shells: [2, 8, 7], spdf: "1s² 2s² 2p⁶ 3s² 3p⁵", valence: 7, valency: 1, ion: "Cl⁻", metal: false, fixedValency: false, possibleValencies: [1] },
+      { z: 18, symbol: "Ar", name: "Argon", group: 18, period: 3, shells: [2, 8, 8], spdf: "1s² 2s² 2p⁶ 3s² 3p⁶", valence: 8, valency: 0, ion: "None", metal: false, fixedValency: true, possibleValencies: [0] },
+      { z: 19, symbol: "K", name: "Potassium", group: 1, period: 4, shells: [2, 8, 8, 1], spdf: "1s² 2s² 2p⁶ 3s² 3p⁶ 4s¹", valence: 1, valency: 1, ion: "K⁺", metal: true, fixedValency: true, possibleValencies: [1] },
+      { z: 20, symbol: "Ca", name: "Calcium", group: 2, period: 4, shells: [2, 8, 8, 2], spdf: "1s² 2s² 2p⁶ 3s² 3p⁶ 4s²", valence: 2, valency: 2, ion: "Ca²⁺", metal: true, fixedValency: true, possibleValencies: [2] },
+      
+      // Variable Valency Metals
+      { z: 26, symbol: "Fe", name: "Iron", group: 8, period: 4, shells: [2, 8, 14, 2], spdf: "[Ar] 3d⁶ 4s²", valence: 2, valency: 2, ion: "Fe²⁺ / Fe³⁺", metal: true, fixedValency: false, possibleValencies: [2, 3] },
+      { z: 29, symbol: "Cu", name: "Copper", group: 11, period: 4, shells: [2, 8, 18, 1], spdf: "[Ar] 3d¹⁰ 4s¹", valence: 1, valency: 2, ion: "Cu⁺ / Cu²⁺", metal: true, fixedValency: false, possibleValencies: [1, 2] },
+      { z: 50, symbol: "Sn", name: "Tin", group: 14, period: 5, shells: [2, 8, 18, 18, 4], spdf: "[Kr] 4d¹⁰ 5s² 5p²", valence: 4, valency: 4, ion: "Sn²⁺ / Sn⁴⁺", metal: true, fixedValency: false, possibleValencies: [2, 4] },
+      { z: 79, symbol: "Au", name: "Gold", group: 11, period: 6, shells: [2, 8, 18, 32, 18, 1], spdf: "[Xe] 4f¹⁴ 5d¹⁰ 6s¹", valence: 1, valency: 3, ion: "Au⁺ / Au³⁺", metal: true, fixedValency: false, possibleValencies: [1, 3] },
+      { z: 80, symbol: "Hg", name: "Mercury", group: 12, period: 6, shells: [2, 8, 18, 32, 18, 2], spdf: "[Xe] 4f¹⁴ 5d¹⁰ 6s²", valence: 2, valency: 2, ion: "Hg₂²⁺ / Hg²⁺", metal: true, fixedValency: false, possibleValencies: [1, 2] },
+      { z: 82, symbol: "Pb", name: "Lead", group: 14, period: 6, shells: [2, 8, 18, 32, 18, 4], spdf: "[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p²", valence: 4, valency: 2, ion: "Pb²⁺ / Pb⁴⁺", metal: true, fixedValency: false, possibleValencies: [2, 4] }
+    ];
+
+    // --- COMPOUND BUILDER SPECIFIC DATA ---
+    const cations = [
+      { id: "H", name: "Hydrogen", symbol: "H", formula: "H", valency: 1, subshell: "1s¹" },
+      { id: "Li", name: "Lithium", symbol: "Li", formula: "Li", valency: 1, subshell: "1s² 2s¹" },
+      { id: "Na", name: "Sodium", symbol: "Na", formula: "Na", valency: 1, subshell: "1s² 2s² 2p⁶ 3s¹" },
+      { id: "K", name: "Potassium", symbol: "K", formula: "K", valency: 1, subshell: "[Ar] 4s¹" },
+      { id: "Ag", name: "Silver", symbol: "Ag", formula: "Ag", valency: 1, subshell: "[Kr] 4d¹⁰ 5s¹" },
+      { id: "NH4", name: "Ammonium", symbol: "NH₄", formula: "NH4", valency: 1, isPolyatomic: true, subshell: "N/A (Polyatomic Ion)" },
+      { id: "Be", name: "Beryllium", symbol: "Be", formula: "Be", valency: 2, subshell: "1s² 2s²" },
+      { id: "Mg", name: "Magnesium", symbol: "Mg", formula: "Mg", valency: 2, subshell: "1s² 2s² 2p⁶ 3s²" },
+      { id: "Ca", name: "Calcium", symbol: "Ca", formula: "Ca", valency: 2, subshell: "[Ar] 4s²" },
+      { id: "Ba", name: "Barium", symbol: "Ba", formula: "Ba", valency: 2, subshell: "[Xe] 6s²" },
+      { id: "Zn", name: "Zinc", symbol: "Zn", formula: "Zn", valency: 2, subshell: "[Ar] 3d¹⁰ 4s²" },
+      { id: "Cu1", name: "Copper (I)", symbol: "Cu", formula: "Cu", valency: 1, subshell: "[Ar] 3d¹⁰ 4s¹" },
+      { id: "Cu2", name: "Copper (II)", symbol: "Cu", formula: "Cu", valency: 2, subshell: "[Ar] 3d⁹ 4s²" },
+      { id: "Fe2", name: "Iron (II)", symbol: "Fe", formula: "Fe", valency: 2, subshell: "[Ar] 3d⁶ 4s²" },
+      { id: "Fe3", name: "Iron (III)", symbol: "Fe", formula: "Fe", valency: 3, subshell: "[Ar] 3d⁵ 4s²" },
+      { id: "Al", name: "Aluminium", symbol: "Al", formula: "Al", valency: 3, subshell: "1s² 2s² 2p⁶ 3s² 3p¹" },
+      { id: "Pb2", name: "Lead (II)", symbol: "Pb", formula: "Pb", valency: 2, subshell: "[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p²" },
+      { id: "Hg1", name: "Mercury (I)", symbol: "Hg", formula: "Hg", valency: 1, subshell: "[Xe] 4f¹⁴ 5d¹⁰ 6s²" },
+      { id: "Hg2", name: "Mercury (II)", symbol: "Hg", formula: "Hg", valency: 2, subshell: "[Xe] 4f¹⁴ 5d¹⁰ 6s²" },
+      { id: "Au1", name: "Gold (I)", symbol: "Au", formula: "Au", valency: 1, subshell: "[Xe] 4f¹⁴ 5d¹⁰ 6s¹" },
+      { id: "Au3", name: "Gold (III)", symbol: "Au", formula: "Au", valency: 3, subshell: "[Xe] 4f¹⁴ 5d¹⁰ 6s¹" }
+    ];
+
+    const anions = [
+      { id: "H_anion", name: "Hydride", symbol: "H", formula: "H", valency: 1, subshell: "1s¹" },
+      { id: "F", name: "Fluoride", symbol: "F", formula: "F", valency: 1, subshell: "1s² 2s² 2p⁵" },
+      { id: "Cl", name: "Chloride", symbol: "Cl", formula: "Cl", valency: 1, subshell: "1s² 2s² 2p⁶ 3s² 3p⁵" },
+      { id: "Br", name: "Bromide", symbol: "Br", formula: "Br", valency: 1, subshell: "[Ar] 3d¹⁰ 4s² 4p⁵" },
+      { id: "I", name: "Iodide", symbol: "I", formula: "I", valency: 1, subshell: "[Kr] 4d¹⁰ 5s² 5p⁵" },
+      { id: "OH", name: "Hydroxide", symbol: "OH", formula: "OH", valency: 1, isPolyatomic: true, subshell: "N/A (Polyatomic Ion)" },
+      { id: "NO3", name: "Trioxonitrate (V)", symbol: "NO₃", formula: "NO3", valency: 1, isPolyatomic: true, subshell: "N/A (Polyatomic Ion)" },
+      { id: "NO2", name: "Dioxonitrate (III)", symbol: "NO₂", formula: "NO2", valency: 1, isPolyatomic: true, subshell: "N/A (Polyatomic Ion)" },
+      { id: "HCO3", name: "Hydrogen Trioxocarbonate (IV)", symbol: "HCO₃", formula: "HCO3", valency: 1, isPolyatomic: true, subshell: "N/A (Polyatomic Ion)" },
+      { id: "HSO4", name: "Hydrogen Tetraoxosulphate (VI)", symbol: "HSO₄", formula: "HSO4", valency: 1, isPolyatomic: true, subshell: "N/A (Polyatomic Ion)" },
+      { id: "ClO3", name: "Trioxochlorate (V)", symbol: "ClO₃", formula: "ClO3", valency: 1, isPolyatomic: true, subshell: "N/A (Polyatomic Ion)" },
+      { id: "O", name: "Oxide", symbol: "O", formula: "O", valency: 2, subshell: "1s² 2s² 2p⁴" },
+      { id: "S", name: "Sulphide", symbol: "S", formula: "S", valency: 2, subshell: "1s² 2s² 2p⁶ 3s² 3p⁴" },
+      { id: "CO3", name: "Trioxocarbonate (IV)", symbol: "CO₃", formula: "CO3", valency: 2, isPolyatomic: true, subshell: "N/A (Polyatomic Ion)" },
+      { id: "SO4", name: "Tetraoxosulphate (VI)", symbol: "SO₄", formula: "SO4", valency: 2, isPolyatomic: true, subshell: "N/A (Polyatomic Ion)" },
+      { id: "SO3", name: "Trioxosulphate (IV)", symbol: "SO₃", formula: "SO3", valency: 2, isPolyatomic: true, subshell: "N/A (Polyatomic Ion)" },
+      { id: "N", name: "Nitride", symbol: "N", formula: "N", valency: 3, subshell: "1s² 2s² 2p³" },
+      { id: "PO4", name: "Tetraoxophosphate (V)", symbol: "PO₄", formula: "PO4", valency: 3, isPolyatomic: true, subshell: "N/A (Polyatomic Ion)" }
+    ];
+
+    // Helper: Greatest Common Divisor
+    function gcd(a, b) {
+      return b === 0 ? a : gcd(b, a % b);
+    }
+
+    // Real-World Existence & Stability Rules Evaluator
+    function evaluateChemicalFeasibility(cat, ani) {
+      // Rule 1: Ammonium Nitride (NH4)3N
+      if (cat.id === "NH4" && ani.id === "N") {
+        return {
+          possible: false,
+          status: "NOT POSSIBLE IN REAL LIFE",
+          reason: "Ammonium nitride (NH₄)₃N cannot exist under standard or isolated conditions. Ionic nitrides require small, highly electropositive metal cations (like Li⁺ or Mg²⁺) with high lattice energy to stabilize the strongly basic N³⁻ anion. The weakly acidic NH₄⁺ ion instead rapidly undergoes internal proton transfer to yield Ammonia gas (NH₃)."
+        };
+      }
+
+      // Rule 2: Ammonium Hydride (NH4)H
+      if (cat.id === "NH4" && ani.id === "H_anion") {
+        return {
+          possible: false,
+          status: "NOT POSSIBLE IN REAL LIFE",
+          reason: "Ammonium hydride NH₄H is highly unstable and instantly decomposes. The acidic proton on NH₄⁺ reacts violently in a redox redox-neutralisation with the hydride anion (H⁻) to form Hydrogen gas (H₂): NH₄⁺ + H⁻ → NH₃ + H₂."
+        };
+      }
+
+      // Rule 3: Hydrogen Hydride (H+ + H-)
+      if (cat.id === "H" && ani.id === "H_anion") {
+        return {
+          possible: true,
+          status: "EXISTENT (MOLECULAR FORM)",
+          reason: "H⁺ and H⁻ combine in a redox-neutralisation to form neutral diatomic Hydrogen gas (H₂), rather than an ionic lattice salt."
+        };
+      }
+
+      // Rule 4: Cation and Anion using non-metals for Hydride anion (e.g. H_anion with non-metal or Ammonium)
+      if (ani.id === "H_anion" && !["Li", "Na", "K", "Be", "Mg", "Ca", "Ba", "Al"].includes(cat.id)) {
+        return {
+          possible: false,
+          status: "NOT POSSIBLE IN REAL LIFE",
+          reason: `Hydride ions (H⁻) are extremely strong bases and reducing agents. They can only form stable ionic compounds with alkali metals, alkaline earth metals, or Aluminium. Combination with ${cat.name} leads to rapid decomposition or redox reactions rather than a stable hydride salt.`
+        };
+      }
+
+      // Rule 5: Hydrogen combining with acidic anions (H+ with polyatomics or non-metals)
+      if (cat.id === "H") {
+        const acidNames = {
+          "Cl": "Hydrochloric Acid (HCl)",
+          "Br": "Hydrobromic Acid (HBr)",
+          "I": "Hydroiodic Acid (HI)",
+          "F": "Hydrofluoric Acid (HF)",
+          "NO3": "Trioxonitrate (V) Acid / Nitric Acid (HNO₃)",
+          "NO2": "Dioxonitrate (III) Acid / Nitrous Acid (HNO₂)",
+          "SO4": "Tetraoxosulphate (VI) Acid / Sulphuric Acid (H₂SO₄)",
+          "SO3": "Trioxosulphate (IV) Acid / Sulphurous Acid (H₂SO₃)",
+          "CO3": "Trioxocarbonate (IV) Acid / Carbonic Acid (H₂CO₃)",
+          "PO4": "Tetraoxophosphate (V) Acid / Phosphoric Acid (H₃PO₄)",
+          "OH": "Water (H₂O)"
+        };
+
+        if (acidNames[ani.id]) {
+          return {
+            possible: true,
+            status: "EXISTENT (ACID / MOLECULAR FORM)",
+            reason: `Forms ${acidNames[ani.id]}. Exists as a covalent molecular compound or aqueous acid solution rather than a crystalline ionic metal salt.`
+          };
+        }
+      }
+
+      // Rule 6: Copper (I) Carbonate, Copper (I) Hydroxide
+      if (cat.id === "Cu1" && (ani.id === "CO3" || ani.id === "OH")) {
+        return {
+          possible: false,
+          status: "NOT POSSIBLE IN REAL LIFE",
+          reason: `Copper (I) ${ani.name} is extremely unstable in aqueous or ambient conditions. Cu⁺ disproportionates into Cu²⁺ and Cu⁰ metal, while hydroxides/carbonates immediately decompose into Copper (I) oxide (Cu₂O).`
+        };
+      }
+
+      // Rule 7: Aluminium Carbonate
+      if (cat.id === "Al" && ani.id === "CO3") {
+        return {
+          possible: false,
+          status: "NOT POSSIBLE IN REAL LIFE",
+          reason: "Aluminium trioxocarbonate (IV) [Al₂(CO₃)₃] cannot be isolated under standard conditions. The high charge density of Al³⁺ causes intense hydration and immediate hydrolysis in water, liberating Carbon Dioxide gas [CO₂] and precipitating Aluminium Hydroxide [Al(OH)₃]."
+        };
+      }
+
+      // Rule 8: Gold (I) / Gold (III) Nitrates, Carbonates, Hydroxides
+      if ((cat.id === "Au1" || cat.id === "Au3") && ["CO3", "NO3", "NO2", "SO4", "SO3"].includes(ani.id)) {
+        return {
+          possible: false,
+          status: "NOT POSSIBLE IN REAL LIFE",
+          reason: `Gold salts of oxoacids like ${ani.name} are extremely unstable due to Gold's high electronegativity and nobility. They decompose spontaneously into metallic Gold (Au) and respective gases at standard conditions.`
+        };
+      }
+
+      // Rule 9: Mercury (I) Carbonate / Hydroxide
+      if (cat.id === "Hg1" && (ani.id === "CO3" || ani.id === "OH")) {
+        return {
+          possible: false,
+          status: "NOT POSSIBLE IN REAL LIFE",
+          reason: `Mercury (I) ${ani.name} instantly disproportionates into elemental Mercury (Hg), Mercury (II) oxide/salt, and Carbon Dioxide or water upon formation.`
+        };
+      }
+
+      // Default: Stable / Standard Ionic Compound
+      return {
+        possible: true,
+        status: "STABLE REAL-WORLD COMPOUND",
+        reason: "This compound is thermodynamically stable under ambient conditions or standard synthesis procedures."
+      };
+    }
+
+    // --- SHELL STYLES ---
+    const shellDefinitions = [
+      { name: "K Shell (n=1)", label: "K (n=1)", stroke: "#38bdf8", fill: "#0284c7" },
+      { name: "L Shell (n=2)", label: "L (n=2)", stroke: "#10b981", fill: "#059669" },
+      { name: "M Shell (n=3)", label: "M (n=3)", stroke: "#f59e0b", fill: "#d97706" },
+      { name: "N Shell (n=4)", label: "N (n=4)", stroke: "#a855f7", fill: "#7e22ce" }
+    ];
+
+    // --- OXIDATION VS VALENCY DATA ---
+    const oxCases = [
+      {
+        title: "Iron in Iron (III) Oxide (Fe₂O₃)",
+        valency: 3,
+        oxState: "+3",
+        explanation: "Iron exhibits variable oxidation states. In Fe₂O₃, each Iron atom loses 3 electrons to Oxygen, taking an oxidation state of +3. IUPAC naming explicitly requires the Roman numeral (III) to distinguish it from Iron (II) oxide (FeO)."
+      },
+      {
+        title: "Copper in Copper (I) Oxide (Cu₂O)",
+        valency: 1,
+        oxState: "+1",
+        explanation: "Copper can exist in +1 or +2 oxidation states. In Cu₂O, Copper donates 1 electron per atom to Oxygen. The Stock system explicitly labels this as Copper (I) oxide."
+      },
+      {
+        title: "Carbon in Methane (CH₄)",
+        valency: 4,
+        oxState: "-4",
+        explanation: "Carbon forms 4 single covalent bonds with Hydrogen (Valency = 4). Because Carbon is more electronegative than Hydrogen (2.55 vs 2.20), Carbon 'claims' all 8 bonding electrons for accounting purposes, giving it an Oxidation State of -4."
+      },
+      {
+        title: "Carbon in Trioxocarbonate (IV) Ion (CO₃²⁻)",
+        valency: 4,
+        oxState: "+4",
+        explanation: "Carbon forms 4 total covalent bonds with Oxygen. Because Oxygen is much more electronegative than Carbon (3.44 vs 2.55), Carbon 'loses' all 4 valence electrons in charge assignment, resulting in an Oxidation State of +4 in trioxocarbonate (IV)."
+      },
+      {
+        title: "Sulphur in Sulphur (VI) Fluoride (SF₆)",
+        valency: 6,
+        oxState: "+6",
+        explanation: "Sulphur forms 6 single covalent bonds with Fluorine (Valency = 6). Fluorine is the most electronegative element (3.98 vs 2.58), causing Sulphur to lose bookkeeping control over all 6 electrons, yielding an Oxidation State of +6."
+      }
+    ];
+
+    // --- REACTION DATABASE FOR BALANCER ---
+    const reactions = [
+      {
+        name: "Synthesis of Iron (III) Oxide (Fe + O₂ → Fe₂O₃)",
+        reactants: [{ formula: "Fe", atoms: { Fe: 1 } }, { formula: "O2", atoms: { O: 2 } }],
+        products: [{ formula: "Fe2O3", atoms: { Fe: 2, O: 3 } }]
+      },
+      {
+        name: "Synthesis of Copper (II) Oxide (Cu + O₂ → CuO)",
+        reactants: [{ formula: "Cu", atoms: { Cu: 1 } }, { formula: "O2", atoms: { O: 2 } }],
+        products: [{ formula: "CuO", atoms: { Cu: 1, O: 1 } }]
+      },
+      {
+        name: "Synthesis of Water (H₂ + O₂ → H₂O)",
+        reactants: [{ formula: "H2", atoms: { H: 2 } }, { formula: "O2", atoms: { O: 2 } }],
+        products: [{ formula: "H2O", atoms: { H: 2, O: 1 } }]
+      },
+      {
+        name: "Synthesis of Aluminium Chloride (Al + Cl₂ → AlCl₃)",
+        reactants: [{ formula: "Al", atoms: { Al: 1 } }, { formula: "Cl2", atoms: { Cl: 2 } }],
+        products: [{ formula: "AlCl3", atoms: { Al: 1, Cl: 3 } }]
+      },
+      {
+        name: "Haber-Bosch Synthesis of Ammonia (N₂ + H₂ → NH₃)",
+        reactants: [{ formula: "N2", atoms: { N: 2 } }, { formula: "H2", atoms: { H: 2 } }],
+        products: [{ formula: "NH3", atoms: { N: 1, H: 3 } }]
+      },
+      {
+        name: "Combustion of Methane (CH₄ + O₂ → CO₂ + H₂O)",
+        reactants: [{ formula: "CH4", atoms: { C: 1, H: 4 } }, { formula: "O2", atoms: { O: 2 } }],
+        products: [{ formula: "CO2", atoms: { C: 1, O: 2 } }, { formula: "H2O", atoms: { H: 2, O: 1 } }]
+      },
+      {
+        name: "Synthesis of Lead (II) Chloride (Pb + Cl₂ → PbCl₂)",
+        reactants: [{ formula: "Pb", atoms: { Pb: 1 } }, { formula: "Cl2", atoms: { Cl: 2 } }],
+        products: [{ formula: "PbCl2", atoms: { Pb: 1, Cl: 2 } }]
+      },
+      {
+        name: "Thermal Decomposition of Mercury (II) Oxide (HgO → Hg + O₂)",
+        reactants: [{ formula: "HgO", atoms: { Hg: 1, O: 1 } }],
+        products: [{ formula: "Hg", atoms: { Hg: 1 } }, { formula: "O2", atoms: { O: 2 } }]
+      },
+      {
+        name: "Oxidation of Tin (II) to Tin (IV) Oxide (SnO + O₂ → SnO₂)",
+        reactants: [{ formula: "SnO", atoms: { Sn: 1, O: 1 } }, { formula: "O2", atoms: { O: 2 } }],
+        products: [{ formula: "SnO2", atoms: { Sn: 1, O: 2 } }]
+      },
+      {
+        name: "Single Displacement: Iron & Copper (II) Tetraoxosulphate (VI) (Fe + CuS → FeS + Cu)",
+        reactants: [{ formula: "Fe", atoms: { Fe: 1 } }, { formula: "CuS", atoms: { Cu: 1, S: 1 } }],
+        products: [{ formula: "FeS", atoms: { Fe: 1, S: 1 } }, { formula: "Cu", atoms: { Cu: 1 } }]
+      }
+    ];
+
+    let currentSelectedElement = elements[0];
+    let currentCoeffs = [];
+    let animFrameId = null;
+    let animTime = 0;
+
+    // --- TAB SWITCHING ---
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.view-panel').forEach(panel => panel.classList.remove('active'));
+      
+      event.target.classList.add('active');
+      document.getElementById(tabId).classList.add('active');
+    }
+
+    // --- EXPLORER MODULE ---
+    function initExplorer() {
+      const grid = document.getElementById('elementGrid');
+      grid.innerHTML = '';
+      elements.forEach(el => {
+        const card = document.createElement('div');
+        card.className = `element-card ${el.z === currentSelectedElement.z ? 'selected' : ''}`;
+        card.innerHTML = `
+          <span class="num">${el.z}</span>
+          <div class="symbol">${el.symbol}</div>
+          <div class="name">${el.name}</div>
+          <div class="sub-config">${el.spdf}</div>
+        `;
+        card.onclick = () => selectElement(el);
+        grid.appendChild(card);
+      });
+      renderElementDetails(currentSelectedElement);
+    }
+
+    function selectElement(el) {
+      currentSelectedElement = el;
+      document.querySelectorAll('.element-card').forEach((card, idx) => {
+        card.classList.toggle('selected', elements[idx].z === el.z);
+      });
+      renderElementDetails(el);
+    }
+
+    function renderElementDetails(el) {
+      document.getElementById('elemTitle').textContent = `${el.name} (${el.symbol})`;
+      document.getElementById('elemZ').textContent = el.z;
+      document.getElementById('elemSymbol').textContent = el.symbol;
+      document.getElementById('elemGroupPeriod').textContent = `Group ${el.group}, Period ${el.period}`;
+      document.getElementById('elemConfig').textContent = el.shells.join(', ');
+      document.getElementById('elemSpdfConfig').textContent = el.spdf;
+      document.getElementById('elemValElectrons').textContent = el.valence;
+      document.getElementById('elemValency').textContent = el.possibleValencies.join(', ');
+      document.getElementById('elemIon').textContent = el.ion;
+
+      startAtomAnimation(el);
+    }
+
+    function startAtomAnimation(el) {
+      if (animFrameId) {
+        cancelAnimationFrame(animFrameId);
+      }
+
+      const canvas = document.getElementById('bohrCanvas');
+      const ctx = canvas.getContext('2d');
+      const shellTilts = [0, Math.PI / 4, -Math.PI / 4, Math.PI / 2];
+
+      function animate() {
+        animTime += 0.02;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        const centerX = canvas.width / 2;
+        const centerY = canvas.height / 2;
+        const displayShells = el.shells.slice(-4);
+        const baseRx = 45;
+        const baseRy = 22;
+        const stepR = 26;
+
+        // Nucleus
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, 22, 0, 2 * Math.PI);
+        ctx.fillStyle = '#2563eb';
+        ctx.shadowColor = '#60a5fa';
+        ctx.shadowBlur = 18;
+        ctx.fill();
+        ctx.restore();
+
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 13px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(el.symbol, centerX, centerY);
+
+        // Orbital Shells
+        displayShells.forEach((electronCount, shellIdx) => {
+          const rx = baseRx + shellIdx * stepR;
+          const ry = baseRy + shellIdx * (stepR * 0.45);
+          const tiltAngle = shellTilts[shellIdx % shellTilts.length];
+          const shellDef = shellDefinitions[shellIdx % shellDefinitions.length];
+
+          ctx.save();
+          ctx.translate(centerX, centerY);
+          ctx.rotate(tiltAngle);
+
+          // Glow ring
+          ctx.beginPath();
+          ctx.ellipse(0, 0, rx, ry, 0, 0, 2 * Math.PI);
+          ctx.strokeStyle = shellDef.stroke + '40';
+          ctx.lineWidth = 6;
+          ctx.stroke();
+
+          // Main shell line
+          ctx.beginPath();
+          ctx.ellipse(0, 0, rx, ry, 0, 0, 2 * Math.PI);
+          ctx.strokeStyle = shellDef.stroke;
+          ctx.lineWidth = 2;
+          ctx.setLineDash([6, 4]);
+          ctx.stroke();
+
+          // Label
+          ctx.save();
+          ctx.setLineDash([]);
+          ctx.font = 'bold 10px monospace';
+          ctx.fillStyle = shellDef.stroke;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(shellDef.label, 0, -ry - 8);
+          ctx.restore();
+
+          // Electrons
+          const speedFactor = (1.8 - shellIdx * 0.3);
+          const shellTime = animTime * speedFactor;
+          const visCount = Math.min(electronCount, 12);
+
+          for (let i = 0; i < visCount; i++) {
+            const angle = shellTime + (2 * Math.PI / visCount) * i;
+            const ex = rx * Math.cos(angle);
+            const ey = ry * Math.sin(angle);
+
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(ex, ey, 7, 0, 2 * Math.PI);
+            ctx.fillStyle = shellDef.stroke + '50';
+            ctx.shadowColor = shellDef.stroke;
+            ctx.shadowBlur = 10;
+            ctx.fill();
+            ctx.restore();
+
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(ex, ey, 4.5, 0, 2 * Math.PI);
+
+            const grad = ctx.createRadialGradient(ex - 1.5, ey - 1.5, 0.5, ex, ey, 4.5);
+            grad.addColorStop(0, '#ffffff');
+            grad.addColorStop(0.5, shellDef.fill);
+            grad.addColorStop(1, shellDef.stroke);
+
+            ctx.fillStyle = grad;
+            ctx.shadowColor = shellDef.stroke;
+            ctx.shadowBlur = 8;
+            ctx.fill();
+
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+            ctx.restore();
+          }
+
+          ctx.restore();
+        });
+
+        animFrameId = requestAnimationFrame(animate);
+      }
+
+      animate();
+    }
+
+    // --- COMPOUND BUILDER MODULE ---
+    function initBuilder() {
+      const cationSelect = document.getElementById("cationSelect");
+      const anionSelect = document.getElementById("anionSelect");
+      const cationInfo = document.getElementById("cationInfo");
+      const anionInfo = document.getElementById("anionInfo");
+      const buildBtn = document.getElementById("buildBtn");
+      const resultCard = document.getElementById("resultCard");
+      
+      const resCationSymbol = document.getElementById("resCationSymbol");
+      const resCationValency = document.getElementById("resCationValency");
+      const resAnionSymbol = document.getElementById("resAnionSymbol");
+      const resAnionValency = document.getElementById("resAnionValency");
+      const resRatio = document.getElementById("resRatio");
+      const formulaDisplay = document.getElementById("formulaDisplay");
+      const nameDisplay = document.getElementById("nameDisplay");
+      const feasibilityBanner = document.getElementById("feasibilityBanner");
+
+      // Populate Cations
+      cations.forEach(item => {
+        const opt = document.createElement("option");
+        opt.value = item.id;
+        opt.textContent = `${item.name} (${item.symbol}) [Valency: ${item.valency}]`;
+        cationSelect.appendChild(opt);
+      });
+
+      // Populate Anions
+      anions.forEach(item => {
+        const opt = document.createElement("option");
+        opt.value = item.id;
+        opt.textContent = `${item.name} (${item.symbol}) [Valency: ${item.valency}]`;
+        anionSelect.appendChild(opt);
+      });
+
+      // Event Listeners
+      cationSelect.addEventListener("change", () => {
+        const selected = cations.find(c => c.id === cationSelect.value);
+        if (selected) {
+          cationInfo.innerHTML = `<strong>Valency:</strong> ${selected.valency}<br><strong>Subshell Config:</strong> ${selected.subshell}`;
+        }
+      });
+
+      anionSelect.addEventListener("change", () => {
+        const selected = anions.find(a => a.id === anionSelect.value);
+        if (selected) {
+          anionInfo.innerHTML = `<strong>Valency:</strong> ${selected.valency}<br><strong>Subshell Config:</strong> ${selected.subshell}`;
+        }
+      });
+
+      buildBtn.addEventListener("click", () => {
+        const cation = cations.find(c => c.id === cationSelect.value);
+        const anion = anions.find(a => a.id === anionSelect.value);
+
+        if (!cation || !anion) {
+          alert("Please select both a cation and an anion.");
+          return;
+        }
+
+        synthesizeCompound(cation, anion);
+      });
+
+      function synthesizeCompound(cat, ani) {
+        const v1 = cat.valency;
+        const v2 = ani.valency;
+
+        // Simplify ratio via GCD
+        const divisor = gcd(v1, v2);
+        const subCat = v2 / divisor; 
+        const subAni = v1 / divisor; 
+
+        // Format Formula HTML
+        let catPart = cat.symbol;
+        if (subCat > 1) {
+          if (cat.isPolyatomic) catPart = `(${cat.symbol})`;
+          catPart += `<span class="subscript">${subCat}</span>`;
+        }
+
+        let aniPart = ani.symbol;
+        if (subAni > 1) {
+          if (ani.isPolyatomic) aniPart = `(${ani.symbol})`;
+          aniPart += `<span class="subscript">${subAni}</span>`;
+        }
+
+        // Evaluate chemical feasibility
+        const evalResult = evaluateChemicalFeasibility(cat, ani);
+
+        // Set Feasibility Banner UI
+        if (!evalResult.possible) {
+          feasibilityBanner.className = "p-4 rounded-lg border text-sm flex flex-col gap-1 bg-red-950/80 border-red-500 text-red-200";
+          feasibilityBanner.innerHTML = `
+            <span class="font-bold text-red-400 text-base">⚠️ ${evalResult.status}</span>
+            <span><strong>Why:</strong> ${evalResult.reason}</span>
+          `;
+        } else if (evalResult.status.includes("ACID") || evalResult.status.includes("MOLECULAR")) {
+          feasibilityBanner.className = "p-4 rounded-lg border text-sm flex flex-col gap-1 bg-amber-950/80 border-amber-500 text-amber-200";
+          feasibilityBanner.innerHTML = `
+            <span class="font-bold text-amber-400 text-base">ℹ️ ${evalResult.status}</span>
+            <span><strong>Note:</strong> ${evalResult.reason}</span>
+          `;
+        } else {
+          feasibilityBanner.className = "p-4 rounded-lg border text-sm flex flex-col gap-1 bg-emerald-950/80 border-emerald-500 text-emerald-200";
+          feasibilityBanner.innerHTML = `
+            <span class="font-bold text-emerald-400 text-base">✓ ${evalResult.status}</span>
+            <span>${evalResult.reason}</span>
+          `;
+        }
+
+        // Update Results Display
+        resCationSymbol.textContent = cat.symbol;
+        resCationValency.textContent = `Valency: ${cat.valency}`;
+        resAnionSymbol.textContent = ani.symbol;
+        resAnionValency.textContent = `Valency: ${ani.valency}`;
+        resRatio.textContent = `${subCat} : ${subAni}`;
+
+        formulaDisplay.innerHTML = `${catPart}${aniPart}`;
+        nameDisplay.textContent = `${cat.name} ${ani.name}`;
+
+        resultCard.classList.remove("hidden");
+      }
+    }
+
+    // --- OXIDATION VS VALENCY MODULE ---
+    function initOxidation() {
+      const select = document.getElementById('moleculeSelect');
+      select.innerHTML = '';
+      oxCases.forEach((item, idx) => {
+        select.innerHTML += `<option value="${idx}">${item.title}</option>`;
+      });
+      updateOxidationView();
+    }
+
+    function updateOxidationView() {
+      const idx = document.getElementById('moleculeSelect').value;
+      const data = oxCases[idx];
+
+      document.getElementById('oxValencyVal').textContent = data.valency;
+      document.getElementById('oxStateVal').textContent = data.oxState;
+      document.getElementById('oxExplanationText').textContent = data.explanation;
+    }
+
+    // --- EQUATION BALANCER MODULE ---
+    function initBalancer() {
+      const select = document.getElementById('reactionSelect');
+      select.innerHTML = '';
+      reactions.forEach((r, idx) => {
+        select.innerHTML += `<option value="${idx}">${r.name}</option>`;
+      });
+      loadReaction();
+    }
+
+    function parseSubscripts(formula) {
+      return formula.replace(/(\d+)/g, '<sub>$1</sub>');
+    }
+
+    function loadReaction() {
+      const rIdx = document.getElementById('reactionSelect').value;
+      const rxn = reactions[rIdx];
+      const totalSpecies = rxn.reactants.length + rxn.products.length;
+      
+      currentCoeffs = new Array(totalSpecies).fill(1);
+      renderEquationWorkspace(rxn);
+      checkBalance();
+    }
+
+    function renderEquationWorkspace(rxn) {
+      const workspace = document.getElementById('equationWorkspace');
+      workspace.innerHTML = '';
+
+      let coeffIndex = 0;
+
+      rxn.reactants.forEach((sp, i) => {
+        if (i > 0) workspace.innerHTML += `<span class="arrow">+</span>`;
+        workspace.appendChild(createSpeciesUI(sp.formula, coeffIndex));
+        coeffIndex++;
+      });
+
+      workspace.innerHTML += `<span class="arrow">→</span>`;
+
+      rxn.products.forEach((sp, i) => {
+        if (i > 0) workspace.innerHTML += `<span class="arrow">+</span>`;
+        workspace.appendChild(createSpeciesUI(sp.formula, coeffIndex));
+        coeffIndex++;
+      });
+    }
+
+    function createSpeciesUI(formula, idx) {
+      const group = document.createElement('div');
+      group.className = 'species-group';
+      group.innerHTML = `
+        <div class="coeff-controls">
+          <button class="coeff-btn" onclick="changeCoeff(${idx}, 1)">▲</button>
+          <button class="coeff-btn" onclick="changeCoeff(${idx}, -1)">▼</button>
+        </div>
+        <div class="coeff-val" id="coeff-${idx}">1</div>
+        <div class="species-formula">${parseSubscripts(formula)}</div>
+      `;
+      return group;
+    }
+
+    function changeCoeff(idx, delta) {
+      if (currentCoeffs[idx] + delta >= 1) {
+        currentCoeffs[idx] += delta;
+        document.getElementById(`coeff-${idx}`).textContent = currentCoeffs[idx];
+        checkBalance();
+      }
+    }
+
+    function checkBalance() {
+      const rxn = reactions[document.getElementById('reactionSelect').value];
+      const reactantTally = {};
+      const productTally = {};
+
+      let coeffIdx = 0;
+
+      rxn.reactants.forEach(sp => {
+        const c = currentCoeffs[coeffIdx++];
+        for (let atom in sp.atoms) {
+          reactantTally[atom] = (reactantTally[atom] || 0) + sp.atoms[atom] * c;
+        }
+      });
+
+      rxn.products.forEach(sp => {
+        const c = currentCoeffs[coeffIdx++];
+        for (let atom in sp.atoms) {
+          productTally[atom] = (productTally[atom] || 0) + sp.atoms[atom] * c;
+        }
+      });
+
+      const rDiv = document.getElementById('reactantTally');
+      const pDiv = document.getElementById('productTally');
+      rDiv.innerHTML = '';
+      pDiv.innerHTML = '';
+
+      let isBalanced = true;
+      const allAtoms = new Set([...Object.keys(reactantTally), ...Object.keys(productTally)]);
+
+      allAtoms.forEach(atom => {
+        const rCount = reactantTally[atom] || 0;
+        const pCount = productTally[atom] || 0;
+
+        if (rCount !== pCount) isBalanced = false;
+
+        const color = rCount === pCount ? 'var(--accent-green)' : 'var(--accent-red)';
+
+        rDiv.innerHTML += `<div class="tally-row"><span>${atom}:</span><strong style="color:${color}">${rCount}</strong></div>`;
+        pDiv.innerHTML += `<div class="tally-row"><span>${atom}:</span><strong style="color:${color}">${pCount}</strong></div>`;
+      });
+
+      const statusBox = document.getElementById('balanceStatus');
+      if (isBalanced) {
+        statusBox.textContent = "✓ Chemical Equation Balanced (Mass Conserved)";
+        statusBox.className = "balance-status status-balanced";
+      } else {
+        statusBox.textContent = "✕ Equation Unbalanced - Adjust Coefficients";
+        statusBox.className = "balance-status status-unbalanced";
+      }
+    }
+
+    // --- INITIALIZATION ---
+    window.onload = () => {
+      initExplorer();
+      initBuilder();
+      initOxidation();
+      initBalancer();
+    };
+  </script>
+</body>
+</html>

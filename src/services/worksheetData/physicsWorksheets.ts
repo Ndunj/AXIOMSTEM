@@ -617,5 +617,116 @@ export const PHYSICS_WORKSHEETS: Record<string, SimulationWorksheetData> = {
       task: "Explain to a visitor why the beach stays pleasant and cool in the afternoon compared to inland cities just 20 miles away.",
       exemplarAnswer: "Inland cities have pavement and buildings that trap heat with no ocean nearby to create a breeze. At the beach, the temperature difference between the hot sand and cold ocean creates a natural air-conditioning effect (the Sea Breeze), continuously blowing cool ocean air onto the shore."
     }
+  },
+
+  "sim-hydraulic-press-lift": {
+    drivingQuestion: "How does Pascal's Principle allow a small input force on a narrow piston to lift an enormous automobile or crush heavy materials on a wide piston?",
+    hypothesisPrompt: "If you increase the radius of the output cylinder (r2) while keeping the input effort force (F1) and small radius (r1) constant, predict what will happen to the output lifting force (F2) and the distance the load moves per stroke.",
+    tableHeaders: ["Trial", "Input Force (F1)", "Radius r1 (cm)", "Radius r2 (cm)", "Area Ratio (A2 / A1)", "Fluid Pressure (N/m²)", "Output Force (F2)", "Lift / Stroke Result"],
+    tableRows: [
+      ["1 (Baseline)", "150 N", "3.0 cm", "8.0 cm", "7.11×", "53,052 N/m²", "1,066 N", "Small Load Lifted (7.1:1 stroke ratio)"],
+      ["2 (Increased F1)", "300 N", "3.0 cm", "8.0 cm", "7.11×", "106,103 N/m²", "2,133 N", "Double output force at same stroke ratio"],
+      ["3 (Wide Lift Piston)", "150 N", "2.0 cm", "10.0 cm", "25.00×", "119,366 N/m²", "3,750 N", "High multiplication (25:1 stroke ratio)"],
+      ["4 (Narrow Input Piston)", "200 N", "1.5 cm", "12.0 cm", "64.00×", "282,942 N/m²", "12,800 N", "Massive force multiplication (> 12 kN)"],
+      ["5 (Heavy Car Lift)", "400 N", "1.5 cm", "15.0 cm", "100.00×", "565,884 N/m²", "40,000 N", "Easily lifts & crushes 25,000 N small car!"]
+    ],
+    criticalQuestions: [
+      {
+        prompt: "1. Pascal's Principle and Pressure Transmission",
+        subtext: "Pascal's Principle states that pressure applied to an enclosed fluid is transmitted equally in all directions (P = F1 ÷ A1 = F2 ÷ A2). Explain why the pressure measured under the small piston is identical to the pressure under the large piston.",
+        exemplarAnswer: "Because liquids like hydraulic oil and water are virtually incompressible and enclosed in a rigid chamber, any external force applied to the fluid distributes pressure equally throughout all molecules in the system, maintaining uniform pressure P1 = P2 across every square meter."
+      },
+      {
+        prompt: "2. Force Multiplication vs. Distance Tradeoff (Conservation of Energy)",
+        subtext: "In Trial 5, a modest 400 N effort produces a massive 40,000 N output (100× force multiplication). According to the conservation of work (Work = Force × Distance), why does the mechanic have to pump the small piston multiple times through a long distance to raise the heavy car just a few centimeters?",
+        exemplarAnswer: "Work input must equal work output (F1 × d1 = F2 × d2). Gaining a 100-fold increase in output force requires the input piston to travel 100 times the total distance of the output piston. Multi-stroke pumping with check valves lets the operator add distance incrementally without needing a giant single stroke."
+      },
+      {
+        prompt: "3. Effect of Fluid Viscosity and Type",
+        subtext: "Compare using standard hydraulic oil versus thick, viscous molasses in the simulation. How does fluid viscosity affect the flow rate, pumping speed, and practical efficiency of hydraulic machinery?",
+        exemplarAnswer: "Highly viscous fluids like molasses generate significant internal fluid friction, slowing down stroke cycles and increasing resistance, whereas hydraulic oils provide optimal non-compressibility, lubrication, low friction, and fast response times."
+      }
+    ],
+    realWorldScenario: {
+      title: "Automotive Crash Safety & Crumple Zones",
+      scenario: "Automotive engineers intentionally design vehicle front and rear crumple zones to deform plastically during a highway collision (approximating an inelastic collision rather than an elastic bounce).",
+      task: "Using impulse (J = F_avg × Δt), momentum change (Δp), and kinetic energy dissipation, explain why a controlled inelastic crumple collision is significantly safer for vehicle occupants than a perfectly elastic collision.",
+      exemplarAnswer: "In an elastic collision, the vehicle bounces backward, resulting in nearly double the momentum change (Δp = m(v_final - v_initial) ≈ 2mv) and subjecting passengers to extreme whiplash accelerations. Crumple zones undergo controlled inelastic deformation, dissipating huge amounts of kinetic energy as structural deformation work while extending the duration of impact (Δt), thereby drastically reducing the peak average impact force (F_avg = Δp / Δt) experienced by the human body."
+    }
+  },
+
+  "sim-double-pendulum-chaos": {
+    drivingQuestion: "How do coupled non-linear differential equations and conservation of mechanical energy govern deterministic chaos in a double physical pendulum?",
+    hypothesisPrompt: "If the initial release angle or upper mass of a double pendulum is altered by an infinitesimally small perturbation, predict whether the subsequent long-term trajectory will remain predictable or diverge exponentially.",
+    tableHeaders: ["Trial", "Gravity (g)", "Upper Mass (m₁)", "Lower Mass (m₂)", "Upper Length (l₁)", "Lower Length (l₂)", "Initial Angles (θ₁, θ₂)", "Observed Dynamics", "Phase Trail Character", "Trajectory Predictability"],
+    tableRows: [
+      ["1", "9.81 m/s²", "10 kg", "10 kg", "140 px", "140 px", "90°, 90°", "Coupled chaotic flips with rapid whipping", "Complex dense multi-loop rainbow attractor", "Chaotic / Diverges after ~3 swings"],
+      ["2", "9.81 m/s²", "40 kg", "2 kg", "140 px", "140 px", "90°, 90°", "Dominant upper harmonic driver with chaotic tail", "Symmetric inner envelope with chaotic outer tips", "Semi-periodic driver with chaotic tip"],
+      ["3", "9.81 m/s²", "5 kg", "35 kg", "140 px", "140 px", "90°, 90°", "Heavy lower mass destabilizes primary pivot", "Erratic jerky wide orbital excursions", "Highly chaotic from first swing"],
+      ["4", "0.00 m/s²", "10 kg", "10 kg", "140 px", "140 px", "90°, 90°", "Zero gravity constant angular momentum drift", "Smooth circular/elliptical orbital loops", "Completely deterministic & predictable"],
+      ["5", "18.00 m/s²", "10 kg", "10 kg", "100 px", "160 px", "45°, 45°", "High-gravity fast whipping and sudden inversions", "Dense high-frequency trajectory lattice", "Extreme sensitivity / rapid divergence"]
+    ],
+    criticalQuestions: [
+      {
+        prompt: "1. The Butterfly Effect & Lyapunov Exponents in Coupled Oscillators",
+        subtext: "Explain why two identical double pendulums released from release angles differing by only 0.001° will follow nearly identical paths for several cycles before rapidly diverging into completely different trajectories.",
+        exemplarAnswer: "The double pendulum is governed by non-linear coupled differential equations where the phase space trajectories have positive Lyapunov exponents. Tiny differences (perturbations) in initial conditions grow exponentially over time rather than linearly. While deterministic (exact physics with zero randomness), the system's exponential sensitivity renders long-term predictive calculation impossible without infinite numerical precision."
+      },
+      {
+        prompt: "2. Energy Exchange and Whipping Mechanics",
+        subtext: "Observe the velocity of the lower mass (m₂) when the upper mass (m₁) momentarily comes to rest. How does conservation of total mechanical energy explain the sudden whipping motion of the lower arm?",
+        exemplarAnswer: "Total mechanical energy E = T + V (kinetic + gravitational potential energy) is conserved in the frictionless system. When the upper mass m₁ slows or halts near the bottom of its swing, its kinetic energy and angular momentum are transferred through the coupled pivot into the lower arm l₂. Because m₂ receives the transferred energy while possessing a smaller moment of inertia, it must accelerate dramatically, executing rapid high-velocity whips and full 360° loops."
+      },
+      {
+        prompt: "3. Runge-Kutta 4th Order (RK4) Numerical Integration",
+        subtext: "Why is an advanced numerical method like 4th-order Runge-Kutta (RK4) required to simulate a double pendulum rather than simple Euler integration?",
+        exemplarAnswer: "Standard Euler integration introduces cumulative O(dt) energy drift errors that rapidly cause the pendulum to falsely gain or lose artificial energy, causing the simulation to explode. RK4 evaluates derivatives at four intermediate trial sub-steps per time increment (O(dt⁴) local error), providing the numerical stability and energy-conservation fidelity necessary to track non-linear chaotic dynamics."
+      }
+    ],
+    realWorldScenario: {
+      title: "Atmospheric Weather Forecasting & Chaos Theory",
+      scenario: "In 1961, meteorologist Edward Lorenz discovered that rounding atmospheric computer simulation parameters from 0.506127 to 0.506 produced radically divergent weather forecasts within days (founding modern Chaos Theory).",
+      task: "Using your observations of the double pendulum's sensitive dependence on initial conditions, explain why long-range 14-day weather forecasts inherently experience high uncertainty despite modern supercomputing models.",
+      exemplarAnswer: "The Earth's atmosphere is a turbulent, coupled fluid dynamical system governed by non-linear Navier-Stokes differential equations, analogous to a vast network of interconnected non-linear pendulums. Because sensor networks cannot measure temperature, pressure, and wind speed with infinite continuous precision at every cubic meter of the planet, tiny unmeasured microscopic discrepancies grow exponentially over time, creating a fundamental predictability horizon of roughly 10 to 14 days."
+    }
+  },
+
+  "sim-lissajous-curves": {
+    drivingQuestion: "How do orthogonal simple harmonic oscillations combine parametrically to generate Lissajous figures, and how do frequency ratios and phase shifts dictate geometric symmetry?",
+    hypothesisPrompt: "If you maintain equal horizontal and vertical frequencies (a:b = 1:1) while smoothly shifting the phase difference δ from 0° to 90° to 180°, predict the geometric transformation of the resulting trajectory. What happens when the frequency ratio is changed to 1:2 or 3:2?",
+    tableHeaders: ["Trial / Pattern", "Frequency a (X)", "Frequency b (Y)", "Ratio (a:b)", "Phase Shift (δ)", "Amplitude (A, B)", "Observed Shape", "Lobe / Intersection Count", "Symmetry & Closed Loop"],
+    tableRows: [
+      ["1:1 Linear (In-Phase)", "1 Hz", "1 Hz", "1:1", "0°", "1.0, 1.0", "Diagonal straight line (y = x)", "0 intersections, endpoints at (±1, ±1)", "Symmetric across 45° axis"],
+      ["1:1 Ellipse", "1 Hz", "1 Hz", "1:1", "45°", "1.0, 1.0", "Tilted ellipse", "Smooth closed orbital loop", "Reflective diagonal symmetry"],
+      ["1:1 Circle (Quadrature)", "1 Hz", "1 Hz", "1:1", "90°", "1.0, 1.0", "Perfect circle of radius 1.0", "x² + y² = 1 (cos² + sin² = 1)", "Full rotational continuous symmetry"],
+      ["1:1 Linear (Out-of-Phase)", "1 Hz", "1 Hz", "1:1", "180°", "1.0, 1.0", "Diagonal line (y = -x)", "Reversed slope line", "Symmetric across -45° axis"],
+      ["1:2 Parabola / Figure-8", "1 Hz", "2 Hz", "1:2", "90°", "1.0, 1.0", "Figure-8 / Parabolic loop", "1 central self-intersection node, 2 vertical lobes", "Vertical axis reflection"],
+      ["3:2 Knot Pattern", "3 Hz", "2 Hz", "3:2", "90°", "1.0, 1.0", "3-lobed harmonic weave / knot", "3 horizontal lobes, 2 vertical lobes", "Bilateral symmetry"],
+      ["3:4 Complex Pattern", "3 Hz", "4 Hz", "3:4", "90°", "1.0, 1.0", "Dense multi-crossing harmonic grid", "3 horizontal lobes, 4 vertical lobes", "Complex multi-axis grid symmetry"]
+    ],
+    criticalQuestions: [
+      {
+        prompt: "1. Parametric Equations & Pythagorean Identity for the Circle",
+        subtext: "When a = 1, b = 1, and δ = 90° (π/2 rad), x(t) = sin(t + π/2) = cos(t) and y(t) = sin(t). Prove mathematically why the resulting curve is a circle of radius 1.0.",
+        exemplarAnswer: "By the fundamental Pythagorean trigonometric identity, x(t)² + y(t)² = cos²(t) + sin²(t) = 1. This matches the Cartesian equation for a circle centered at the origin with radius r = 1. The point rotates counterclockwise at a constant angular frequency ω = 1 rad/s."
+      },
+      {
+        prompt: "2. Counting Lobes to Determine Frequency Ratios (Oscilloscope XY Mode)",
+        subtext: "In electrical engineering and acoustics, an oscilloscope in XY mode displays an unknown input signal on the Y-axis against a calibrated reference signal on the X-axis. How can you determine the exact frequency ratio a:b by counting the tangencies (peaks) along the horizontal and vertical boundaries?",
+        exemplarAnswer: "The ratio of frequencies is equal to the ratio of tangencies: (Frequency a / Frequency b) = (Number of vertical tangency peaks / Number of horizontal tangency peaks). For example, a curve tangent to the top horizontal boundary 2 times and the right vertical boundary 3 times has a frequency ratio of 3:2."
+      },
+      {
+        prompt: "3. Rational vs. Irrational Frequency Ratios & Space-Filling Curves",
+        subtext: "What would happen to the Lissajous trajectory if the ratio a:b was an irrational number (like √2 : 1 or π : 1) instead of an integer ratio? Would the curve ever close upon itself?",
+        exemplarAnswer: "If the frequency ratio is irrational, the period of the horizontal oscillation is incommensurable with the period of the vertical oscillation. The curve will never repeat or form a closed loop; instead, over infinite time, the trajectory will densely fill the entire rectangular boundary [-A, A] × [-B, B] without ever self-closing (forming a quasi-periodic dense ergodic orbit)."
+      }
+    ],
+    realWorldScenario: {
+      title: "Audio Synthesizer Phase Alignment & Oscilloscope Diagnostics",
+      scenario: "Audio mastering engineers and radar technicians feed dual stereo audio signals or RF carrier signals into an oscilloscope in XY mode (goniometer / Lissajous vector scope) to check phase coherence and harmonic distortion before broadcasting.",
+      task: "Explain how viewing a Lissajous figure allows an audio engineer to instantly detect whether stereo left and right channels are perfectly in-phase (mono-compatible), 90° stereo-widened, or 180° out-of-phase (causing total phase cancellation in mono speakers).",
+      exemplarAnswer: "If both stereo channels are identical (mono), the Lissajous display collapses into a crisp 45° diagonal line (δ = 0°). A healthy wide stereo image creates an elliptical cloud (δ ≈ 90°). However, if the display shows a negative diagonal line (δ = 180°), the channels are in direct phase opposition—when summed into a single mono speaker (like on phones or club sound systems), the two signals will destructively interfere and completely cancel each other out."
+    }
   }
 };
+

@@ -269,65 +269,65 @@ export const WorksheetGeneratorModal: React.FC<WorksheetModalProps> = ({
             </div>
 
             {/* Student Metadata Fields Mock */}
-            <div className="p-3.5 bg-slate-950/60 rounded-xl border border-slate-800 grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs text-slate-400">
+            <div className="p-4 bg-slate-950/60 rounded-xl border border-slate-800 grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm text-slate-400">
               <div>
-                <span className="font-semibold text-slate-300 block text-[10px] uppercase">
+                <span className="font-semibold text-slate-300 block text-xs uppercase tracking-wider">
                   Student Name:
                 </span>
-                <span className="font-mono text-slate-500">____________________</span>
+                <span className="font-mono text-slate-500 text-sm">____________________</span>
               </div>
               <div>
-                <span className="font-semibold text-slate-300 block text-[10px] uppercase">Date:</span>
-                <span className="font-mono text-slate-500">______________</span>
+                <span className="font-semibold text-slate-300 block text-xs uppercase tracking-wider">Date:</span>
+                <span className="font-mono text-slate-500 text-sm">______________</span>
               </div>
               <div>
-                <span className="font-semibold text-slate-300 block text-[10px] uppercase">
+                <span className="font-semibold text-slate-300 block text-xs uppercase tracking-wider">
                   Class / Period:
                 </span>
-                <span className="font-mono text-slate-500">__________</span>
+                <span className="font-mono text-slate-500 text-sm">__________</span>
               </div>
               <div>
-                <span className="font-semibold text-slate-300 block text-[10px] uppercase">
+                <span className="font-semibold text-slate-300 block text-xs uppercase tracking-wider">
                   Total Score:
                 </span>
-                <span className="font-bold text-sky-400 font-mono">______ / 100 PTS</span>
+                <span className="font-bold text-sky-400 font-mono text-sm">______ / 100 PTS</span>
               </div>
             </div>
 
             {/* Driving Phenomenon Callout */}
-            <div className="p-4 rounded-xl bg-sky-950/30 border border-sky-500/30 text-xs space-y-1">
-              <div className="font-bold text-sky-300 uppercase tracking-wider text-[10px] flex items-center gap-1.5">
-                <HelpCircle className="w-3.5 h-3.5 text-sky-400" /> Central Driving Phenomenon & Inquiry
+            <div className="p-4.5 rounded-xl bg-sky-950/30 border border-sky-500/30 space-y-1.5">
+              <div className="font-bold text-sky-300 uppercase tracking-wider text-xs flex items-center gap-1.5">
+                <HelpCircle className="w-4 h-4 text-sky-400" /> Central Driving Phenomenon & Inquiry
                 Question:
               </div>
-              <p className="text-slate-200 italic font-serif leading-relaxed text-sm">
+              <p className="text-slate-100 italic font-serif leading-relaxed text-base">
                 "{worksheetData.drivingQuestion}"
               </p>
             </div>
 
             {/* PHASE 1: PRE-LAB HYPOTHESIS / CONJECTURE */}
-            <div className="space-y-2">
-              <div className="flex items-center gap-2 text-sm font-bold text-white">
-                <span className="w-6 h-6 rounded-lg bg-sky-600 text-white flex items-center justify-center text-xs font-bold">
+            <div className="space-y-2.5">
+              <div className="flex items-center gap-2.5 text-base font-bold text-white">
+                <span className="w-6.5 h-6.5 rounded-lg bg-sky-600 text-white flex items-center justify-center text-xs font-bold">
                   1
                 </span>
                 <span>{phrasing.phase1Title}</span>
               </div>
-              <p className="text-xs text-slate-300 pl-8 leading-relaxed">
+              <p className="text-sm text-slate-300 pl-9 leading-relaxed">
                 {worksheetData.hypothesisPrompt}
               </p>
-              <div className="pl-8 pt-1">
+              <div className="pl-9 pt-1">
                 {includeAnswerKey ? (
-                  <div className="p-3 rounded-xl bg-emerald-950/30 border border-emerald-500/30 text-xs space-y-1 text-emerald-200">
-                    <span className="font-bold uppercase text-[10px] text-emerald-400">
+                  <div className="p-3.5 rounded-xl bg-emerald-950/30 border border-emerald-500/30 text-sm space-y-1 text-emerald-200">
+                    <span className="font-bold uppercase text-xs text-emerald-400">
                       Exemplar Response & Criteria:
                     </span>
-                    <p className="text-slate-300">
+                    <p className="text-slate-200 text-sm leading-relaxed">
                       Student states a clear, mathematically/scientifically sound hypothesis or conjecture with structural reasoning and expected relationships.
                     </p>
                   </div>
                 ) : (
-                  <div className="space-y-2 border border-dashed border-slate-800 rounded-xl p-3 bg-slate-950/30">
+                  <div className="space-y-2 border border-dashed border-slate-800 rounded-xl p-3.5 bg-slate-950/30">
                     <div className="h-4 border-b border-slate-800" />
                     <div className="h-4 border-b border-slate-800" />
                   </div>
@@ -337,31 +337,31 @@ export const WorksheetGeneratorModal: React.FC<WorksheetModalProps> = ({
 
             {/* PHASE 2: QUANTITATIVE / INVARIANT DATA COLLECTION TABLE */}
             <div className="space-y-3">
-              <div className="flex items-center gap-2 text-sm font-bold text-white">
-                <span className="w-6 h-6 rounded-lg bg-sky-600 text-white flex items-center justify-center text-xs font-bold">
+              <div className="flex items-center gap-2.5 text-base font-bold text-white">
+                <span className="w-6.5 h-6.5 rounded-lg bg-sky-600 text-white flex items-center justify-center text-xs font-bold">
                   2
                 </span>
                 <span>{phrasing.phase2Title}</span>
               </div>
-              <p className="text-xs text-slate-400 pl-8 leading-relaxed">
+              <p className="text-sm text-slate-400 pl-9 leading-relaxed">
                 {phrasing.phase2Subtitle}
               </p>
               <div className="overflow-x-auto rounded-xl border border-slate-800">
-                <table className="w-full text-left text-xs border-collapse">
+                <table className="w-full text-left text-sm border-collapse">
                   <thead>
-                    <tr className="bg-slate-950 text-slate-300 border-b border-slate-800 font-mono text-[11px]">
+                    <tr className="bg-slate-950 text-slate-300 border-b border-slate-800 font-mono text-xs">
                       {worksheetData.tableHeaders.map((h, i) => (
-                        <th key={i} className="p-2.5 font-bold">
+                        <th key={i} className="p-3 font-bold">
                           {h}
                         </th>
                       ))}
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-800/60 font-mono text-[11px]">
+                  <tbody className="divide-y divide-slate-800/60 font-mono text-xs">
                     {worksheetData.tableRows.map((row, rIdx) => (
                       <tr key={rIdx} className="hover:bg-slate-800/30">
                         {row.map((cell, cIdx) => (
-                          <td key={cIdx} className="p-2.5 text-slate-300">
+                          <td key={cIdx} className="p-3 text-slate-200 font-medium">
                             {includeAnswerKey || cIdx <= 1 ? (
                               cell
                             ) : (
@@ -378,24 +378,24 @@ export const WorksheetGeneratorModal: React.FC<WorksheetModalProps> = ({
 
             {/* PHASE 3: CRITICAL THINKING & DEDUCTIVE ANALYSIS */}
             <div className="space-y-4">
-              <div className="flex items-center gap-2 text-sm font-bold text-white">
-                <span className="w-6 h-6 rounded-lg bg-sky-600 text-white flex items-center justify-center text-xs font-bold">
+              <div className="flex items-center gap-2.5 text-base font-bold text-white">
+                <span className="w-6.5 h-6.5 rounded-lg bg-sky-600 text-white flex items-center justify-center text-xs font-bold">
                   3
                 </span>
                 <span>{phrasing.phase3Title}</span>
               </div>
 
-              <div className="space-y-3 pl-8">
+              <div className="space-y-3 pl-9">
                 {worksheetData.criticalQuestions.map((q, qIdx) => (
-                  <div key={qIdx} className="p-3.5 rounded-xl bg-slate-950/60 border border-slate-800 space-y-1.5">
-                    <h4 className="text-xs font-bold text-slate-200">{q.prompt}</h4>
-                    <p className="text-xs text-slate-400 leading-relaxed">{q.subtext}</p>
+                  <div key={qIdx} className="p-4 rounded-xl bg-slate-950/60 border border-slate-800 space-y-2">
+                    <h4 className="text-sm font-bold text-slate-100">{q.prompt}</h4>
+                    <p className="text-sm text-slate-300 leading-relaxed">{q.subtext}</p>
                     {includeAnswerKey && q.exemplarAnswer && (
-                      <div className="mt-2 p-2.5 rounded-lg bg-emerald-950/30 border border-emerald-500/20 text-xs text-emerald-200 space-y-0.5">
-                        <span className="font-bold text-[10px] uppercase text-emerald-400">
+                      <div className="mt-2.5 p-3 rounded-lg bg-emerald-950/30 border border-emerald-500/20 text-sm text-emerald-200 space-y-1">
+                        <span className="font-bold text-xs uppercase text-emerald-400">
                           Exemplar Model Answer:
                         </span>
-                        <p className="text-slate-300">{q.exemplarAnswer}</p>
+                        <p className="text-slate-200 text-sm leading-relaxed">{q.exemplarAnswer}</p>
                       </div>
                     )}
                   </div>
@@ -405,37 +405,37 @@ export const WorksheetGeneratorModal: React.FC<WorksheetModalProps> = ({
 
             {/* PHASE 4: SYNTHESIS CONCLUSION */}
             <div className="space-y-3">
-              <div className="flex items-center gap-2 text-sm font-bold text-white">
-                <span className="w-6 h-6 rounded-lg bg-sky-600 text-white flex items-center justify-center text-xs font-bold">
+              <div className="flex items-center gap-2.5 text-base font-bold text-white">
+                <span className="w-6.5 h-6.5 rounded-lg bg-sky-600 text-white flex items-center justify-center text-xs font-bold">
                   4
                 </span>
                 <span>{phrasing.phase4Title}</span>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pl-8">
-                <div className="p-3.5 rounded-xl bg-slate-950/60 border border-slate-800 space-y-1">
-                  <span className="text-xs font-bold text-sky-400 uppercase tracking-wider block">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 pl-9">
+                <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800 space-y-1.5">
+                  <span className="text-sm font-bold text-sky-400 uppercase tracking-wider block">
                     {phrasing.claimTitle}
                   </span>
-                  <p className="text-[11px] text-slate-400">
+                  <p className="text-xs text-slate-300">
                     {phrasing.claimSubtext}
                   </p>
                 </div>
 
-                <div className="p-3.5 rounded-xl bg-slate-950/60 border border-slate-800 space-y-1">
-                  <span className="text-xs font-bold text-sky-400 uppercase tracking-wider block">
+                <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800 space-y-1.5">
+                  <span className="text-sm font-bold text-sky-400 uppercase tracking-wider block">
                     {phrasing.evidenceTitle}
                   </span>
-                  <p className="text-[11px] text-slate-400">
+                  <p className="text-xs text-slate-300">
                     {phrasing.evidenceSubtext}
                   </p>
                 </div>
 
-                <div className="p-3.5 rounded-xl bg-slate-950/60 border border-slate-800 space-y-1">
-                  <span className="text-xs font-bold text-sky-400 uppercase tracking-wider block">
+                <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800 space-y-1.5">
+                  <span className="text-sm font-bold text-sky-400 uppercase tracking-wider block">
                     {phrasing.reasoningTitle}
                   </span>
-                  <p className="text-[11px] text-slate-400">
+                  <p className="text-xs text-slate-300">
                     {phrasing.reasoningSubtext}
                   </p>
                 </div>
@@ -443,12 +443,12 @@ export const WorksheetGeneratorModal: React.FC<WorksheetModalProps> = ({
             </div>
 
             {/* PHASE 5: REAL-WORLD APPLICATION & ASSESSMENT RUBRIC */}
-            <div className="p-4 rounded-xl bg-slate-950/70 border border-slate-800 space-y-2">
-              <div className="text-xs font-bold text-indigo-400 uppercase tracking-wider flex items-center gap-1.5">
+            <div className="p-4.5 rounded-xl bg-slate-950/70 border border-slate-800 space-y-2">
+              <div className="text-sm font-bold text-indigo-300 uppercase tracking-wider flex items-center gap-1.5">
                 <Award className="w-4 h-4 text-amber-400" />
                 <span>Everyday STEM Connection: {worksheetData.realWorldScenario.title}</span>
               </div>
-              <p className="text-xs text-slate-300 leading-relaxed">
+              <p className="text-sm text-slate-300 leading-relaxed">
                 {worksheetData.realWorldScenario.scenario} {worksheetData.realWorldScenario.task}
               </p>
             </div>

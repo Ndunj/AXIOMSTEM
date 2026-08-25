@@ -206,7 +206,7 @@ export function generateWorksheetPDF(
 
   const pageWidth = 210;
   const pageHeight = 297;
-  const margin = 14;
+  const margin = 12;
   const contentWidth = pageWidth - margin * 2;
 
   // -------------------------------------------------------------
@@ -222,181 +222,194 @@ export function generateWorksheetPDF(
 
   // Institution / Program Header
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(8.5);
+  doc.setFontSize(9);
   doc.setTextColor(theme.accent[0], theme.accent[1], theme.accent[2]);
-  doc.text("AXIOM STEM LABORATORY CURRICULUM", margin, 14);
+  doc.text("AXIOM STEM LABORATORY CURRICULUM", margin, 13.5);
 
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(8);
+  doc.setFontSize(8.5);
   doc.setTextColor(100, 116, 139);
-  doc.text(`Grade Level: ${grade}  •  Discipline: ${theme.name}`, margin + 65, 14);
+  doc.text(`Grade Level: ${grade}  •  Discipline: ${theme.name}`, margin + 70, 13.5);
 
   // Document Badge (Teacher Key vs Student Sheet)
   if (isKey) {
     doc.setFillColor(220, 38, 38); // Red 600
-    doc.roundedRect(pageWidth - margin - 48, 9, 48, 7, 1.5, 1.5, "F");
+    doc.roundedRect(pageWidth - margin - 52, 8.5, 52, 7.5, 1.5, 1.5, "F");
     doc.setTextColor(255, 255, 255);
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(7.5);
-    doc.text("TEACHER KEY & SCORING", pageWidth - margin - 24, 13.8, { align: "center" });
+    doc.setFontSize(8);
+    doc.text("TEACHER KEY & SCORING", pageWidth - margin - 26, 13.5, { align: "center" });
   } else {
     doc.setFillColor(theme.primary[0], theme.primary[1], theme.primary[2]);
-    doc.roundedRect(pageWidth - margin - 48, 9, 48, 7, 1.5, 1.5, "F");
+    doc.roundedRect(pageWidth - margin - 52, 8.5, 52, 7.5, 1.5, 1.5, "F");
     doc.setTextColor(255, 255, 255);
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(7.5);
-    doc.text("STUDENT LAB INQUIRY", pageWidth - margin - 24, 13.8, { align: "center" });
+    doc.setFontSize(8);
+    doc.text("STUDENT LAB INQUIRY", pageWidth - margin - 26, 13.5, { align: "center" });
   }
 
   // Simulation Title
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(15);
+  doc.setFontSize(16);
   doc.setTextColor(theme.primary[0], theme.primary[1], theme.primary[2]);
   doc.text(simulation.title.toUpperCase(), margin, 23);
 
   // Subtitle / Tagline & Standards
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(8.5);
+  doc.setFontSize(9.5);
   doc.setTextColor(71, 85, 105);
-  doc.text(simulation.tagline, margin, 28);
+  doc.text(simulation.tagline, margin, 28.5);
 
   const standardsStr = simulation.standards && simulation.standards.length > 0
     ? `Standards: ${simulation.standards.slice(0, 3).join(", ")}`
     : `Curriculum: Next Generation High-School STEM Standards`;
-  doc.setFontSize(7.5);
+  doc.setFontSize(8.5);
   doc.setTextColor(100, 116, 139);
-  doc.text(standardsStr, margin, 32.5);
+  doc.text(standardsStr, margin, 33);
 
   // Student Metadata Box (Name, Date, Period, Score)
   doc.setFillColor(248, 250, 252); // Slate 50
   doc.setDrawColor(226, 232, 240); // Slate 200
   doc.setLineWidth(0.3);
-  doc.roundedRect(margin, 35, contentWidth, 12, 1.5, 1.5, "FD");
+  doc.roundedRect(margin, 36, contentWidth, 12, 1.5, 1.5, "FD");
 
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(7.5);
+  doc.setFontSize(8.5);
   doc.setTextColor(51, 65, 85);
-  doc.text("STUDENT NAME:", margin + 3, 40);
-  doc.text("DATE:", margin + 65, 40);
-  doc.text("CLASS / PERIOD:", margin + 110, 40);
-  doc.text("TOTAL SCORE:", margin + 148, 40);
+  doc.text("STUDENT NAME:", margin + 3, 41.5);
+  doc.text("DATE:", margin + 68, 41.5);
+  doc.text("CLASS / PERIOD:", margin + 112, 41.5);
+  doc.text("TOTAL SCORE:", margin + 150, 41.5);
 
   doc.setFont("helvetica", "normal");
+  doc.setFontSize(9);
   doc.setTextColor(148, 163, 184);
-  doc.text(options.studentName || "________________________", margin + 25, 40);
-  doc.text("____________", margin + 74, 40);
-  doc.text(options.period || "_________", margin + 132, 40);
+  doc.text(options.studentName || "________________________", margin + 28, 41.5);
+  doc.text("____________", margin + 78, 41.5);
+  doc.text(options.period || "_________", margin + 135, 41.5);
   doc.setTextColor(theme.accent[0], theme.accent[1], theme.accent[2]);
   doc.setFont("helvetica", "bold");
-  doc.text("_____ / 100 PTS", margin + 168, 40);
+  doc.text("_____ / 100 PTS", margin + 171, 41.5);
 
-  let y = 51;
+  let y = 52;
 
   // Central Driving Phenomenon Callout Box
   doc.setFillColor(theme.light[0], theme.light[1], theme.light[2]);
   doc.setDrawColor(theme.border[0], theme.border[1], theme.border[2]);
   doc.setLineWidth(0.4);
-  doc.roundedRect(margin, y, contentWidth, 14, 1.5, 1.5, "FD");
-
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(7.5);
-  doc.setTextColor(theme.accent[0], theme.accent[1], theme.accent[2]);
-  doc.text("CENTRAL DRIVING PHENOMENON & INQUIRY QUESTION:", margin + 3, y + 4.5);
 
   doc.setFont("helvetica", "italic");
-  doc.setFontSize(8.2);
-  doc.setTextColor(15, 23, 42);
+  doc.setFontSize(9.5);
   const dqLines = doc.splitTextToSize(`"${data.drivingQuestion}"`, contentWidth - 6);
-  doc.text(dqLines, margin + 3, y + 9.5);
+  const dqBoxHeight = Math.max(16, 8 + dqLines.length * 4.5);
+  doc.roundedRect(margin, y, contentWidth, dqBoxHeight, 1.5, 1.5, "FD");
 
-  y += 18;
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(8.5);
+  doc.setTextColor(theme.accent[0], theme.accent[1], theme.accent[2]);
+  doc.text("CENTRAL DRIVING PHENOMENON & INQUIRY QUESTION:", margin + 3, y + 4.8);
+
+  doc.setFont("helvetica", "italic");
+  doc.setFontSize(9.5);
+  doc.setTextColor(15, 23, 42);
+  doc.text(dqLines, margin + 3, y + 10);
+
+  y += dqBoxHeight + 4;
 
   // SECTION 1: PRE-LAB HYPOTHESIS & PRIOR KNOWLEDGE
   doc.setFillColor(theme.primary[0], theme.primary[1], theme.primary[2]);
-  doc.roundedRect(margin, y, 7, 7, 1.5, 1.5, "F");
+  doc.roundedRect(margin, y, 7.5, 7.5, 1.5, 1.5, "F");
   doc.setTextColor(255, 255, 255);
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(8);
-  doc.text("1", margin + 3.5, y + 4.8, { align: "center" });
+  doc.setFontSize(8.5);
+  doc.text("1", margin + 3.75, y + 5.2, { align: "center" });
 
   doc.setTextColor(theme.primary[0], theme.primary[1], theme.primary[2]);
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(10);
-  doc.text(phrasing.phase1Title, margin + 10, y + 5);
-  y += 8;
+  doc.setFontSize(11);
+  doc.text(phrasing.phase1Title, margin + 11, y + 5.5);
+  y += 9;
 
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(8);
+  doc.setFontSize(9);
   doc.setTextColor(71, 85, 105);
   const hypLines = doc.splitTextToSize(data.hypothesisPrompt, contentWidth);
   doc.text(hypLines, margin, y);
-  y += hypLines.length * 3.6 + 2;
+  y += hypLines.length * 4 + 2;
 
   // Answer lines / Exemplar Box / Student Hypothesis
   if (isKey) {
     doc.setFillColor(theme.light[0], theme.light[1], theme.light[2]);
     doc.setDrawColor(theme.border[0], theme.border[1], theme.border[2]);
     doc.setLineWidth(0.3);
-    doc.roundedRect(margin, y, contentWidth, 14, 1.5, 1.5, "FD");
+    
+    const exemplarText = "Student states a clear, mathematically/physically sound conjecture with direct proportionality or structural mechanism.";
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    const exLines = doc.splitTextToSize(exemplarText, contentWidth - 6);
+    const boxH = Math.max(16, 7 + exLines.length * 4.5);
+    
+    doc.roundedRect(margin, y, contentWidth, boxH, 1.5, 1.5, "FD");
     doc.setTextColor(theme.accent[0], theme.accent[1], theme.accent[2]);
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(7.5);
-    doc.text("TEACHER SCORING GUIDE & EXEMPLARY CONJECTURE:", margin + 3, y + 4.5);
+    doc.setFontSize(8.5);
+    doc.text("TEACHER SCORING GUIDE & EXEMPLARY CONJECTURE:", margin + 3, y + 5);
+    
     doc.setTextColor(15, 23, 42);
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(7.5);
-    doc.text(
-      "Student states a clear, mathematically/physically sound conjecture with direct proportionality or structural mechanism.",
-      margin + 3,
-      y + 9,
-      { maxWidth: contentWidth - 6 }
-    );
-    y += 18;
+    doc.setFontSize(9);
+    doc.text(exLines, margin + 3, y + 10);
+    y += boxH + 4;
   } else if (options.studentAnswers?.hypothesis) {
     doc.setFillColor(248, 250, 252);
     doc.setDrawColor(theme.border[0], theme.border[1], theme.border[2]);
     doc.setLineWidth(0.3);
-    doc.roundedRect(margin, y, contentWidth, 14, 1.5, 1.5, "FD");
+    
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    const stLines = doc.splitTextToSize(options.studentAnswers.hypothesis, contentWidth - 6);
+    const boxH = Math.max(16, 7 + stLines.length * 4.5);
+
+    doc.roundedRect(margin, y, contentWidth, boxH, 1.5, 1.5, "FD");
     doc.setTextColor(theme.accent[0], theme.accent[1], theme.accent[2]);
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(7.5);
-    doc.text("STUDENT RECORDED HYPOTHESIS:", margin + 3, y + 4.5);
+    doc.setFontSize(8.5);
+    doc.text("STUDENT RECORDED HYPOTHESIS:", margin + 3, y + 5);
+    
     doc.setTextColor(15, 23, 42);
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(7.5);
-    doc.text(options.studentAnswers.hypothesis, margin + 3, y + 9, {
-      maxWidth: contentWidth - 6,
-    });
-    y += 18;
+    doc.setFontSize(9);
+    doc.text(stLines, margin + 3, y + 10);
+    y += boxH + 4;
   } else {
     doc.setDrawColor(203, 213, 225); // Slate 300 dotted
     doc.setLineDashPattern([1, 1], 0);
     for (let i = 0; i < 3; i++) {
-      doc.line(margin, y + 4 + i * 5, margin + contentWidth, y + 4 + i * 5);
+      doc.line(margin, y + 4 + i * 5.5, margin + contentWidth, y + 4 + i * 5.5);
     }
     doc.setLineDashPattern([], 0);
-    y += 18;
+    y += 20;
   }
 
   // SECTION 2: VIRTUAL DATA COLLECTION & EXPERIMENTAL RUNS
   doc.setFillColor(theme.primary[0], theme.primary[1], theme.primary[2]);
-  doc.roundedRect(margin, y, 7, 7, 1.5, 1.5, "F");
+  doc.roundedRect(margin, y, 7.5, 7.5, 1.5, 1.5, "F");
   doc.setTextColor(255, 255, 255);
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(8);
-  doc.text("2", margin + 3.5, y + 4.8, { align: "center" });
+  doc.setFontSize(8.5);
+  doc.text("2", margin + 3.75, y + 5.2, { align: "center" });
 
   doc.setTextColor(theme.primary[0], theme.primary[1], theme.primary[2]);
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(10);
-  doc.text(phrasing.phase2Title, margin + 10, y + 5);
-  y += 8;
+  doc.setFontSize(11);
+  doc.text(phrasing.phase2Title, margin + 11, y + 5.5);
+  y += 9;
 
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(8);
+  doc.setFontSize(9);
   doc.setTextColor(71, 85, 105);
   doc.text(phrasing.phase2Subtitle, margin, y);
-  y += 4;
+  y += 4.5;
 
   // AutoTable for Data Collection
   const tableData = isKey
@@ -416,13 +429,13 @@ export function generateWorksheetPDF(
       fillColor: theme.primary,
       textColor: [255, 255, 255],
       fontStyle: "bold",
-      fontSize: 7.5,
-      cellPadding: 2,
+      fontSize: 8.5,
+      cellPadding: 2.5,
     },
     bodyStyles: {
       textColor: [15, 23, 42],
-      fontSize: 7,
-      cellPadding: 2,
+      fontSize: 8,
+      cellPadding: 2.2,
       lineColor: [226, 232, 240],
       lineWidth: 0.2,
     },
@@ -434,12 +447,12 @@ export function generateWorksheetPDF(
 
   // Footer for Page 1
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(7.5);
+  doc.setFontSize(8);
   doc.setTextColor(148, 163, 184);
   doc.text(
     `Axiom STEM Interactive Curriculum • ${simulation.title} • Page 1 of 2`,
     pageWidth / 2,
-    pageHeight - 8,
+    pageHeight - 7,
     { align: "center" }
   );
 
@@ -456,258 +469,275 @@ export function generateWorksheetPDF(
 
   doc.setTextColor(255, 255, 255);
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(8.5);
+  doc.setFontSize(9);
   doc.text(`${simulation.title.toUpperCase()} — CRITICAL ANALYSIS & PROOF`, margin, 7.5);
 
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(7.5);
+  doc.setFontSize(8.5);
   doc.setTextColor(203, 213, 225);
-  doc.text("PHASES 3 & 4: ANALYSIS, SYNTHESIS, & EVALUATION", pageWidth - margin - 80, 7.5);
+  doc.text("PHASES 3 & 4: ANALYSIS, SYNTHESIS, & EVALUATION", pageWidth - margin - 85, 7.5);
 
-  y = 20;
+  y = 18;
 
   // SECTION 3: DEEP CRITICAL THINKING & MATHEMATICAL MODELING
   doc.setFillColor(theme.primary[0], theme.primary[1], theme.primary[2]);
-  doc.roundedRect(margin, y, 7, 7, 1.5, 1.5, "F");
+  doc.roundedRect(margin, y, 7.5, 7.5, 1.5, 1.5, "F");
   doc.setTextColor(255, 255, 255);
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(8);
-  doc.text("3", margin + 3.5, y + 4.8, { align: "center" });
+  doc.setFontSize(8.5);
+  doc.text("3", margin + 3.75, y + 5.2, { align: "center" });
 
   doc.setTextColor(theme.primary[0], theme.primary[1], theme.primary[2]);
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(10);
-  doc.text(phrasing.phase3Title, margin + 10, y + 5);
+  doc.setFontSize(11);
+  doc.text(phrasing.phase3Title, margin + 11, y + 5.5);
   y += 9;
 
   // Render each Critical Thinking Question
   data.criticalQuestions.forEach((q, qIdx) => {
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(8.5);
+    doc.setFontSize(9.5);
     doc.setTextColor(theme.primary[0], theme.primary[1], theme.primary[2]);
     doc.text(q.prompt, margin, y);
-    y += 4;
+    y += 4.5;
 
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(8);
+    doc.setFontSize(8.5);
     doc.setTextColor(71, 85, 105);
     const subLines = doc.splitTextToSize(q.subtext, contentWidth);
     doc.text(subLines, margin, y);
-    y += subLines.length * 3.6 + 1.5;
+    y += subLines.length * 3.8 + 1.5;
 
     if (isKey && q.exemplarAnswer) {
       doc.setFillColor(theme.light[0], theme.light[1], theme.light[2]);
       doc.setDrawColor(theme.border[0], theme.border[1], theme.border[2]);
       doc.setLineWidth(0.3);
-      doc.roundedRect(margin, y, contentWidth, 12, 1.5, 1.5, "FD");
+      
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(9);
+      const ansLines = doc.splitTextToSize(q.exemplarAnswer, contentWidth - 6);
+      const qBoxH = Math.max(14, 6.5 + ansLines.length * 4.2);
+
+      doc.roundedRect(margin, y, contentWidth, qBoxH, 1.5, 1.5, "FD");
       doc.setTextColor(theme.accent[0], theme.accent[1], theme.accent[2]);
       doc.setFont("helvetica", "bold");
-      doc.setFontSize(7.5);
-      doc.text("EXEMPLAR MODEL RESPONSE:", margin + 2.5, y + 3.5);
+      doc.setFontSize(8.5);
+      doc.text("EXEMPLAR MODEL RESPONSE:", margin + 3, y + 4.5);
+      
       doc.setTextColor(15, 23, 42);
       doc.setFont("helvetica", "normal");
-      doc.setFontSize(7.2);
-      const ansLines = doc.splitTextToSize(q.exemplarAnswer, contentWidth - 5);
-      doc.text(ansLines, margin + 2.5, y + 7);
-      y += 14;
+      doc.setFontSize(9);
+      doc.text(ansLines, margin + 3, y + 9);
+      y += qBoxH + 3.5;
     } else if (options.studentAnswers?.criticalAnswers?.[qIdx]) {
       doc.setFillColor(248, 250, 252);
       doc.setDrawColor(theme.border[0], theme.border[1], theme.border[2]);
       doc.setLineWidth(0.3);
-      doc.roundedRect(margin, y, contentWidth, 12, 1.5, 1.5, "FD");
+      
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(9);
+      const ansLines = doc.splitTextToSize(options.studentAnswers.criticalAnswers[qIdx], contentWidth - 6);
+      const qBoxH = Math.max(14, 6.5 + ansLines.length * 4.2);
+
+      doc.roundedRect(margin, y, contentWidth, qBoxH, 1.5, 1.5, "FD");
       doc.setTextColor(theme.accent[0], theme.accent[1], theme.accent[2]);
       doc.setFont("helvetica", "bold");
-      doc.setFontSize(7.5);
-      doc.text("STUDENT ANALYSIS:", margin + 2.5, y + 3.5);
+      doc.setFontSize(8.5);
+      doc.text("STUDENT ANALYSIS:", margin + 3, y + 4.5);
+      
       doc.setTextColor(15, 23, 42);
       doc.setFont("helvetica", "normal");
-      doc.setFontSize(7.2);
-      const ansLines = doc.splitTextToSize(options.studentAnswers.criticalAnswers[qIdx], contentWidth - 5);
-      doc.text(ansLines, margin + 2.5, y + 7);
-      y += 14;
+      doc.setFontSize(9);
+      doc.text(ansLines, margin + 3, y + 9);
+      y += qBoxH + 3.5;
     } else {
       doc.setDrawColor(203, 213, 225);
       doc.setLineDashPattern([1, 1], 0);
       for (let l = 0; l < 2; l++) {
-        doc.line(margin, y + 4 + l * 4.5, margin + contentWidth, y + 4 + l * 4.5);
+        doc.line(margin, y + 4 + l * 4.8, margin + contentWidth, y + 4 + l * 4.8);
       }
       doc.setLineDashPattern([], 0);
-      y += 12;
+      y += 13;
     }
   });
 
   // SECTION 4: CER SYNTHESIS CONCLUSION
   doc.setFillColor(theme.primary[0], theme.primary[1], theme.primary[2]);
-  doc.roundedRect(margin, y, 7, 7, 1.5, 1.5, "F");
+  doc.roundedRect(margin, y, 7.5, 7.5, 1.5, 1.5, "F");
   doc.setTextColor(255, 255, 255);
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(8);
-  doc.text("4", margin + 3.5, y + 4.8, { align: "center" });
+  doc.setFontSize(8.5);
+  doc.text("4", margin + 3.75, y + 5.2, { align: "center" });
 
   doc.setTextColor(theme.primary[0], theme.primary[1], theme.primary[2]);
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(10);
-  doc.text(phrasing.phase4Title, margin + 10, y + 5);
-  y += 8;
+  doc.setFontSize(11);
+  doc.text(phrasing.phase4Title, margin + 11, y + 5.5);
+  y += 8.5;
 
   // 3-Part CER Grid
   const cerBoxWidth = (contentWidth - 6) / 3;
+  const cerBoxHeight = 30;
 
   // Claim Box
   doc.setFillColor(248, 250, 252);
   doc.setDrawColor(theme.border[0], theme.border[1], theme.border[2]);
   doc.setLineWidth(0.4);
-  doc.roundedRect(margin, y, cerBoxWidth, 26, 1.5, 1.5, "FD");
+  doc.roundedRect(margin, y, cerBoxWidth, cerBoxHeight, 1.5, 1.5, "FD");
 
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(8);
+  doc.setFontSize(8.5);
   doc.setTextColor(theme.accent[0], theme.accent[1], theme.accent[2]);
-  doc.text(phrasing.claimTitle, margin + 2.5, y + 4.5);
+  doc.text(phrasing.claimTitle, margin + 2.5, y + 4.8);
 
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(7);
+  doc.setFontSize(7.5);
   doc.setTextColor(100, 116, 139);
-  doc.text(phrasing.claimSubtext, margin + 2.5, y + 8, {
+  doc.text(phrasing.claimSubtext, margin + 2.5, y + 8.5, {
     maxWidth: cerBoxWidth - 5,
   });
 
   if (isKey) {
     doc.setFont("helvetica", "italic");
-    doc.setFontSize(6.8);
+    doc.setFontSize(8.5);
     doc.setTextColor(15, 23, 42);
-    doc.text("Clear quantitative claim linking input parameter to observed response.", margin + 2.5, y + 18, {
+    doc.text("Clear quantitative claim linking input parameter to observed response.", margin + 2.5, y + 17, {
       maxWidth: cerBoxWidth - 5,
     });
   } else if (options.studentAnswers?.claim) {
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(6.8);
+    doc.setFontSize(8.5);
     doc.setTextColor(15, 23, 42);
-    doc.text(options.studentAnswers.claim, margin + 2.5, y + 15, {
+    doc.text(options.studentAnswers.claim, margin + 2.5, y + 16, {
       maxWidth: cerBoxWidth - 5,
     });
   } else {
     doc.setDrawColor(203, 213, 225);
     doc.setLineDashPattern([1, 1], 0);
-    doc.line(margin + 2.5, y + 17, margin + cerBoxWidth - 2.5, y + 17);
-    doc.line(margin + 2.5, y + 22, margin + cerBoxWidth - 2.5, y + 22);
+    doc.line(margin + 2.5, y + 19, margin + cerBoxWidth - 2.5, y + 19);
+    doc.line(margin + 2.5, y + 25, margin + cerBoxWidth - 2.5, y + 25);
     doc.setLineDashPattern([], 0);
   }
 
   // Evidence Box
   const evidX = margin + cerBoxWidth + 3;
   doc.setFillColor(248, 250, 252);
-  doc.roundedRect(evidX, y, cerBoxWidth, 26, 1.5, 1.5, "FD");
+  doc.roundedRect(evidX, y, cerBoxWidth, cerBoxHeight, 1.5, 1.5, "FD");
 
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(8);
+  doc.setFontSize(8.5);
   doc.setTextColor(theme.accent[0], theme.accent[1], theme.accent[2]);
-  doc.text(phrasing.evidenceTitle, evidX + 2.5, y + 4.5);
+  doc.text(phrasing.evidenceTitle, evidX + 2.5, y + 4.8);
 
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(7);
+  doc.setFontSize(7.5);
   doc.setTextColor(100, 116, 139);
-  doc.text(phrasing.evidenceSubtext, evidX + 2.5, y + 8, {
+  doc.text(phrasing.evidenceSubtext, evidX + 2.5, y + 8.5, {
     maxWidth: cerBoxWidth - 5,
   });
 
   if (isKey) {
     doc.setFont("helvetica", "italic");
-    doc.setFontSize(6.8);
+    doc.setFontSize(8.5);
     doc.setTextColor(15, 23, 42);
-    doc.text("Includes exact units, coordinates, and calculated invariants.", evidX + 2.5, y + 18, {
+    doc.text("Includes exact units, coordinates, and calculated invariants.", evidX + 2.5, y + 17, {
       maxWidth: cerBoxWidth - 5,
     });
   } else if (options.studentAnswers?.evidence) {
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(6.8);
+    doc.setFontSize(8.5);
     doc.setTextColor(15, 23, 42);
-    doc.text(options.studentAnswers.evidence, evidX + 2.5, y + 15, {
+    doc.text(options.studentAnswers.evidence, evidX + 2.5, y + 16, {
       maxWidth: cerBoxWidth - 5,
     });
   } else {
     doc.setDrawColor(203, 213, 225);
     doc.setLineDashPattern([1, 1], 0);
-    doc.line(evidX + 2.5, y + 17, evidX + cerBoxWidth - 2.5, y + 17);
-    doc.line(evidX + 2.5, y + 22, evidX + cerBoxWidth - 2.5, y + 22);
+    doc.line(evidX + 2.5, y + 19, evidX + cerBoxWidth - 2.5, y + 19);
+    doc.line(evidX + 2.5, y + 25, evidX + cerBoxWidth - 2.5, y + 25);
     doc.setLineDashPattern([], 0);
   }
 
   // Reasoning Box
   const reasX = evidX + cerBoxWidth + 3;
   doc.setFillColor(248, 250, 252);
-  doc.roundedRect(reasX, y, cerBoxWidth, 26, 1.5, 1.5, "FD");
+  doc.roundedRect(reasX, y, cerBoxWidth, cerBoxHeight, 1.5, 1.5, "FD");
 
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(8);
+  doc.setFontSize(8.5);
   doc.setTextColor(theme.accent[0], theme.accent[1], theme.accent[2]);
-  doc.text(phrasing.reasoningTitle, reasX + 2.5, y + 4.5);
+  doc.text(phrasing.reasoningTitle, reasX + 2.5, y + 4.8);
 
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(7);
+  doc.setFontSize(7.5);
   doc.setTextColor(100, 116, 139);
-  doc.text(phrasing.reasoningSubtext, reasX + 2.5, y + 8, {
+  doc.text(phrasing.reasoningSubtext, reasX + 2.5, y + 8.5, {
     maxWidth: cerBoxWidth - 5,
   });
 
   if (isKey) {
     doc.setFont("helvetica", "italic");
-    doc.setFontSize(6.8);
+    doc.setFontSize(8.5);
     doc.setTextColor(15, 23, 42);
-    doc.text(phrasing.reasoningExemplar, reasX + 2.5, y + 18, {
+    doc.text(phrasing.reasoningExemplar, reasX + 2.5, y + 17, {
       maxWidth: cerBoxWidth - 5,
     });
   } else if (options.studentAnswers?.reasoning) {
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(6.8);
+    doc.setFontSize(8.5);
     doc.setTextColor(15, 23, 42);
-    doc.text(options.studentAnswers.reasoning, reasX + 2.5, y + 15, {
+    doc.text(options.studentAnswers.reasoning, reasX + 2.5, y + 16, {
       maxWidth: cerBoxWidth - 5,
     });
   } else {
     doc.setDrawColor(203, 213, 225);
     doc.setLineDashPattern([1, 1], 0);
-    doc.line(reasX + 2.5, y + 17, reasX + cerBoxWidth - 2.5, y + 17);
-    doc.line(reasX + 2.5, y + 22, reasX + cerBoxWidth - 2.5, y + 22);
+    doc.line(reasX + 2.5, y + 19, reasX + cerBoxWidth - 2.5, y + 19);
+    doc.line(reasX + 2.5, y + 25, reasX + cerBoxWidth - 2.5, y + 25);
     doc.setLineDashPattern([], 0);
   }
 
-  y += 30;
+  y += cerBoxHeight + 4;
 
   // SECTION 5: REAL-WORLD APPLICATION / RUBRIC SUMMARY
   doc.setFillColor(theme.light[0], theme.light[1], theme.light[2]);
   doc.setDrawColor(theme.border[0], theme.border[1], theme.border[2]);
   doc.setLineWidth(0.4);
-  doc.roundedRect(margin, y, contentWidth, 22, 2, 2, "FD");
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8.5);
+  const rwLines = doc.splitTextToSize(`${data.realWorldScenario.scenario} — ${data.realWorldScenario.task}`, contentWidth - 6);
+  const rwBoxH = Math.max(22, 12 + rwLines.length * 4);
+
+  doc.roundedRect(margin, y, contentWidth, rwBoxH, 2, 2, "FD");
 
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(8.5);
+  doc.setFontSize(9.5);
   doc.setTextColor(theme.primary[0], theme.primary[1], theme.primary[2]);
   doc.text(`EVERYDAY STEM IN ACTION: ${data.realWorldScenario.title.toUpperCase()}`, margin + 3, y + 5);
 
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(7.5);
+  doc.setFontSize(8.5);
   doc.setTextColor(51, 65, 85);
-  doc.text(`${data.realWorldScenario.scenario} — ${data.realWorldScenario.task}`, margin + 3, y + 9.5, {
-    maxWidth: contentWidth - 6,
-  });
+  doc.text(rwLines, margin + 3, y + 9.5);
 
   if (isKey && data.realWorldScenario.exemplarAnswer) {
     doc.setFont("helvetica", "italic");
-    doc.setFontSize(7.2);
+    doc.setFontSize(9);
     doc.setTextColor(theme.accent[0], theme.accent[1], theme.accent[2]);
-    doc.text(`Exemplar: ${data.realWorldScenario.exemplarAnswer}`, margin + 3, y + 17, {
+    doc.text(`Exemplar: ${data.realWorldScenario.exemplarAnswer}`, margin + 3, y + rwBoxH - 3, {
       maxWidth: contentWidth - 6,
     });
   } else if (options.studentAnswers?.realWorldAnswer) {
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(7.2);
+    doc.setFontSize(9);
     doc.setTextColor(15, 23, 42);
-    doc.text(`Student Solution: ${options.studentAnswers.realWorldAnswer}`, margin + 3, y + 17, {
+    doc.text(`Student Solution: ${options.studentAnswers.realWorldAnswer}`, margin + 3, y + rwBoxH - 3, {
       maxWidth: contentWidth - 6,
     });
   }
 
-  y += 26;
+  y += rwBoxH + 4;
 
   // Teacher Assessment Rubric
   autoTable(doc, {
@@ -748,13 +778,13 @@ export function generateWorksheetPDF(
       fillColor: theme.primary,
       textColor: [255, 255, 255],
       fontStyle: "bold",
-      fontSize: 7,
-      cellPadding: 1.5,
+      fontSize: 8,
+      cellPadding: 1.8,
     },
     bodyStyles: {
       textColor: [15, 23, 42],
-      fontSize: 6.5,
-      cellPadding: 1.5,
+      fontSize: 7.5,
+      cellPadding: 1.8,
       lineColor: [226, 232, 240],
       lineWidth: 0.2,
     },
@@ -766,12 +796,12 @@ export function generateWorksheetPDF(
 
   // Footer for Page 2
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(7.5);
+  doc.setFontSize(8);
   doc.setTextColor(148, 163, 184);
   doc.text(
     `Axiom STEM Interactive Curriculum • ${simulation.title} • Page 2 of 2`,
     pageWidth / 2,
-    pageHeight - 8,
+    pageHeight - 7,
     { align: "center" }
   );
 
