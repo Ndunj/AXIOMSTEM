@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Graphical Solution of Linear & Quadratic Equations</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-color: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent-blue: #38bdf8;
+            --accent-pink: #f472b6;
+            --accent-green: #4ade80;
+            --grid-line: #334155;
+            --border-color: #475569;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 1.25rem;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 1.25rem;
+        }
+
+        header h1 {
+            font-size: 1.75rem;
+            color: var(--text-color);
+            margin-bottom: 0.35rem;
+        }
+
+        header p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.25rem;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        @media (max-width: 968px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .panel {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.25rem;
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+        }
+
+        button {
+            background-color: #334155;
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            padding: 0.6rem 0.9rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: all 0.2s ease;
+        }
+
+        button:hover:not(:disabled) {
+            background-color: #475569;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        button.btn-eq1 { border-color: var(--accent-blue); color: var(--accent-blue); }
+        button.btn-eq2 { border-color: var(--accent-pink); color: var(--accent-pink); }
+
+        .equation-box {
+            background: rgba(15, 23, 42, 0.6);
+            border-radius: 8px;
+            padding: 0.85rem;
+            border-left: 4px solid var(--accent-blue);
+        }
+
+        .equation-box.eq2 { border-left-color: var(--accent-pink); }
+
+        .eq-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.25rem;
+        }
+
+        .eq-title.eq1 { color: var(--accent-blue); }
+        .eq-title.eq2 { color: var(--accent-pink); }
+
+        .eq-text {
+            font-size: 1.15rem;
+            font-weight: bold;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        .tables-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.8rem;
+            text-align: center;
+        }
+
+        th, td {
+            padding: 0.4rem 0.2rem;
+            border: 1px solid var(--border-color);
+        }
+
+        th { background-color: rgba(255, 255, 255, 0.05); }
+        tr.highlight-row { background-color: rgba(255, 255, 255, 0.1); }
+
+        .sub-calc {
+            font-size: 0.75rem;
+            color: var(--accent-green);
+            display: block;
+            margin-top: 2px;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        .canvas-container {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 0.8; 
+            background-color: #090d16;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .solution-card {
+            background: rgba(74, 222, 128, 0.1);
+            border: 1px solid var(--accent-green);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            color: var(--accent-green);
+            font-weight: 600;
+            text-align: center;
+            font-size: 0.95rem;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Linear & Quadratic Equations Visualizer</h1>
+        <p>Step-by-step plotting with axis projection lines.</p>
+    </header>
+
+    <div class="container">
+        <!-- Control Panel -->
+        <div class="panel">
+            <div class="controls">
+                <button onclick="generateRandomSystem()">Generate New Equations</button>
+            </div>
+
+            <!-- Equations -->
+            <div class="equation-box">
+                <div class="eq-title eq1">Equation 1 (Quadratic Curve)</div>
+                <div class="eq-text" id="eq1Display" style="color: var(--accent-blue)">y = ax² + bx + c</div>
+            </div>
+
+            <div class="equation-box eq2">
+                <div class="eq-title eq2">Equation 2 (Straight Line)</div>
+                <div class="eq-text" id="eq2Display" style="color: var(--accent-pink)">y = mx + k</div>
+            </div>
+
+            <!-- Plotting Controls -->
+            <div class="controls">
+                <button class="btn-eq1" id="btnPlotEq1" onclick="plotNextPoint(1)">Plot Quadratic Point</button>
+                <button class="btn-eq1" id="joinEq1Btn" onclick="animateJoinLine(1)" disabled>Draw Curve (Very Slow)</button>
+                <button class="btn-eq2" id="btnPlotEq2" onclick="plotNextPoint(2)">Plot Linear Point</button>
+                <button class="btn-eq2" id="joinEq2Btn" onclick="animateJoinLine(2)" disabled>Draw Line</button>
+            </div>
+
+            <!-- Tables -->
+            <div class="tables-container">
+                <div>
+                    <div class="eq-title eq1" style="margin-bottom:0.4rem;">Table 1 (Curve)</div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>x</th>
+                                <th>Substitution</th>
+                                <th>(x, y)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table1Body"></tbody>
+                    </table>
+                </div>
+
+                <div>
+                    <div class="eq-title eq2" style="margin-bottom:0.4rem;">Table 2 (Line)</div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>x</th>
+                                <th>Substitution</th>
+                                <th>(x, y)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table2Body"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Solution -->
+            <div class="solution-card" id="solutionDisplay">
+                Solutions: (x1, y1) and (x2, y2)
+            </div>
+        </div>
+
+        <!-- Graph Panel -->
+        <div class="panel">
+            <div class="canvas-container">
+                <canvas id="graphCanvas"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('graphCanvas');
+        const ctx = canvas.getContext('2d');
+
+        let eqQuad = { a: 1, b: 0, c: -4 };
+        let eqLin = { m: 1, k: 2 };
+        let xValues = [];
+        let intersections = [];
+
+        let plottedPointsEq1 = 0;
+        let plottedPointsEq2 = 0;
+        let eq1LineProgress = 0;
+        let eq2LineProgress = 0;
+        let isAnimating = false;
+
+        const GRID_RANGE_X = 10; 
+        const GRID_RANGE_Y = 12;
+
+        function initCanvas() {
+            const rect = canvas.parentElement.getBoundingClientRect();
+            canvas.width = rect.width * window.devicePixelRatio;
+            canvas.height = rect.height * window.devicePixelRatio;
+            drawGraph();
+        }
+
+        window.addEventListener('resize', initCanvas);
+
+        function generateRandomSystem() {
+            let r1 = Math.floor(Math.random() * 7) - 3; 
+            let r2 = r1 + Math.floor(Math.random() * 4) + 1; 
+            
+            let m = Math.floor(Math.random() * 5) - 2; 
+            let k = Math.floor(Math.random() * 7) - 3; 
+
+            let possibleA = [1, -1];
+            let a = possibleA[Math.floor(Math.random() * possibleA.length)];
+
+            let B = -a * (r1 + r2);
+            let C = a * (r1 * r2);
+
+            let b = B + m;
+            let c = C + k;
+
+            eqQuad = { a, b, c };
+            eqLin = { m, k };
+
+            let y1 = m * r1 + k;
+            let y2 = m * r2 + k;
+            intersections = [
+                { x: r1, y: y1 },
+                { x: r2, y: y2 }
+            ];
+
+            let minX = Math.min(r1, r2) - 2;
+            let maxX = Math.max(r1, r2) + 2;
+            
+            xValues = [];
+            for (let x = minX; x <= maxX; x++) {
+                xValues.push(x);
+            }
+
+            resetPlotState();
+            updateUI();
+        }
+
+        function resetPlotState() {
+            plottedPointsEq1 = 0;
+            plottedPointsEq2 = 0;
+            eq1LineProgress = 0;
+            eq2LineProgress = 0;
+            
+            document.getElementById('btnPlotEq1').disabled = false;
+            document.getElementById('btnPlotEq2').disabled = false;
+            document.getElementById('joinEq1Btn').disabled = true;
+            document.getElementById('joinEq2Btn').disabled = true;
+            
+            updateButtonLabels();
+        }
+
+        function updateButtonLabels() {
+            const btn1 = document.getElementById('btnPlotEq1');
+            const btn2 = document.getElementById('btnPlotEq2');
+            
+            btn1.textContent = `Plot Quadratic (${plottedPointsEq1}/${xValues.length})`;
+            btn2.textContent = `Plot Linear (${plottedPointsEq2}/${xValues.length})`;
+
+            if (plottedPointsEq1 >= xValues.length) {
+                btn1.disabled = true;
+                document.getElementById('joinEq1Btn').disabled = false;
+            }
+            if (plottedPointsEq2 >= xValues.length) {
+                btn2.disabled = true;
+                document.getElementById('joinEq2Btn').disabled = false;
+            }
+        }
+
+        function plotNextPoint(eqNum) {
+            if (eqNum === 1 && plottedPointsEq1 < xValues.length) plottedPointsEq1++;
+            else if (eqNum === 2 && plottedPointsEq2 < xValues.length) plottedPointsEq2++;
+            updateButtonLabels();
+            updateUI(); 
+        }
+
+        function animateJoinLine(eqNum) {
+            if (isAnimating) return;
+            let start = null;
+            const duration = (eqNum === 1) ? 6000 : 3000; 
+            isAnimating = true;
+
+            if (eqNum === 1) document.getElementById('joinEq1Btn').disabled = true;
+            if (eqNum === 2) document.getElementById('joinEq2Btn').disabled = true;
+
+            function step(timestamp) {
+                if (!start) start = timestamp;
+                const elapsed = timestamp - start;
+                const progress = Math.min(elapsed / duration, 1.0);
+
+                if (eqNum === 1) eq1LineProgress = progress;
+                if (eqNum === 2) eq2LineProgress = progress;
+
+                drawGraph();
+
+                if (progress < 1.0) {
+                    requestAnimationFrame(step);
+                } else {
+                    isAnimating = false;
+                }
+            }
+            requestAnimationFrame(step);
+        }
+
+        function formatQuadratic(a, b, c) {
+            let str = "y = ";
+            if (a === 1) str += "x²";
+            else if (a === -1) str += "-x²";
+            else str += a + "x²";
+
+            if (b === 1) str += " + x";
+            else if (b === -1) str += " - x";
+            else if (b > 0) str += " + " + b + "x";
+            else if (b < 0) str += " - " + Math.abs(b) + "x";
+
+            if (c > 0) str += " + " + c;
+            else if (c < 0) str += " - " + Math.abs(c);
+            
+            if (b === 0 && c === 0 && Math.abs(a) !== 1) return str;
+            return str;
+        }
+
+        function formatLinear(m, k) {
+            let str = "y = ";
+            if (m === 1) str += "x";
+            else if (m === -1) str += "-x";
+            else if (m !== 0) str += m + "x";
+
+            if (m === 0) str += k;
+            else if (k > 0) str += " + " + k;
+            else if (k < 0) str += " - " + Math.abs(k);
+            return str;
+        }
+
+        function updateUI() {
+            document.getElementById('eq1Display').innerHTML = formatQuadratic(eqQuad.a, eqQuad.b, eqQuad.c);
+            document.getElementById('eq2Display').innerHTML = formatLinear(eqLin.m, eqLin.k);
+
+            const t1 = document.getElementById('table1Body');
+            const t2 = document.getElementById('table2Body');
+            t1.innerHTML = '';
+            t2.innerHTML = '';
+
+            xValues.forEach((x, index) => {
+                const y1 = eqQuad.a * x * x + eqQuad.b * x + eqQuad.c;
+                const y2 = eqLin.m * x + eqLin.k;
+
+                const isPlotted1 = index < plottedPointsEq1;
+                const isPlotted2 = index < plottedPointsEq2;
+
+                let ax2Str = (eqQuad.a !== 1 && eqQuad.a !== -1) ? `${eqQuad.a}(${x})²` : (eqQuad.a === -1 ? `-(${x})²` : `(${x})²`);
+                let bxStr = eqQuad.b !== 0 ? (eqQuad.b > 0 ? `+ ${eqQuad.b}(${x})` : `- ${Math.abs(eqQuad.b)}(${x})`) : "";
+                let cStr = eqQuad.c !== 0 ? (eqQuad.c > 0 ? `+ ${eqQuad.c}` : `- ${Math.abs(eqQuad.c)}`) : "";
+                let quadSub = `y = ${ax2Str} ${bxStr} ${cStr}`.replace(/\s+/g, ' ');
+
+                let mxStr = eqLin.m !== 0 ? `${eqLin.m}(${x})` : "";
+                let kStr = eqLin.k !== 0 ? (eqLin.k > 0 ? `+ ${eqLin.k}` : `- ${Math.abs(eqLin.k)}`) : "";
+                if (eqLin.m === 0) kStr = eqLin.k;
+                let linSub = `y = ${mxStr} ${kStr}`.replace(/^\s*\+\s*/, '').replace(/\s+/g, ' ');
+
+                t1.innerHTML += `
+                    <tr class="${isPlotted1 ? 'highlight-row' : ''}" style="opacity: ${isPlotted1 ? '1' : '0.4'}">
+                        <td><b>${x}</b></td>
+                        <td><span class="sub-calc">${quadSub}<br>y = ${y1}</span></td>
+                        <td><span style="color:var(--text-muted);">(${x}, ${y1})</span></td>
+                    </tr>`;
+
+                t2.innerHTML += `
+                    <tr class="${isPlotted2 ? 'highlight-row' : ''}" style="opacity: ${isPlotted2 ? '1' : '0.4'}">
+                        <td><b>${x}</b></td>
+                        <td><span class="sub-calc">${linSub}<br>y = ${y2}</span></td>
+                        <td><span style="color:var(--text-muted);">(${x}, ${y2})</span></td>
+                    </tr>`;
+            });
+
+            document.getElementById('solutionDisplay').textContent = 
+                `Solutions: (${intersections[0].x}, ${intersections[0].y}) and (${intersections[1].x}, ${intersections[1].y})`;
+
+            drawGraph();
+        }
+
+        function toCanvasCoords(x, y) {
+            const w = canvas.width;
+            const h = canvas.height;
+            const cx = w / 2;
+            const cy = h / 2;
+            const unitX = w / (GRID_RANGE_X * 2);
+            const unitY = h / (GRID_RANGE_Y * 2);
+
+            return {
+                x: cx + x * unitX,
+                y: cy - y * unitY
+            };
+        }
+
+        function drawDashedLine(x1, y1, x2, y2, color) {
+            ctx.save();
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 1.5 * window.devicePixelRatio;
+            ctx.setLineDash([5 * window.devicePixelRatio, 5 * window.devicePixelRatio]);
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.stroke();
+            ctx.restore();
+        }
+
+        function drawGraph() {
+            const w = canvas.width;
+            const h = canvas.height;
+            const cx = w / 2;
+            const cy = h / 2;
+
+            ctx.clearRect(0, 0, w, h);
+
+            // Draw Grid
+            ctx.lineWidth = 1;
+            ctx.strokeStyle = '#334155';
+            ctx.fillStyle = '#64748b';
+            ctx.font = `${12 * window.devicePixelRatio}px sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            for (let i = -GRID_RANGE_X; i <= GRID_RANGE_X; i++) {
+                if (i === 0) continue;
+                const pos = toCanvasCoords(i, 0);
+                ctx.beginPath(); ctx.moveTo(pos.x, 0); ctx.lineTo(pos.x, h); ctx.stroke();
+                ctx.fillText(i, pos.x, cy + 15 * window.devicePixelRatio);
+            }
+
+            for (let i = -GRID_RANGE_Y; i <= GRID_RANGE_Y; i+=2) {
+                if (i === 0) continue;
+                const pos = toCanvasCoords(0, i);
+                ctx.beginPath(); ctx.moveTo(0, pos.y); ctx.lineTo(w, pos.y); ctx.stroke();
+                ctx.fillText(i, cx - 18 * window.devicePixelRatio, pos.y);
+            }
+
+            // Draw Axes
+            ctx.lineWidth = 2 * window.devicePixelRatio;
+            ctx.strokeStyle = '#94a3b8';
+            ctx.beginPath(); ctx.moveTo(0, cy); ctx.lineTo(w, cy); ctx.stroke(); 
+            ctx.beginPath(); ctx.moveTo(cx, 0); ctx.lineTo(cx, h); ctx.stroke(); 
+
+            ctx.fillStyle = '#f8fafc';
+            ctx.textAlign = 'right'; ctx.fillText('X', w - 10, cy - 15);
+            ctx.textAlign = 'left'; ctx.fillText('Y', cx + 15, 15);
+
+            // Draw Parabola with slow progression (6 seconds)
+            if (eq1LineProgress > 0) {
+                ctx.strokeStyle = '#38bdf8';
+                ctx.lineWidth = 3 * window.devicePixelRatio;
+                ctx.beginPath();
+                let startX = -GRID_RANGE_X;
+                let endX = GRID_RANGE_X;
+                let currentMaxX = startX + (endX - startX) * eq1LineProgress;
+                
+                let first = true;
+                for (let x = startX; x <= currentMaxX; x += 0.05) {
+                    let y = eqQuad.a * x * x + eqQuad.b * x + eqQuad.c;
+                    let pt = toCanvasCoords(x, y);
+                    if (first) { ctx.moveTo(pt.x, pt.y); first = false; }
+                    else { ctx.lineTo(pt.x, pt.y); }
+                }
+                ctx.stroke();
+            }
+
+            // Draw Linear Line with progression
+            if (eq2LineProgress > 0) {
+                ctx.strokeStyle = '#f472b6';
+                ctx.lineWidth = 3 * window.devicePixelRatio;
+                let yStart = eqLin.m * (-GRID_RANGE_X) + eqLin.k;
+                let yEnd = eqLin.m * GRID_RANGE_X + eqLin.k;
+                
+                let p1 = toCanvasCoords(-GRID_RANGE_X, yStart);
+                let p2 = toCanvasCoords(GRID_RANGE_X, yEnd);
+
+                let currX = p1.x + (p2.x - p1.x) * eq2LineProgress;
+                let currY = p1.y + (p2.y - p1.y) * eq2LineProgress;
+
+                ctx.beginPath(); ctx.moveTo(p1.x, p1.y); ctx.lineTo(currX, currY); ctx.stroke();
+            }
+
+            // Draw Points
+            for (let i = 0; i < plottedPointsEq1; i++) {
+                let x = xValues[i];
+                let y = eqQuad.a * x * x + eqQuad.b * x + eqQuad.c;
+                drawPoint(x, y, '#38bdf8');
+            }
+
+            for (let i = 0; i < plottedPointsEq2; i++) {
+                let x = xValues[i];
+                let y = eqLin.m * x + eqLin.k;
+                drawPoint(x, y, '#f472b6');
+            }
+
+            // Highlight Intersections and Draw Dotted Axis Projections when fully drawn
+            if (eq1LineProgress === 1.0 && eq2LineProgress === 1.0) {
+                intersections.forEach(int => {
+                    let pt = toCanvasCoords(int.x, int.y);
+                    let xAxisPt = toCanvasCoords(int.x, 0);
+                    let yAxisPt = toCanvasCoords(0, int.y);
+
+                    // Dashed line to X-axis
+                    drawDashedLine(pt.x, pt.y, xAxisPt.x, xAxisPt.y, 'rgba(74, 222, 128, 0.6)');
+                    // Dashed line to Y-axis
+                    drawDashedLine(pt.x, pt.y, yAxisPt.x, yAxisPt.y, 'rgba(74, 222, 128, 0.6)');
+
+                    // Intersection dot
+                    ctx.beginPath();
+                    ctx.arc(pt.x, pt.y, 8 * window.devicePixelRatio, 0, Math.PI * 2);
+                    ctx.fillStyle = '#4ade80'; ctx.fill();
+                    ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2; ctx.stroke();
+                    
+                    ctx.fillStyle = '#4ade80';
+                    ctx.font = `bold ${14 * window.devicePixelRatio}px sans-serif`;
+                    ctx.textAlign = 'left';
+                    ctx.fillText(`(${int.x}, ${int.y})`, pt.x + 12, pt.y - 12);
+                });
+            }
+        }
+
+        function drawPoint(x, y, color) {
+            const pt = toCanvasCoords(x, y);
+            ctx.beginPath();
+            ctx.arc(pt.x, pt.y, 5 * window.devicePixelRatio, 0, Math.PI * 2);
+            ctx.fillStyle = color;
+            ctx.fill();
+        }
+
+        generateRandomSystem();
+        setTimeout(initCanvas, 100);
+    </script>
+</body>
+</html>

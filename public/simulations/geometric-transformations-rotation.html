@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Geometric Transformations & 2D Rotation Virtual Lab</title>
+  <style>
+    :root {
+      --bg-color: #0f172a;
+      --card-bg: #1e293b;
+      --accent-blue: #38bdf8;
+      --accent-red: #f43f5e;
+      --accent-green: #10b981;
+      --accent-yellow: #f59e0b;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --border-color: #334155;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      background-color: var(--card-bg);
+      padding: 0.85rem 1.5rem;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    header h1 {
+      font-size: 1.25rem;
+      color: var(--accent-blue);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    header span {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      background: #0f172a;
+      padding: 0.2rem 0.6rem;
+      border-radius: 4px;
+      border: 1px solid var(--border-color);
+    }
+
+    .app-container {
+      display: grid;
+      grid-template-columns: 310px 1fr 310px;
+      gap: 1rem;
+      padding: 1rem;
+      flex: 1;
+      height: calc(100vh - 60px);
+      overflow: hidden;
+    }
+
+    .panel {
+      background-color: var(--card-bg);
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      overflow-y: auto;
+    }
+
+    .panel-title {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 0.4rem;
+      font-weight: 600;
+    }
+
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .control-group label {
+      font-size: 0.85rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    select, input[type="number"], button {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      border: 1px solid var(--border-color);
+      padding: 0.5rem;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      outline: none;
+    }
+
+    select:focus, input:focus, button:focus {
+      border-color: var(--accent-blue);
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--accent-blue);
+    }
+
+    .btn {
+      cursor: pointer;
+      font-weight: 600;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .btn-primary {
+      background-color: var(--accent-blue);
+      color: #0f172a;
+      border: none;
+    }
+
+    .btn-primary:hover {
+      background-color: #7dd3fc;
+    }
+
+    .btn-secondary {
+      background-color: transparent;
+      color: var(--accent-blue);
+      border: 1px solid var(--accent-blue);
+    }
+
+    .btn-secondary:hover {
+      background-color: rgba(56, 189, 248, 0.1);
+    }
+
+    .btn-danger {
+      background-color: transparent;
+      color: var(--accent-red);
+      border: 1px solid var(--accent-red);
+    }
+
+    .btn-danger:hover {
+      background-color: rgba(244, 63, 94, 0.1);
+    }
+
+    .preset-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem;
+    }
+
+    .canvas-container {
+      position: relative;
+      background-color: #0b1120;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      width: 100%;
+      height: 100%;
+    }
+
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      cursor: crosshair;
+    }
+
+    .overlay-controls {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background-color: rgba(30, 41, 59, 0.85);
+      padding: 0.5rem 0.75rem;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      backdrop-filter: blur(4px);
+    }
+
+    .overlay-controls label {
+      font-size: 0.8rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      cursor: pointer;
+    }
+
+    .matrix-box {
+      background-color: var(--bg-color);
+      padding: 0.75rem;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 0.85rem;
+      color: var(--accent-blue);
+      text-align: center;
+      line-height: 1.4;
+    }
+
+    .coord-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8rem;
+    }
+
+    .coord-table th, .coord-table td {
+      border: 1px solid var(--border-color);
+      padding: 0.4rem;
+      text-align: center;
+    }
+
+    .coord-table th {
+      background-color: var(--bg-color);
+      color: var(--text-muted);
+    }
+
+    .tag-pre { color: var(--accent-blue); font-weight: bold; }
+    .tag-post { color: var(--accent-red); font-weight: bold; }
+
+    @media (max-width: 1024px) {
+      .app-container {
+        grid-template-columns: 1fr;
+        height: auto;
+        overflow: visible;
+      }
+      .canvas-container {
+        height: 500px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>📐 Geometric Transformations & 2D Rotation Lab</h1>
+    <span>Multi-Shape Support</span>
+  </header>
+
+  <div class="app-container">
+    
+    <!-- Left Control Panel -->
+    <div class="panel">
+      
+      <!-- Shape Selector Section -->
+      <div class="panel-title">1. Select / Edit Plane Shape</div>
+
+      <div class="control-group">
+        <label for="shapePreset">Preset Shapes</label>
+        <select id="shapePreset">
+          <option value="triangle">Triangle (3 Vertices)</option>
+          <option value="rectangle">Rectangle (4 Vertices)</option>
+          <option value="parallelogram">Parallelogram (4 Vertices)</option>
+          <option value="pentagon">Regular Pentagon (5 Vertices)</option>
+          <option value="star">5-Pointed Star (10 Vertices)</option>
+          <option value="custom">Custom Polygon</option>
+        </select>
+      </div>
+
+      <div class="preset-grid">
+        <button class="btn btn-secondary" id="addVertexBtn">+ Add Vertex</button>
+        <button class="btn btn-danger" id="removeVertexBtn">- Remove Vertex</button>
+      </div>
+
+      <!-- Transformation Type -->
+      <div class="panel-title" style="margin-top:0.5rem;">2. Transformation Settings</div>
+
+      <div class="control-group">
+        <label for="transformMode">Transformation Type</label>
+        <select id="transformMode">
+          <option value="rotation">Rotation</option>
+          <option value="translation">Translation</option>
+          <option value="reflection">Reflection</option>
+          <option value="dilation">Dilation</option>
+        </select>
+      </div>
+
+      <!-- Controls: Rotation -->
+      <div id="rotationControls" class="control-group">
+        <label>Angle (θ): <span id="angleVal">90°</span></label>
+        <input type="range" id="angleSlider" min="-360" max="360" value="90" step="5">
+        <div class="preset-grid">
+          <button class="btn btn-secondary" onclick="setAngle(90)">90° CCW</button>
+          <button class="btn btn-secondary" onclick="setAngle(180)">180°</button>
+          <button class="btn btn-secondary" onclick="setAngle(270)">270° CCW</button>
+          <button class="btn btn-secondary" onclick="setAngle(-90)">-90° (90° CW)</button>
+        </div>
+        <label style="margin-top:0.5rem;">Center of Rotation (x₀, y₀)</label>
+        <div style="display:flex; gap:0.5rem;">
+          <input type="number" id="rotX" value="0" step="1">
+          <input type="number" id="rotY" value="0" step="1">
+        </div>
+      </div>
+
+      <!-- Controls: Translation -->
+      <div id="translationControls" class="control-group" style="display:none;">
+        <label>Horizontal Shift (Δx): <span id="dxVal">3</span></label>
+        <input type="range" id="dxSlider" min="-10" max="10" value="3" step="1">
+        
+        <label>Vertical Shift (Δy): <span id="dyVal">2</span></label>
+        <input type="range" id="dySlider" min="-10" max="10" value="2" step="1">
+      </div>
+
+      <!-- Controls: Reflection -->
+      <div id="reflectionControls" class="control-group" style="display:none;">
+        <label for="reflectAxis">Line of Reflection</label>
+        <select id="reflectAxis">
+          <option value="x">X-Axis (y = 0)</option>
+          <option value="y">Y-Axis (x = 0)</option>
+          <option value="yx">Line y = x</option>
+          <option value="y-x">Line y = -x</option>
+        </select>
+      </div>
+
+      <!-- Controls: Dilation -->
+      <div id="dilationControls" class="control-group" style="display:none;">
+        <label>Scale Factor (k): <span id="scaleVal">2.0</span></label>
+        <input type="range" id="scaleSlider" min="0.25" max="3" value="2.0" step="0.25">
+        
+        <label>Center of Dilation (x₀, y₀)</label>
+        <div style="display:flex; gap:0.5rem;">
+          <input type="number" id="dilX" value="0" step="1">
+          <input type="number" id="dilY" value="0" step="1">
+        </div>
+      </div>
+
+      <div style="display:flex; gap:0.5rem; margin-top:0.5rem;">
+        <button class="btn btn-primary" id="animateBtn" style="flex:1;">▶ Animate</button>
+        <button class="btn btn-secondary" id="resetBtn">Reset</button>
+      </div>
+    </div>
+
+    <!-- Center Canvas Viewport -->
+    <div class="canvas-container" id="canvasContainer">
+      <canvas id="gridCanvas"></canvas>
+      <div class="overlay-controls">
+        <label><input type="checkbox" id="showGrid" checked> Grid & Axes</label>
+        <label><input type="checkbox" id="showLabels" checked> Vertex Labels</label>
+        <label><input type="checkbox" id="showArcs" checked> Rotation Arcs / Rays</label>
+      </div>
+    </div>
+
+    <!-- Right Math & Data Panel -->
+    <div class="panel">
+      <div class="panel-title">3. Algebraic Mapping Rule</div>
+      <div class="matrix-box" id="mappingRule">
+        (x, y) ➔ (-y, x)
+      </div>
+
+      <div class="panel-title" style="margin-top:0.5rem;">4. Transformation Matrix</div>
+      <div class="matrix-box" id="matrixDisplay">
+        [ cos(90°)  -sin(90°) ] [ x ]<br>
+        [ sin(90°)   cos(90°) ] [ y ]
+      </div>
+
+      <div class="panel-title" style="margin-top:0.5rem;">5. Coordinate Mapping Table</div>
+      <div style="flex:1; overflow-y:auto;">
+        <table class="coord-table">
+          <thead>
+            <tr>
+              <th>Vertex</th>
+              <th>Pre-Image <span class="tag-pre">(x, y)</span></th>
+              <th>Image <span class="tag-post">(x', y')</span></th>
+            </tr>
+          </thead>
+          <tbody id="coordTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const canvas = document.getElementById('gridCanvas');
+    const ctx = canvas.getContext('2d');
+    const container = document.getElementById('canvasContainer');
+
+    const shapePresets = {
+      triangle: [ {x: 2, y: 1}, {x: 5, y: 1}, {x: 3, y: 4} ],
+      rectangle: [ {x: 1, y: 1}, {x: 4, y: 1}, {x: 4, y: 3}, {x: 1, y: 3} ],
+      parallelogram: [ {x: 1, y: 1}, {x: 4, y: 1}, {x: 5, y: 3}, {x: 2, y: 3} ],
+      pentagon: [
+        {x: 2, y: 4}, {x: 4, y: 2.5}, {x: 3.2, y: 0.5},
+        {x: 0.8, y: 0.5}, {x: 0, y: 2.5}
+      ],
+      star: [
+        {x: 0, y: 3}, {x: 0.9, y: 1.2}, {x: 2.8, y: 0.9},
+        {x: 1.4, y: -0.4}, {x: 1.8, y: -2.3}, {x: 0, y: -1.2},
+        {x: -1.8, y: -2.3}, {x: -1.4, y: -0.4}, {x: -2.8, y: 0.9},
+        {x: -0.9, y: 1.2}
+      ],
+      custom: [ {x: 1, y: 1}, {x: 4, y: 2}, {x: 2, y: 4} ]
+    };
+
+    let vertices = JSON.parse(JSON.stringify(shapePresets.triangle));
+    let progress = 1.0;
+    let isAnimating = false;
+    let animId = null;
+
+    const gridSize = 32;
+    let width = 600;
+    let height = 500;
+
+    const shapePresetSelect = document.getElementById('shapePreset');
+    const transformMode = document.getElementById('transformMode');
+    const angleSlider = document.getElementById('angleSlider');
+    const angleVal = document.getElementById('angleVal');
+    const rotX = document.getElementById('rotX');
+    const rotY = document.getElementById('rotY');
+    const dxSlider = document.getElementById('dxSlider');
+    const dySlider = document.getElementById('dySlider');
+    const dxVal = document.getElementById('dxVal');
+    const dyVal = document.getElementById('dyVal');
+    const reflectAxis = document.getElementById('reflectAxis');
+    const scaleSlider = document.getElementById('scaleSlider');
+    const scaleVal = document.getElementById('scaleVal');
+    const dilX = document.getElementById('dilX');
+    const dilY = document.getElementById('dilY');
+    const showGrid = document.getElementById('showGrid');
+    const showLabels = document.getElementById('showLabels');
+    const showArcs = document.getElementById('showArcs');
+    const mappingRule = document.getElementById('mappingRule');
+    const matrixDisplay = document.getElementById('matrixDisplay');
+    const coordTableBody = document.getElementById('coordTableBody');
+
+    function resizeCanvas() {
+      width = container.clientWidth;
+      height = container.clientHeight;
+      canvas.width = width * window.devicePixelRatio;
+      canvas.height = height * window.devicePixelRatio;
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+      draw();
+    }
+    window.addEventListener('resize', resizeCanvas);
+
+    function toScreen(x, y) {
+      const cx = width / 2;
+      const cy = height / 2;
+      return { x: cx + x * gridSize, y: cy - y * gridSize };
+    }
+
+    function transformPoint(pt, prog = 1.0) {
+      const mode = transformMode.value;
+      if (mode === 'rotation') {
+        const cx = parseFloat(rotX.value) || 0;
+        const cy = parseFloat(rotY.value) || 0;
+        const deg = parseFloat(angleSlider.value) * prog;
+        const rad = deg * (Math.PI / 180);
+        const relX = pt.x - cx;
+        const relY = pt.y - cy;
+        const rx = relX * Math.cos(rad) - relY * Math.sin(rad);
+        const ry = relX * Math.sin(rad) + relY * Math.cos(rad);
+        return { x: cx + rx, y: cy + ry };
+      } else if (mode === 'translation') {
+        const dx = parseFloat(dxSlider.value) * prog;
+        const dy = parseFloat(dySlider.value) * prog;
+        return { x: pt.x + dx, y: pt.y + dy };
+      } else if (mode === 'reflection') {
+        const axis = reflectAxis.value;
+        let fx = pt.x, fy = pt.y;
+        if (axis === 'x') fy = -pt.y;
+        else if (axis === 'y') fx = -pt.x;
+        else if (axis === 'yx') { fx = pt.y; fy = pt.x; }
+        else if (axis === 'y-x') { fx = -pt.y; fy = -pt.x; }
+        return { x: pt.x + (fx - pt.x) * prog, y: pt.y + (fy - pt.y) * prog };
+      } else if (mode === 'dilation') {
+        const cx = parseFloat(dilX.value) || 0;
+        const cy = parseFloat(dilY.value) || 0;
+        const k = 1 + (parseFloat(scaleSlider.value) - 1) * prog;
+        return { x: cx + (pt.x - cx) * k, y: cy + (pt.y - cy) * k };
+      }
+      return { x: pt.x, y: pt.y };
+    }
+
+    function updateMathPanels() {
+      const mode = transformMode.value;
+      let ruleStr = "";
+      let matStr = "";
+
+      if (mode === 'rotation') {
+        const deg = parseFloat(angleSlider.value);
+        const rad = deg * (Math.PI / 180);
+        const cosVal = Math.round(Math.cos(rad) * 100) / 100;
+        const sinVal = Math.round(Math.sin(rad) * 100) / 100;
+        ruleStr = `(x, y) ➔ (x·cos(${deg}°) - y·sin(${deg}°), x·sin(${deg}°) + y·cos(${deg}°))`;
+        matStr = `[ ${cosVal >= 0 ? ' ' : ''}${cosVal}   ${-sinVal >= 0 ? ' ' : ''}${-sinVal} ] [ x ]<br>[ ${sinVal >= 0 ? ' ' : ''}${sinVal}   ${cosVal >= 0 ? ' ' : ''}${cosVal} ] [ y ]`;
+      } else if (mode === 'translation') {
+        const dx = dxSlider.value;
+        const dy = dySlider.value;
+        ruleStr = `(x, y) ➔ (x ${dx >= 0 ? '+' : ''}${dx}, y ${dy >= 0 ? '+' : ''}${dy})`;
+        matStr = `[ 1  0  ${dx} ] [ x ]<br>[ 0  1  ${dy} ] [ y ]<br>[ 0  0  1  ] [ 1 ]`;
+      } else if (mode === 'reflection') {
+        const axis = reflectAxis.value;
+        if (axis === 'x') {
+          ruleStr = "(x, y) ➔ (x, -y) [Reflect over x-axis]";
+          matStr = "[ 1   0 ] [ x ]<br>[ 0  -1 ] [ y ]";
+        } else if (axis === 'y') {
+          ruleStr = "(x, y) ➔ (-x, y) [Reflect over y-axis]";
+          matStr = "[ -1  0 ] [ x ]<br>[  0  1 ] [ y ]";
+        } else if (axis === 'yx') {
+          ruleStr = "(x, y) ➔ (y, x) [Reflect over y = x]";
+          matStr = "[ 0  1 ] [ x ]<br>[ 1  0 ] [ y ]";
+        } else if (axis === 'y-x') {
+          ruleStr = "(x, y) ➔ (-y, -x) [Reflect over y = -x]";
+          matStr = "[  0 -1 ] [ x ]<br>[ -1  0 ] [ y ]";
+        }
+      } else if (mode === 'dilation') {
+        const k = scaleSlider.value;
+        ruleStr = `(x, y) ➔ (${k}x, ${k}y) [Scale Factor k = ${k}]`;
+        matStr = `[ ${k}  0 ] [ x ]<br>[ 0  ${k} ] [ y ]`;
+      }
+
+      mappingRule.innerHTML = ruleStr;
+      matrixDisplay.innerHTML = matStr;
+
+      coordTableBody.innerHTML = "";
+      vertices.forEach((v, idx) => {
+        const label = String.fromCharCode(65 + idx);
+        const trans = transformPoint(v, 1.0);
+        coordTableBody.innerHTML += `
+          <tr>
+            <td><strong>${label}</strong></td>
+            <td><span class="tag-pre">(${v.x.toFixed(1)}, ${v.y.toFixed(1)})</span></td>
+            <td><span class="tag-post">(${trans.x.toFixed(1)}, ${trans.y.toFixed(1)})</span></td>
+          </tr>
+        `;
+      });
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, width, height);
+
+      const cx = width / 2;
+      const cy = height / 2;
+
+      if (showGrid.checked) {
+        ctx.strokeStyle = '#1e293b';
+        ctx.lineWidth = 1;
+        for (let x = cx % gridSize; x < width; x += gridSize) {
+          ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, height); ctx.stroke();
+        }
+        for (let y = cy % gridSize; y < height; y += gridSize) {
+          ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(width, y); ctx.stroke();
+        }
+
+        ctx.strokeStyle = '#475569';
+        ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(0, cy); ctx.lineTo(width, cy); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(cx, 0); ctx.lineTo(cx, height); ctx.stroke();
+
+        ctx.fillStyle = '#64748b';
+        ctx.font = '10px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'top';
+
+        for (let i = -20; i <= 20; i++) {
+          if (i === 0) continue;
+          const pos = toScreen(i, 0);
+          if (pos.x > 0 && pos.x < width) ctx.fillText(i, pos.x, cy + 4);
+          const posY = toScreen(0, i);
+          if (posY.y > 0 && posY.y < height) ctx.fillText(i, cx - 12, posY.y - 5);
+        }
+      }
+
+      if (showArcs.checked) {
+        vertices.forEach(v => {
+          const p1 = toScreen(v.x, v.y);
+          const cur = transformPoint(v, progress);
+          const p2 = toScreen(cur.x, cur.y);
+
+          ctx.setLineDash([4, 4]);
+          ctx.strokeStyle = 'rgba(244, 63, 94, 0.4)';
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.moveTo(p1.x, p1.y);
+          ctx.lineTo(p2.x, p2.y);
+          ctx.stroke();
+          ctx.setLineDash([]);
+        });
+      }
+
+      // Pre-Image
+      if (vertices.length > 1) {
+        ctx.fillStyle = 'rgba(56, 189, 248, 0.15)';
+        ctx.strokeStyle = '#38bdf8';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        vertices.forEach((v, i) => {
+          const s = toScreen(v.x, v.y);
+          if (i === 0) ctx.moveTo(s.x, s.y);
+          else ctx.lineTo(s.x, s.y);
+        });
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        vertices.forEach((v, i) => {
+          const s = toScreen(v.x, v.y);
+          ctx.fillStyle = '#38bdf8';
+          ctx.beginPath(); ctx.arc(s.x, s.y, 5, 0, Math.PI * 2); ctx.fill();
+
+          if (showLabels.checked) {
+            ctx.fillStyle = '#f8fafc';
+            ctx.font = 'bold 12px sans-serif';
+            ctx.fillText(String.fromCharCode(65 + i), s.x + 8, s.y - 8);
+          }
+        });
+      }
+
+      // Transformed Image
+      if (vertices.length > 1) {
+        ctx.fillStyle = 'rgba(244, 63, 94, 0.2)';
+        ctx.strokeStyle = '#f43f5e';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        vertices.forEach((v, i) => {
+          const trans = transformPoint(v, progress);
+          const s = toScreen(trans.x, trans.y);
+          if (i === 0) ctx.moveTo(s.x, s.y);
+          else ctx.lineTo(s.x, s.y);
+        });
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        vertices.forEach((v, i) => {
+          const trans = transformPoint(v, progress);
+          const s = toScreen(trans.x, trans.y);
+          ctx.fillStyle = '#f43f5e';
+          ctx.beginPath(); ctx.arc(s.x, s.y, 5, 0, Math.PI * 2); ctx.fill();
+
+          if (showLabels.checked) {
+            ctx.fillStyle = '#f43f5e';
+            ctx.font = 'bold 12px sans-serif';
+            ctx.fillText(String.fromCharCode(65 + i) + "'", s.x + 8, s.y - 8);
+          }
+        });
+      }
+    }
+
+    function setAngle(deg) {
+      angleSlider.value = deg;
+      angleVal.textContent = deg + "°";
+      updateMathPanels();
+      draw();
+    }
+
+    shapePresetSelect.addEventListener('change', (e) => {
+      vertices = JSON.parse(JSON.stringify(shapePresets[e.target.value] || shapePresets.triangle));
+      updateMathPanels();
+      draw();
+    });
+
+    transformMode.addEventListener('change', (e) => {
+      document.getElementById('rotationControls').style.display = e.target.value === 'rotation' ? 'flex' : 'none';
+      document.getElementById('translationControls').style.display = e.target.value === 'translation' ? 'flex' : 'none';
+      document.getElementById('reflectionControls').style.display = e.target.value === 'reflection' ? 'flex' : 'none';
+      document.getElementById('dilationControls').style.display = e.target.value === 'dilation' ? 'flex' : 'none';
+      updateMathPanels();
+      draw();
+    });
+
+    angleSlider.addEventListener('input', (e) => { angleVal.textContent = e.target.value + "°"; updateMathPanels(); draw(); });
+    dxSlider.addEventListener('input', (e) => { dxVal.textContent = e.target.value; updateMathPanels(); draw(); });
+    dySlider.addEventListener('input', (e) => { dyVal.textContent = e.target.value; updateMathPanels(); draw(); });
+    scaleSlider.addEventListener('input', (e) => { scaleVal.textContent = e.target.value; updateMathPanels(); draw(); });
+    [rotX, rotY, dilX, dilY, reflectAxis, showGrid, showLabels, showArcs].forEach(el => {
+      el.addEventListener('change', () => { updateMathPanels(); draw(); });
+    });
+
+    document.getElementById('animateBtn').addEventListener('click', () => {
+      if (isAnimating) return;
+      isAnimating = true;
+      progress = 0;
+      let start = null;
+      function anim(ts) {
+        if (!start) start = ts;
+        const elapsed = ts - start;
+        progress = Math.min(elapsed / 1000, 1.0);
+        draw();
+        if (progress < 1.0) {
+          animId = requestAnimationFrame(anim);
+        } else {
+          isAnimating = false;
+        }
+      }
+      animId = requestAnimationFrame(anim);
+    });
+
+    document.getElementById('resetBtn').addEventListener('click', () => {
+      if (animId) cancelAnimationFrame(animId);
+      isAnimating = false;
+      progress = 1.0;
+      draw();
+    });
+
+    updateMathPanels();
+    setTimeout(resizeCanvas, 50);
+  </script>
+</body>
+</html>

@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Graphical Solution of Simultaneous Linear Equations</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-color: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent-blue: #38bdf8;
+            --accent-pink: #f472b6;
+            --accent-green: #4ade80;
+            --grid-line: #334155;
+            --border-color: #475569;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 1.25rem;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 1.25rem;
+        }
+
+        header h1 {
+            font-size: 1.75rem;
+            color: var(--text-color);
+            margin-bottom: 0.35rem;
+        }
+
+        header p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.25rem;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        @media (max-width: 968px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .panel {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.25rem;
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+        }
+
+        button {
+            background-color: #334155;
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            padding: 0.6rem 0.9rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: all 0.2s ease;
+        }
+
+        button:hover:not(:disabled) {
+            background-color: #475569;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        button.btn-eq1 {
+            border-color: var(--accent-blue);
+            color: var(--accent-blue);
+        }
+
+        button.btn-eq2 {
+            border-color: var(--accent-pink);
+            color: var(--accent-pink);
+        }
+
+        .equation-box {
+            background: rgba(15, 23, 42, 0.6);
+            border-radius: 8px;
+            padding: 0.85rem;
+            border-left: 4px solid var(--accent-blue);
+        }
+
+        .equation-box.eq2 {
+            border-left-color: var(--accent-pink);
+        }
+
+        .eq-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.25rem;
+        }
+
+        .eq-title.eq1 { color: var(--accent-blue); }
+        .eq-title.eq2 { color: var(--accent-pink); }
+
+        .eq-text {
+            font-size: 1.15rem;
+            font-weight: bold;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        .tables-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+            text-align: center;
+        }
+
+        th, td {
+            padding: 0.5rem 0.3rem;
+            border: 1px solid var(--border-color);
+        }
+
+        th {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        
+        tr.highlight-row {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .sub-calc {
+            font-size: 0.75rem;
+            color: var(--accent-green);
+            display: block;
+            margin-top: 2px;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        .canvas-container {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 0.75; 
+            background-color: #090d16;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .solution-card {
+            background: rgba(74, 222, 128, 0.1);
+            border: 1px solid var(--accent-green);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            color: var(--accent-green);
+            font-weight: 600;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Simultaneous Linear Equations Visualizer</h1>
+        <p>Step-by-step plotting with a focus on integer values.</p>
+    </header>
+
+    <div class="container">
+        <!-- Control & Data Panel -->
+        <div class="panel">
+            <div class="controls">
+                <button onclick="generateRandomSystem()">New Equations</button>
+                <button onclick="generateRandomX()">Random X Values</button>
+            </div>
+
+            <!-- Equations Display -->
+            <div class="equation-box">
+                <div class="eq-title eq1">Equation 1 (Blue)</div>
+                <div class="eq-text" id="eq1Display">y = mx + c</div>
+            </div>
+
+            <div class="equation-box eq2">
+                <div class="eq-title eq2">Equation 2 (Pink)</div>
+                <div class="eq-text" id="eq2Display">y = mx + c</div>
+            </div>
+
+            <!-- Graphing Action Controls -->
+            <div class="controls">
+                <button class="btn-eq1" id="btnPlotEq1" onclick="plotNextPoint(1)">Plot Eq 1 Point (0/5)</button>
+                <button class="btn-eq1" id="joinEq1Btn" onclick="animateJoinLine(1)" disabled>Join Eq 1 Line</button>
+                <button class="btn-eq2" id="btnPlotEq2" onclick="plotNextPoint(2)">Plot Eq 2 Point (0/5)</button>
+                <button class="btn-eq2" id="joinEq2Btn" onclick="animateJoinLine(2)" disabled>Join Eq 2 Line</button>
+            </div>
+
+            <!-- Dynamic Evaluation Tables -->
+            <div class="tables-container">
+                <div>
+                    <div class="eq-title eq1" style="margin-bottom:0.4rem;">Table 1 (Equation 1)</div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>x</th>
+                                <th>Substitution</th>
+                                <th>(x, y)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table1Body"></tbody>
+                    </table>
+                </div>
+
+                <div>
+                    <div class="eq-title eq2" style="margin-bottom:0.4rem;">Table 2 (Equation 2)</div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>x</th>
+                                <th>Substitution</th>
+                                <th>(x, y)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table2Body"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Intersection Solution Box -->
+            <div class="solution-card" id="solutionDisplay">
+                Point of Intersection / Solution: (x, y)
+            </div>
+        </div>
+
+        <!-- Graph View Panel -->
+        <div class="panel">
+            <div class="canvas-container">
+                <canvas id="graphCanvas"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('graphCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // State variables
+        let eq1 = { m: 1, mStr: '1', c: 0 };
+        let eq2 = { m: -1, mStr: '-1', c: 4 };
+        let xValues = [-4, -2, 0, 2, 4];
+        let intersection = { x: 2, y: 2 };
+
+        // Sequential Plotting state
+        let plottedPointsEq1 = 0;
+        let plottedPointsEq2 = 0;
+
+        // Line drawing animation state
+        let eq1LineProgress = 0;
+        let eq2LineProgress = 0;
+        let isAnimating = false;
+
+        // Fixed base unit range for X axis
+        const GRID_RANGE_X = 10; 
+
+        function initCanvas() {
+            const rect = canvas.parentElement.getBoundingClientRect();
+            canvas.width = rect.width * window.devicePixelRatio;
+            canvas.height = rect.height * window.devicePixelRatio;
+            drawGraph();
+        }
+
+        window.addEventListener('resize', initCanvas);
+
+        function cleanNum(n) {
+            return parseFloat(n.toFixed(2));
+        }
+
+        // Generate a random coefficient (integer, proper fraction, or decimal)
+        function getMixedCoefficient() {
+            const types = ['integer', 'fraction', 'decimal'];
+            const type = types[Math.floor(Math.random() * types.length)];
+            
+            let val, str;
+            
+            if (type === 'integer') {
+                val = 0;
+                while (val === 0) {
+                    val = Math.floor(Math.random() * 11) - 5;
+                }
+                str = val.toString();
+            } 
+            else if (type === 'fraction') {
+                const denominators = [2, 3, 4, 5];
+                const den = denominators[Math.floor(Math.random() * denominators.length)];
+                const num = Math.floor(Math.random() * (den - 1)) + 1; 
+                const sign = Math.random() > 0.5 ? 1 : -1;
+                
+                val = cleanNum((num / den) * sign);
+                str = (sign < 0 ? '-' : '') + num + '/' + den;
+            } 
+            else {
+                val = 0;
+                while (Math.abs(val) < 0.2) val = cleanNum(Math.random() * 6 - 3);
+                str = val.toString();
+            }
+            
+            return { val, str };
+        }
+
+        function generateRandomSystem() {
+            // 80% chance to force purely integer equations and intersections
+            const preferIntegers = Math.random() < 0.8;
+            
+            let ix, iy, c1, c2;
+
+            if (preferIntegers) {
+                // Generate clean integer intersection points within visible bounds
+                ix = Math.floor(Math.random() * 11) - 5; 
+                iy = Math.floor(Math.random() * 11) - 5; 
+
+                // Generate clean integer slopes
+                let m1 = 0; while (m1 === 0) m1 = Math.floor(Math.random() * 7) - 3;
+                let m2 = 0; while (m2 === 0 || m2 === m1) m2 = Math.floor(Math.random() * 7) - 3;
+
+                c1 = iy - (m1 * ix);
+                c2 = iy - (m2 * ix);
+
+                eq1 = { m: m1, mStr: m1.toString(), c: c1 };
+                eq2 = { m: m2, mStr: m2.toString(), c: c2 };
+                intersection = { x: ix, y: iy };
+                
+            } else {
+                // Fallback to the mixed decimals/fractions for ~20% of the problems
+                ix = cleanNum((Math.random() * 14 - 7)); 
+                iy = cleanNum((Math.random() * 16 - 8)); 
+
+                let m1Obj = getMixedCoefficient();
+                let m2Obj = getMixedCoefficient();
+
+                while (Math.abs(m2Obj.val - m1Obj.val) < 0.4) {
+                    m2Obj = getMixedCoefficient();
+                }
+
+                c1 = cleanNum(iy - m1Obj.val * ix);
+                c2 = cleanNum(iy - m2Obj.val * ix);
+
+                eq1 = { m: m1Obj.val, mStr: m1Obj.str, c: c1 };
+                eq2 = { m: m2Obj.val, mStr: m2Obj.str, c: c2 };
+                intersection = { x: ix, y: iy };
+            }
+
+            // Generate X values nicely distributed around the intersection point
+            const baseX = Math.round(ix);
+            xValues = [baseX - 4, baseX - 2, baseX, baseX + 2, baseX + 4];
+
+            resetPlotState();
+            updateUI();
+        }
+
+        function generateRandomX() {
+            const baseX = Math.round(intersection.x);
+            const set = new Set();
+            set.add(baseX); 
+            while (set.size < 5) {
+                set.add(Math.floor(Math.random() * 17) - 8);
+            }
+            xValues = Array.from(set).sort((a, b) => a - b);
+            resetPlotState();
+            updateUI();
+        }
+
+        function resetPlotState() {
+            plottedPointsEq1 = 0;
+            plottedPointsEq2 = 0;
+            eq1LineProgress = 0;
+            eq2LineProgress = 0;
+            
+            document.getElementById('btnPlotEq1').disabled = false;
+            document.getElementById('btnPlotEq2').disabled = false;
+            document.getElementById('joinEq1Btn').disabled = true;
+            document.getElementById('joinEq2Btn').disabled = true;
+            
+            updateButtonLabels();
+        }
+
+        function updateButtonLabels() {
+            const btn1 = document.getElementById('btnPlotEq1');
+            const btn2 = document.getElementById('btnPlotEq2');
+            
+            btn1.textContent = `Plot Eq 1 Point (${plottedPointsEq1}/${xValues.length})`;
+            btn2.textContent = `Plot Eq 2 Point (${plottedPointsEq2}/${xValues.length})`;
+
+            if (plottedPointsEq1 >= xValues.length) {
+                btn1.disabled = true;
+                document.getElementById('joinEq1Btn').disabled = false;
+            }
+            if (plottedPointsEq2 >= xValues.length) {
+                btn2.disabled = true;
+                document.getElementById('joinEq2Btn').disabled = false;
+            }
+        }
+
+        function plotNextPoint(eqNum) {
+            if (eqNum === 1 && plottedPointsEq1 < xValues.length) {
+                plottedPointsEq1++;
+            } else if (eqNum === 2 && plottedPointsEq2 < xValues.length) {
+                plottedPointsEq2++;
+            }
+            updateButtonLabels();
+            updateUI(); 
+        }
+
+        function animateJoinLine(eqNum) {
+            if (isAnimating) return;
+
+            let start = null;
+            const duration = 1200; 
+            isAnimating = true;
+
+            if (eqNum === 1) document.getElementById('joinEq1Btn').disabled = true;
+            if (eqNum === 2) document.getElementById('joinEq2Btn').disabled = true;
+
+            function step(timestamp) {
+                if (!start) start = timestamp;
+                const elapsed = timestamp - start;
+                const progress = Math.min(elapsed / duration, 1.0);
+
+                if (eqNum === 1) eq1LineProgress = progress;
+                if (eqNum === 2) eq2LineProgress = progress;
+
+                drawGraph();
+
+                if (progress < 1.0) {
+                    requestAnimationFrame(step);
+                } else {
+                    isAnimating = false;
+                }
+            }
+
+            requestAnimationFrame(step);
+        }
+
+        function formatEquation(mStr, c) {
+            let mFront = mStr === '1' ? '' : (mStr === '-1' ? '-' : mStr);
+            let cStr = '';
+            if (c > 0) cStr = ` + ${c}`;
+            else if (c < 0) cStr = ` - ${Math.abs(c)}`;
+            return `y = ${mFront}x${cStr}`;
+        }
+
+        function formatSubstitution(mStr, mVal, x, c) {
+            const mxVal = cleanNum(mVal * x);
+            const cSign = c >= 0 ? '+' : '-';
+            const absC = Math.abs(c);
+            let mFront = mStr === '1' ? '' : (mStr === '-1' ? '-' : mStr);
+
+            return `y = ${mFront}(${x}) ${cSign} ${absC}<br>y = ${mxVal} ${cSign} ${absC}`;
+        }
+
+        function updateUI() {
+            document.getElementById('eq1Display').textContent = formatEquation(eq1.mStr, eq1.c);
+            document.getElementById('eq2Display').textContent = formatEquation(eq2.mStr, eq2.c);
+
+            const t1 = document.getElementById('table1Body');
+            const t2 = document.getElementById('table2Body');
+            t1.innerHTML = '';
+            t2.innerHTML = '';
+
+            xValues.forEach((x, index) => {
+                const y1 = cleanNum(eq1.m * x + eq1.c);
+                const y2 = cleanNum(eq2.m * x + eq2.c);
+
+                const isPlotted1 = index < plottedPointsEq1;
+                const isPlotted2 = index < plottedPointsEq2;
+
+                t1.innerHTML += `
+                    <tr class="${isPlotted1 ? 'highlight-row' : ''}" style="opacity: ${isPlotted1 ? '1' : '0.4'}">
+                        <td><b>${x}</b></td>
+                        <td><span class="sub-calc">${formatSubstitution(eq1.mStr, eq1.m, x, eq1.c)}</span></td>
+                        <td><b>y = ${y1}</b><br><span style="color:var(--text-muted);">(${x}, ${y1})</span></td>
+                    </tr>
+                `;
+
+                t2.innerHTML += `
+                    <tr class="${isPlotted2 ? 'highlight-row' : ''}" style="opacity: ${isPlotted2 ? '1' : '0.4'}">
+                        <td><b>${x}</b></td>
+                        <td><span class="sub-calc">${formatSubstitution(eq2.mStr, eq2.m, x, eq2.c)}</span></td>
+                        <td><b>y = ${y2}</b><br><span style="color:var(--text-muted);">(${x}, ${y2})</span></td>
+                    </tr>
+                `;
+            });
+
+            document.getElementById('solutionDisplay').textContent = 
+                `Point of Intersection / Solution: x = ${intersection.x}, y = ${intersection.y}  ➔  (${intersection.x}, ${intersection.y})`;
+
+            drawGraph();
+        }
+
+        function toCanvasCoords(x, y) {
+            const w = canvas.width;
+            const h = canvas.height;
+            const cx = w / 2;
+            const cy = h / 2;
+            
+            const unit = w / (GRID_RANGE_X * 2);
+
+            return {
+                x: cx + x * unit,
+                y: cy - y * unit,
+                unit: unit
+            };
+        }
+
+        function drawGraph() {
+            const w = canvas.width;
+            const h = canvas.height;
+            const cx = w / 2;
+            const cy = h / 2;
+            
+            const unit = w / (GRID_RANGE_X * 2);
+            const maxGridY = Math.ceil((h / 2) / unit);
+
+            ctx.clearRect(0, 0, w, h);
+
+            ctx.lineWidth = 1;
+            ctx.strokeStyle = '#334155';
+            ctx.fillStyle = '#64748b';
+            ctx.font = `${12 * window.devicePixelRatio}px sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            for (let i = -GRID_RANGE_X; i <= GRID_RANGE_X; i++) {
+                if (i === 0) continue;
+                const pos = toCanvasCoords(i, 0);
+                
+                ctx.beginPath();
+                ctx.moveTo(pos.x, 0); ctx.lineTo(pos.x, h);
+                ctx.stroke();
+                ctx.fillText(i, pos.x, cy + 15 * window.devicePixelRatio);
+            }
+
+            for (let i = -maxGridY; i <= maxGridY; i++) {
+                if (i === 0) continue;
+                const pos = toCanvasCoords(0, i);
+                
+                ctx.beginPath();
+                ctx.moveTo(0, pos.y); ctx.lineTo(w, pos.y);
+                ctx.stroke();
+                ctx.fillText(i, cx - 18 * window.devicePixelRatio, pos.y);
+            }
+
+            ctx.lineWidth = 2 * window.devicePixelRatio;
+            ctx.strokeStyle = '#94a3b8';
+            ctx.beginPath();
+            ctx.moveTo(0, cy); ctx.lineTo(w, cy); 
+            ctx.moveTo(cx, 0); ctx.lineTo(cx, h); 
+            ctx.stroke();
+
+            ctx.fillStyle = '#f8fafc';
+            ctx.font = `bold ${16 * window.devicePixelRatio}px sans-serif`;
+            ctx.textAlign = 'right';
+            ctx.fillText('X', w - 10 * window.devicePixelRatio, cy - 15 * window.devicePixelRatio);
+            ctx.textAlign = 'left';
+            ctx.fillText('Y', cx + 15 * window.devicePixelRatio, 15 * window.devicePixelRatio);
+
+            if (eq1LineProgress > 0) {
+                drawAnimatedLine(eq1.m, eq1.c, '#38bdf8', eq1LineProgress, maxGridY);
+            }
+            if (eq2LineProgress > 0) {
+                drawAnimatedLine(eq2.m, eq2.c, '#f472b6', eq2LineProgress, maxGridY);
+            }
+
+            for (let i = 0; i < plottedPointsEq1; i++) {
+                const x = xValues[i];
+                const y1 = cleanNum(eq1.m * x + eq1.c);
+                drawPoint(x, y1, '#38bdf8');
+            }
+
+            for (let i = 0; i < plottedPointsEq2; i++) {
+                const x = xValues[i];
+                const y2 = cleanNum(eq2.m * x + eq2.c);
+                drawPoint(x, y2, '#f472b6');
+            }
+
+            if (eq1LineProgress === 1.0 && eq2LineProgress === 1.0) {
+                const intPt = toCanvasCoords(intersection.x, intersection.y);
+                const xAxisPt = toCanvasCoords(intersection.x, 0);
+                const yAxisPt = toCanvasCoords(0, intersection.y);
+
+                ctx.save();
+                ctx.setLineDash([6 * window.devicePixelRatio, 4 * window.devicePixelRatio]);
+                ctx.strokeStyle = '#4ade80';
+                ctx.lineWidth = 2 * window.devicePixelRatio;
+
+                ctx.beginPath();
+                ctx.moveTo(intPt.x, intPt.y);
+                ctx.lineTo(xAxisPt.x, xAxisPt.y);
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.moveTo(intPt.x, intPt.y);
+                ctx.lineTo(yAxisPt.x, yAxisPt.y);
+                ctx.stroke();
+                ctx.restore();
+
+                ctx.beginPath();
+                ctx.arc(intPt.x, intPt.y, 8 * window.devicePixelRatio, 0, Math.PI * 2);
+                ctx.fillStyle = '#4ade80';
+                ctx.fill();
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 2 * window.devicePixelRatio;
+                ctx.stroke();
+
+                ctx.fillStyle = '#4ade80';
+                ctx.font = `bold ${14 * window.devicePixelRatio}px sans-serif`;
+                ctx.textAlign = 'left';
+                ctx.fillText(
+                    `(${intersection.x}, ${intersection.y})`, 
+                    intPt.x + 12 * window.devicePixelRatio, 
+                    intPt.y - 12 * window.devicePixelRatio
+                );
+            }
+        }
+
+        function drawAnimatedLine(m, c, color, progress, yLimit) {
+            const xMin = -GRID_RANGE_X;
+            const xMax = GRID_RANGE_X;
+            const yMin = m * xMin + c;
+            const yMax = m * xMax + c;
+
+            const p1 = toCanvasCoords(xMin, yMin);
+            const p2 = toCanvasCoords(xMax, yMax);
+
+            const currentX = p1.x + (p2.x - p1.x) * progress;
+            const currentY = p1.y + (p2.y - p1.y) * progress;
+
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 3 * window.devicePixelRatio;
+            ctx.beginPath();
+            ctx.moveTo(p1.x, p1.y);
+            ctx.lineTo(currentX, currentY);
+            ctx.stroke();
+        }
+
+        function drawPoint(x, y, color) {
+            const pt = toCanvasCoords(x, y);
+            ctx.beginPath();
+            ctx.arc(pt.x, pt.y, 5 * window.devicePixelRatio, 0, Math.PI * 2);
+            ctx.fillStyle = color;
+            ctx.fill();
+        }
+
+        generateRandomSystem();
+        setTimeout(initCanvas, 100);
+    </script>
+</body>
+</html>
